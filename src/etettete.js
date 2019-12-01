@@ -1,20 +1,35 @@
-const zoneBC = Zone.current.fork({
-  name: 'BC',
-  properties: {
-    data: {
-      value: 'initial'
+Zone['countingZoneSpec'] = {
+  name: 'counterZone',
+  // setTimeout
+  onScheduleTask: function (delegate, current, target, task) {
+    this.data.count += 1;
+    delegate.scheduleTask(target, task);
+  },
+
+  // fires when...
+  // - clearTimeout
+  // - setTimeout finishes
+  onInvokeTask: function (delegate, current, target, task, applyThis, applyArgs) {
+    delegate.invokeTask(target, task, applyThis, applyArgs);
+    this.data.count -= 1;
+  },
+
+  onHasTask: function (delegate, current, target, hasTask) {
+    if (this.data.count === 0 && !this.data.flushed) {
+      this.data.flushed = true;
+      target.run(this.onFlush);
     }
-  }
-});
+  },
 
-function a() {
-  console.log(Zone.current.get('data').value); // 'updated'
-}
+  counter: function () {
+    return this.data.count;
+  },
 
-function b() {
-  console.log(Zone.current.get('data').value); // 'initial'
-  Zone.current.get('data').value = 'updated';
-  setTimeout(a, 2000);
-}
+  data: {
+    count: 0,
+    flushed: false
+  },
 
-zoneBC.run(b);
+  onFlush: function () {}
+};
+

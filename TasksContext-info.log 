@@ -1,0 +1,57 @@
+main.js 2019-11-26 22:44:09 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:44:9[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:44:30 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:44:30[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:45:02 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:45:2[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:45:35 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:45:35[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:46:18 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:46:18[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:46:28 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:46:28[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:46:53 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:46:53[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:47:02 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:47:2[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:47:22 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:47:22[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:48:36 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:48:36[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:49:15 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:49:15[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:49:51 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:49:51[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:51:00 [34mdebug[39m: [[34mINFO[39m] [2m[33m[1m[4m22:51:0[24m[2m[39m[22m [[32mTasksContext[39m] [TasksContext][TasksService]  getAllTasks
+undefined
+main.js 2019-11-26 22:52:48 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:53:44 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 22:55:15 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:01:29 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:02:54 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:03:11 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:03:26 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:04:35 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:04:51 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:05:36 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:06:34 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:07:03 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:07:37 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:08:03 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:09:10 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:09:41 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:13:06 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:13:31 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:13:58 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:14:19 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:14:53 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:17:38 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:18:23 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:18:37 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:19:08 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:20:18 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:22:31 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:22:54 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:23:27 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:23:45 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:24:31 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:28:59 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:30:03 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:30:09 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:30:14 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:30:58 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:31:06 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:31:15 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:31:21 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:31:33 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:31:59 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:46:20 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks
+main.js 2019-11-26 23:46:36 [34mdebug[39m: [TasksContext][TasksService]  getAllTasks

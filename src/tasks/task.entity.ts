@@ -1,0 +1,34 @@
+import { AfterInsert, BaseEntity, Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { TaskStatus } from './tasks.modal';
+import { CreateTaskDto } from './dto/createTask.dto';
+import { UserEntity } from '../auth/user.entity';
+import { CacheManager } from '../shared/cacheManager';
+
+
+@Entity()
+export class TaskEntity extends BaseEntity {
+
+  constructor(createTaskDto: CreateTaskDto) {
+    super();
+    if (createTaskDto) {
+      this.title = createTaskDto.title;
+      this.description = createTaskDto.description;
+      this.status = TaskStatus.OPEN;
+    }
+
+  }
+
+
+  @PrimaryGeneratedColumn() id: number;
+  @Column() title: string;
+  @Column() description: string;
+  @Column() status: TaskStatus;
+  @ManyToOne(type => UserEntity, user => user.tasks, {
+    eager: false,
+  })
+  user: UserEntity;
+
+
+
+
+}

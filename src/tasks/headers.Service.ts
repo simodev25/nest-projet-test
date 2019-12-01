@@ -2,9 +2,10 @@ import { CanActivate, ExecutionContext, Injectable, Scope } from '@nestjs/common
 import { Observable } from 'rxjs';
 
 
+
 export class HeadersService implements CanActivate {
   constructor(){
-    console.log('TestService')
+    console.log('HeadersService')
   }
   headers:any;
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {

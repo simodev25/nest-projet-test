@@ -1,6 +1,8 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
-import { GetTask } from '../get-task';
-import { TasksService } from '../tasks.service';
+import { GetTask } from './get-task';
+import { TasksService } from './tasks.service';
+
+
 
 @Controller('/tasks/:id')
 export class UserController {

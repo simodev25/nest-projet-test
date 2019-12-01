@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../app.module';
+import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { ProduitsModule } from './produits.module';
+import { ProduitsModule } from './produits/produits.module';
 import { Transport } from '@nestjs/common/enums/transport.enum';
-import { ValidationFiltre } from '../tasks/filters/validation-filtre';
-import { ExceptionFactory } from '../shared/exception-factory';
+import { ValidationFiltre } from './tasks/filters/validation-filtre';
+import { ExceptionFactory } from './shared/exception-factory';
 
 async function microservice() {
 
-  const log = new Logger('main')
+  const log = new Logger('microservice.ts')
 
   const produitMicroservice = await NestFactory.createMicroservice(ProduitsModule, {
     transport: Transport.REDIS,
