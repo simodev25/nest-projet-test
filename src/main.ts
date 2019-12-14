@@ -11,44 +11,49 @@ import { LoggingInterceptor } from './shared/logging.Interceptor';
 import { LoggerServiceBase } from './shared/loggerService';
 import * as winston from 'winston';
 import { format } from 'winston';
-import * as path from "path";
+import * as path from 'path';
+import { ScraperModule } from './scraper/scraper.module';
+
+import { ScraperService } from './scraper/scraper.service';
 
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule,{
+  //const app = await NestFactory.create(AppModule, {});
+  const log = new Logger('microservice.ts');
 
-  });
-  const log = new Logger('microservice.ts')
+  /* const produitMicroservice = await NestFactory.createMicroservice(ProduitsModule, {
+     transport: Transport.REDIS,
+     options: {
+       url: 'redis://127.0.0.1:6379',
+     },
+   });
 
-  const produitMicroservice = await NestFactory.createMicroservice(ProduitsModule, {
-    transport: Transport.REDIS,
-    options: {
-      url: 'redis://127.0.0.1:6379'
-    },
-  });
+   app.useGlobalFilters(new ValidationFiltre());
 
+     app.useGlobalPipes(new ValidationPipe({
+      exceptionFactory: (errors) => ExceptionFactory.validationPipe(errors),
+    }));
+    await produitMicroservice.listen(() => {
 
-  app.useGlobalFilters(new ValidationFiltre());
+      log.verbose('microservice successfully started');
 
-  app.useGlobalPipes(new ValidationPipe({
-    exceptionFactory: (errors) => ExceptionFactory.validationPipe(errors),
-  }));
-  await produitMicroservice.listen(() => {
+     })
 
-   log.verbose('microservice successfully started');
+   app.useLogger((winston as any).createLogger({
+     level: 'debug',
 
-  })
+     transports: [
 
-  app.useLogger((winston as any).createLogger(  {
-    level: 'debug',
+       new winston.transports.File({ filename: 'error.log', level: 'error' }),
+     ],
+   }));
 
-    transports: [
+   await app.listen(3001);*/
 
-      new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    ],
-  }))
+  const scraperModule = await NestFactory.createApplicationContext(ScraperModule, {});
+  const scraperService: ScraperService = scraperModule.get(ScraperService);
+  await  scraperService.scrapeAmazoneFr();
 
-  await app.listen(3001);
 }
 
 bootstrap();

@@ -9,6 +9,7 @@ import * as winston from 'winston';
 const { createLogger, format, transports } = require('winston')
 import { LoggingInterceptor } from './shared/logging.Interceptor';
 import { LoggerServiceBase } from './shared/loggerService';
+import { ScraperModule } from './scraper/scraper.module';
 import * as path from 'path';
 const { combine, timestamp, label, printf } = format;
 
@@ -22,7 +23,8 @@ const myFormat = printf(({ level, message, timestamp }) => {
 
 
     TypeOrmModule.forRoot(typeOrmConfig),
-    TasksModule],
+    TasksModule,
+    ScraperModule],
   providers: [LoggerServiceBase, ],
 
 })

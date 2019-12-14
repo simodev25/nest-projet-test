@@ -3,6 +3,7 @@ import { TaskStatus } from './tasks.modal';
 import { CreateTaskDto } from './dto/createTask.dto';
 import { UserEntity } from '../auth/user.entity';
 import { CacheManager } from '../shared/cacheManager';
+import { TasksService } from './tasks.service';
 
 
 @Entity()
@@ -28,6 +29,11 @@ export class TaskEntity extends BaseEntity {
   })
   user: UserEntity;
 
+
+  public test() {
+
+    const test= TasksService.getAllTasks_(this.title);
+  }
 
 
 

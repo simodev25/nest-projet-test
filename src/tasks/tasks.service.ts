@@ -9,7 +9,6 @@ import { DeleteResult } from 'typeorm';
 import { UserEntity } from '../auth/user.entity';
 import { ModuleRef } from '@nestjs/core';
 
-
 import { ScopeService } from '../shared/scope-service.service';
 import { RequestContext } from '../shared/eequestContext';
 import { LoggerServiceBase } from '../shared/loggerService';
@@ -33,19 +32,20 @@ export class TasksService {
   private tasks: Task[] = [];
 
   // @UseInterceptorsBis(LoggingInterceptor)
- // @UseInterceptorsBis(LoggingInterceptor)
+  // @UseInterceptorsBis(LoggingInterceptor)
   async getAllTasks(): Promise<TaskEntity[]> {
-  this.logger.debug('getAllTasks')
+    this.logger.debug('getAllTasks');
 
     return this.taskRepository.find();
   }
 
-  static getAllTasks(): Promise<TaskEntity[]> {
-   // this.logger.debug('getAllTasks')
-    return null;
+  static getAllTasks_(test: string): string{
+    // this.logger.debug('getAllTasks')
+    return test;
 
-   // return this.taskRepository.find();
+    // return this.taskRepository.find();
   }
+
   async getTaskById(id: string): Promise<TaskEntity> {
 
     const task = await this.taskRepository.findOne(id, { cache: true });
