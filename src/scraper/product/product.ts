@@ -1,8 +1,9 @@
 import { ProductDetail } from './productDetail';
-import { Observable } from 'rxjs';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsNumberString, IsUrl, validate } from 'class-validator';
-import { validator, isNil, getValueFromParameters } from '../../shared/utils/shared.utils';
+import { IsNotEmpty, IsNumber, IsUrl, validate } from 'class-validator';
+import { validator } from '../../shared/utils/shared.utils';
+import { IimageProduct } from './product.interface';
+
 
 // tslint:disable-next-line:variable-name
 export class Product {
@@ -30,7 +31,7 @@ export class Product {
   @Exclude()
   private _shipping: string;
   @Exclude()
-  private _images: string[];
+  private _images: IimageProduct[];
 
   @Exclude()
   private _category: string[];
@@ -170,11 +171,11 @@ export class Product {
   }
 
   @Expose()
-  get images(): string[] {
+  get images(): IimageProduct[] {
     return this._images;
   }
 
-  set images(value: string[]) {
+  set images(value: IimageProduct[]) {
     this._images = value;
   }
 

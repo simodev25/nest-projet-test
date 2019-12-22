@@ -1,18 +1,18 @@
-import { HttpService, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { IScraper } from './IScraper';
-import { NestCrawlerService } from 'nest-crawler';
-import { from, Observable } from 'rxjs';
+
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ScraperHelper } from '../ScraperHelper';
 import * as scrapeIt from 'scrape-it';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { ImenuHome } from './ImenuHome';
 import { Exception } from '../../shared/Exception/exception';
-import { validator, isNil, getValueFromParameters } from '../../shared/utils/shared.utils';
+import { deleteSpace, getValueFromParameters, isNil, parseDateFromJson, validator } from '../../shared/utils/shared.utils';
 
 @Injectable()
 export class ScraperAmazoneService implements IScraper {
-  constructor(private readonly httpService: HttpService, private readonly crawler: NestCrawlerService) {
+  constructor(private readonly httpService: HttpService) {
   }
 
 // scraping the specific page
@@ -102,7 +102,7 @@ export class ScraperAmazoneService implements IScraper {
                 link: {//link principale
                   selector: 'div span:nth-child(2) a',
                   attr: 'href',
-                  convert: (x: string) => `https://www.amazon.com/${x}`,
+                  convert: (x: string) => `https://www.amazon.com${x}`,
                 },
                 reviews: {//image principale
                   selector: 'div span:nth-child(2) a span',
@@ -212,13 +212,7 @@ export class ScraperAmazoneService implements IScraper {
             how: 'html',
             convert: (x: string) => x ? x.match(/(\d+)/)[0] : null,
           },
-          linkReviews: {
-            selector: 'a[data-hook=\'see-all-reviews-link-foot\']',
-            attr: 'href',
-            convert: (x: string) => {
-              return `${baseUrlAmazone}${x}&pageNumber=1&filterByStar=five_star`;
-            }
-          },
+
           answeredQuestions: {
             selector: '.askATFLink span                                                                                                                                                                                           ',
             how: 'html',
@@ -267,6 +261,20 @@ export class ScraperAmazoneService implements IScraper {
                 linkDetail);
             },
           },
+          rating: {
+            selector: 'i.a-star-4-5',
+            how: 'text',
+            convert: (x: string) => {
+              return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
+            },
+          },
+          linkReviews: {
+            selector: 'a[data-hook=\'see-all-reviews-link-foot\']',
+            attr: 'href',
+            convert: (x: string) => {
+              return x ? `${baseUrlAmazone}${x}&pageNumber=1&filterByStar=five_star` : null;
+            },
+          },
         });
         return data;
       }),
@@ -275,7 +283,7 @@ export class ScraperAmazoneService implements IScraper {
         //   console.log(data.manufacturer)
         if (!!data) {
           if (data['isCaptcha']) {
-            throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]');
+            throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
           }
           //  throw new Exception('productDetail: error will be picked up by retryWhen');
         }
@@ -286,8 +294,9 @@ export class ScraperAmazoneService implements IScraper {
     );
 
   }
+
   public productReviews(link: string): Observable<any> {
-    const linkDetail: string = 'https://www.amazon.com//Tide-Febreze-Defense-Detergent-Packaging/dp/B07NW4VG91/ref=twister_B07XHY4CR8?_encoding=UTF8&psc=1';//link;
+    const linkDetail: string = link;
     return this.httpService.get(linkDetail, ScraperHelper.requestConfig).pipe(
       map((res: AxiosResponse) => {
         const data: any = scrapeIt.scrapeHTML(res.data, {
@@ -305,97 +314,75 @@ export class ScraperAmazoneService implements IScraper {
               return x;
             },
           },*/
-          category: {
-            selector: 'div.a-padding-medium                                                                                                                                                                                   ',
+          reviews: {
+            selector: '.a-spacing-medium span.a-size-base.a-color-secondary                                                                                                                                                                                  ',
             how: 'text',
             trim: true,
             convert: (x: string) => {
-              let category = x.trim().replace(/^\s*\n/gm, '').split('›');
-              category = category.map(x => {
-                return x.replace(/^\s*\n/gm, '').trim();
-              });
 
-              return category;
+              return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
             },
           },
-          manufacturer: {
-            selector: 'html                                                                                                                                                                                   ',
-            how: 'html',
+          rating: {
+            selector: 'span[data-hook=\'rating-out-of-text\']                                                                                                                                                                               ',
+            how: 'text',
+            trim: true,
             convert: (x: string) => {
-              return this.manufacturer(x);
+
+              return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
             },
           },
-          productTitle: {//
-            selector: 'span.a-size-large',
+          ratings: {
+            selector: 'table#histogramTable                                                                                                                                                                            ',
             how: 'html',
-          },
-          customerRatings: {
-            selector: '#averageCustomerReviews span.a-size-base',
-            how: 'html',
-            convert: (x: string) => x ? x.match(/(\d+)/)[0] : null,
-          },
-          answeredQuestions: {
-            selector: '.askATFLink span                                                                                                                                                                                           ',
-            how: 'html',
-            convert: (x: string) => x ? x.match(/(\d+)/)[0] : null,
-          },
-          crossedprice: {
-            selector: 'span.priceBlockStrikePriceString                                                                                                                                                                                           ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          price: {
-            selector: 'span.priceBlockBuyingPriceString                                                                                                                                                                                           ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          price01: {
-            selector: 'span.priceBlockSalePriceString                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          price02: {
-            selector: 'strong.priceLarge                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          }, priceMin: {
-            selector: 'strong.priceLarge                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          }, priceMax: {
-            selector: 'strong.priceLarge                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          images: {
-            selector: 'html                                                                                                                                                                                   ',
-            how: 'html',
+            trim: true,
             convert: (x: string) => {
-              return this.imagesProduct(x);
+
+              return this.getRatingsProduct(x);
             },
           },
-          childProduct: {
-            selector: 'form#twister                                                                                                                                                                                  ',
+          topCritical: {
+            selector: 'div.critical-review                                                                                                                                                                            ',
             how: 'html',
+            trim: true,
             convert: (x: string) => {
-              return this.childProduct(x,
-                linkDetail);
+
+              return this.getReview(x);
             },
+          },
+          topPositive: {
+            selector: 'div.positive-review                                                                                                                                                                           ',
+            how: 'html',
+            trim: true,
+            convert: (x: string) => {
+
+              return this.getReview(x);
+            },
+          },
+          reviewsContent: {
+            listItem: 'div[data-hook=\'review\'] ',
+            data: {
+              reviewContent: {
+                selector: 'div.celwidget                                                                                                                                                                  ',
+                how: 'html',
+                trim: true,
+                convert: (x: string) => {
+                  return this.getReview(x);
+                },
+              },
+            },
+
           },
         });
         return data;
       }),
       map(data => {
-
-        //   console.log(data.manufacturer)
         if (!!data) {
           if (data['isCaptcha']) {
-            throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]');
+            throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
           }
           //  throw new Exception('productDetail: error will be picked up by retryWhen');
         }
-
-        data['link'] = link;
         return data;
       }),
     );
@@ -433,15 +420,51 @@ export class ScraperAmazoneService implements IScraper {
 
   }
 
+  private getReview(contents: string): any {
+    const reviewProduct: any = {};
+    if (contents != null) {
+      let $: CheerioStatic = ScraperHelper.parseHtml(contents);
+
+      reviewProduct.date = parseDateFromJson($('span.review-date').text());
+      reviewProduct.text = $('span.a-size-base').text();
+
+    }
+    return reviewProduct;
+
+  }
+
+  private getRatingsProduct(contents: string): any {
+    const ratingsProduct: any[] = [];
+    if (contents != null) {
+      let $: CheerioStatic = ScraperHelper.parseHtml(contents);
+
+      const ratingElements: CheerioElement[] = $('tr').toArray();
+
+      ratingElements.forEach((ratingElement) => {
+        $ = ScraperHelper.parseElement(ratingElement);
+        const ratingProduct: any = {};
+
+        ratingProduct.name = deleteSpace($('td.aok-nowrap > span > a ').text());
+        ratingProduct.value = deleteSpace($('td.a-nowrap > span.a-size-base > a ').text());
+
+        ratingsProduct.push(ratingProduct);
+      });
+
+      return ratingsProduct;
+    }
+    return ratingsProduct;
+
+  }
+
   private imagesProduct(contents: string): any {
     const imagesProduct: any[] = [];
 
     if (contents != null) {
       const $: CheerioStatic = ScraperHelper.getScript(contents, 'colorImages');
       if ($) {
-        const html: string = $.root().html();
+        const html: string[] = $.root().html().match(ScraperHelper.regex) || [];
 
-        html.match(ScraperHelper.regex).forEach((match) => {
+        html.forEach((match) => {
 
           imagesProduct.push(match);
         });

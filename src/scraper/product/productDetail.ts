@@ -1,9 +1,10 @@
 import { ChildProduct } from './childProduct';
-import { Exclude, Expose, Transform } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { validator } from '../../shared/utils/shared.utils';
 import { IsNotEmpty, validate } from 'class-validator';
 import { Column } from 'typeorm';
-
+import { ProductReviews } from './productReviews';
+@Exclude()
 export class ProductDetail {
   @Exclude()
   private _manufacturer: string;
@@ -41,6 +42,28 @@ export class ProductDetail {
   private _category: string[];
   @Exclude()
   private _linkReviews: string;
+  @Exclude()
+  private _rating: string;
+  @Exclude()
+  private _productReviews: ProductReviews;
+  @Exclude()
+  get productReviews(): ProductReviews {
+    return this._productReviews;
+  }
+
+  set productReviews(value: ProductReviews) {
+    this._productReviews = value;
+  }
+
+  @Expose()
+  @Transform(value => parseFloat(value) ? parseFloat(value) : null)
+  get rating(): string {
+    return this._rating;
+  }
+
+  set rating(value: string) {
+    this._rating = value;
+  }
 
   @Expose()
   get linkReviews(): string {
@@ -60,6 +83,7 @@ export class ProductDetail {
 
     this._category = value;
   }
+
   @Exclude()
   get isCaptcha(): boolean {
     return this._isCaptcha;

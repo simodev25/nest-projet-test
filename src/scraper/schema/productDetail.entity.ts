@@ -1,38 +1,78 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, Index, ObjectID, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
+import { ProductReviewsEntity } from './productReviews.entity';
+import { modelOptions, mongoose, plugin, pre, prop, Ref } from '@typegoose/typegoose';
+import { Expose } from 'class-transformer';
 
-@Entity()
-export class ProductDetailEntity extends BaseEntity {
+import * as autopopulate from "mongoose-autopopulate"
 
-  @ObjectIdColumn()
-  _id: ObjectID;
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
-  updatedAt?: Date;
-  @Column()
+@pre<ProductDetailEntity>('save', function(next) {
+  this.increment();
+
+  return next();
+})
+
+@pre<ProductDetailEntity>('update', function(next) {
+  this.update({}, { $inc: { __v: 1 } }, next);
+})
+
+@modelOptions({
+  schemaOptions: {
+    timestamps: true,
+  },
+})
+@plugin(autopopulate)
+export class ProductDetailEntity {
+
+  _id: string;
+  @prop({ index: true })
   manufacturer: string;
-  @Column()
+  @prop()
+  @Expose()
   productTitle: string;
-  @Column()
-  customerRatings: string;
-  @Column()
-  answeredQuestions: string;
-  @Column('number')
+  @prop({ type: mongoose.Schema.Types.Number })
+  @Expose()
+  customerRatings: number;
+  @prop({ type: mongoose.Schema.Types.Number })
+  @Expose()
+  answeredQuestions: number;
+  @prop({ type: mongoose.Schema.Types.Number })
+  @Expose()
   crossedPrice: number;
-  @Column()
+  @prop()
   link: string;
-  @Column('number')
-  price: number;
-  @Column('number')
-  price01: number;
-  @Column('number')
-  price02: number;
-  @Column('number')
+  @prop()
+  @Expose()
+  price: string;
+  @prop()
+  @Expose()
+  price01: string;
+  @prop()
+  @Expose()
+  price02: string;
+  @prop()
   priceMin: number;
-  @Column('number')
+  @prop()
   priceMax: number;
-  @Column()
+  @prop()
   images: string[];
-  @Column()
+  @prop()
   linkReviews: string;
+  @prop()
+  @Expose()
+  rating: number;
+  @prop({ ref: ProductReviewsEntity, required: true, autopopulate: true })
+  productReviews?: Ref<ProductReviewsEntity>;
+
+  public equals(productDetail: ProductDetailEntity) {
+
+    return this.productTitle === productDetail.productTitle
+      && this.price === productDetail.price
+      && this.crossedPrice === productDetail.crossedPrice
+      && this.price01 === productDetail.price01
+      && this.price02 === productDetail.price02
+      && this.rating === productDetail.rating
+      && this.customerRatings === productDetail.customerRatings
+      && this.answeredQuestions === productDetail.answeredQuestions
+      ;
+
+  }
 }

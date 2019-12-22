@@ -1,51 +1,83 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ObjectID, ObjectIdColumn, OneToOne, UpdateDateColumn } from 'typeorm';
-import { ProductDetail } from '../product/productDetail';
+import { pre, prop, Ref, modelOptions } from '@typegoose/typegoose';
 import { ProductDetailEntity } from './productDetail.entity';
+import { IsMongoId, IsOptional } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IProduct } from '../product/IProduct';
 
-@Entity()
-export class ProductEntity extends BaseEntity {
+@pre<ProductEntity>('save', function(next) {
+  this.increment();
 
-  @ObjectIdColumn()
-  _id: ObjectID;
+  return next();
+})
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-  @UpdateDateColumn({ type: 'timestamp', nullable: true })
-  updatedAt?: Date;
-  @Column()
-  @Index()
-  asin: string;
-  @Column()
-  @Index()
-  searchWord: string;
-  @Column()
-  currency: string;
-  @Column()
-  @Index()
-  manufacturer: string;
-  @Column()
-  title: string;
-  @Column()
-  image: string;
-  @Column()
-  link: string;
-  @Column('number')
-  reviews: number;
-  @Column('number')
-  price: number;
-  @Column()
-  shipping: string;
-  @Column('array')
-  images: string[];
-  @Column('array')
-  category: string[];
+@pre<ProductEntity>('update', function(next) {
+  this.update({}, { $inc: { __v: 1 } }, next);
+})
 
-  @OneToOne(type => ProductDetailEntity, {
-    cascade: true,
-    lazy: true,
+@modelOptions({
+  schemaOptions:{
+    timestamps:true
+  }
+})
+
+export class ProductEntity  {
+  @IsOptional()
+  @IsMongoId()
+  _id: string;
+
+  @prop({
+    type: String,
+    required: [true, 'Please add an asin'],
+    unique: true,
+    index: true,
 
   })
-  @JoinColumn()
-  productDetail: ProductDetailEntity;
+  asin: string;
+  @prop()
+  searchWord: string;
+  @prop()
+  currency: string;
+  @prop({
+    type: String,
+    required: true,
+    index: true,
+
+  })
+  manufacturer: string;
+  @prop({
+    type: String,
+    required: true,
+    index: true,
+
+  })
+  @Expose()
+  title: string;
+  @prop()
+  @Expose()
+  image: string;
+  @prop()
+  link: string;
+  @prop()
+  @Expose()
+  reviews: number;
+  @prop({
+    type: Number,
+    required: true,
+    index: true,
+
+  })
+  @Expose()
+  price: number;
+  @prop()
+  shipping: string;
+
+  @prop({ ref: ProductDetailEntity, required: true })
+  productDetail: Ref<ProductDetailEntity>;
+
+  public equals(product: ProductEntity) {
+
+    return this.title === product.title && this.price === product.price  && this.image === product.image && this.reviews === product.reviews;
+
+  }
 
 }
