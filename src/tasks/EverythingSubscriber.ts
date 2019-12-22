@@ -1,9 +1,8 @@
-import { EventSubscriber, EntitySubscriberInterface, InsertEvent, UpdateEvent, RemoveEvent, Connection } from 'typeorm';
-import { RequestContext } from '../shared/eequestContext';
+import { Connection, EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { TaskEntity } from './task.entity';
 import { InjectConnection } from '@nestjs/typeorm';
-import { CacheManager } from '../shared/cacheManager';
+import { CacheManager } from '../shared/cache/cacheManager';
 
 @Injectable()
 @EventSubscriber()

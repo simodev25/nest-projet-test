@@ -3,8 +3,8 @@ import { MessagePattern } from '@nestjs/microservices';
 import { ProduitsService } from './produits.service';
 import { Observable } from 'rxjs';
 import { MicroCacheInterceptor } from './micro.cacheInterceptor';
-import { LoggerServiceBase } from '../shared/loggerService';
-import { Logger } from '../shared/logger.decorator';
+import { LoggerServiceBase } from '../shared/logger/loggerService';
+import { Logger } from '../shared/logger/logger.decorator';
 
 @Controller()
 export class ProduitsController {

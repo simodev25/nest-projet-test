@@ -6,8 +6,8 @@ import * as redisStore from 'cache-manager-redis-store';
 import { CronModule } from 'nestjs-cron';
 
 import { SharedModule } from '../shared/shared.module';
-import { LoggerServiceBase } from '../shared/loggerService';
-import { LoggingInterceptor } from '../shared/logging.Interceptor';
+import { LoggerServiceBase } from '../shared/logger/loggerService';
+import { LoggingInterceptor } from '../shared/logger/logging.Interceptor';
 
 @Module({
   imports: [

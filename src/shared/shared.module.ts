@@ -1,8 +1,8 @@
 import { CacheModule, DynamicModule, Module } from '@nestjs/common';
-import { ScopeService } from './scope-service.service';
-import { LoggerServiceBase } from './loggerService';
-import { createLoggerProviders } from './logger.providers';
-import { CacheManager } from './cacheManager';
+
+import { LoggerServiceBase } from './logger/loggerService';
+import { createLoggerProviders } from './logger/logger.providers';
+import { CacheManager } from './cache/cacheManager';
 import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
@@ -13,8 +13,8 @@ import * as redisStore from 'cache-manager-redis-store';
     ttl: 60 * 10, // seconds
     max: 10, // maximum number of items in cache
   })],
-  providers: [ScopeService, LoggerServiceBase, CacheManager],
-  exports: [ScopeService, LoggerServiceBase, CacheModule],
+  providers: [LoggerServiceBase, CacheManager],
+  exports: [LoggerServiceBase, CacheModule],
 })
 export class SharedModule {
 

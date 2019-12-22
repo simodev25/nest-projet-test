@@ -1,5 +1,5 @@
 import { ValidationError, ValidationPipe } from '@nestjs/common';
-import { ValidationException } from '../tasks/filters/validation.exception';
+import { ValidationException } from '../../tasks/filters/validation.exception';
 
 export class ExceptionFactory {
 

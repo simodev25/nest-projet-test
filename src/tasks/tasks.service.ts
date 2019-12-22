@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Task, TaskStatus } from './tasks.modal';
 import { TaskFilterDTO } from './dto/task-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,14 +8,9 @@ import { CreateTaskDto } from './dto/createTask.dto';
 import { DeleteResult } from 'typeorm';
 import { UserEntity } from '../auth/user.entity';
 import { ModuleRef } from '@nestjs/core';
-
-import { ScopeService } from '../shared/scope-service.service';
-import { RequestContext } from '../shared/eequestContext';
-import { LoggerServiceBase } from '../shared/loggerService';
-import { LoggingInterceptor } from '../shared/logging.Interceptor';
-import { Logger } from '../shared/logger.decorator';
-import { CacheManager } from '../shared/cacheManager';
-import { UseInterceptorsBis } from '../shared/interceptors/use-interceptors.decorator';
+import { RequestContext } from '../shared/request/requestContext';
+import { LoggerServiceBase } from '../shared/logger/loggerService';
+import { Logger } from '../shared/logger/logger.decorator';
 
 @Injectable()
 

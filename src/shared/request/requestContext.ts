@@ -1,9 +1,9 @@
 import { createNamespace, getNamespace } from 'node-request-context';
 import * as uuid from 'uuid';
-import { UserEntity } from '../auth/user.entity';
+import { UserEntity } from '../../auth/user.entity';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import * as cls from 'cls-hooked';
-import { TaskEntity } from '../tasks/task.entity';
+import { TaskEntity } from '../../tasks/task.entity';
 export class RequestContext {
 
   public static nsid = 'some_random_guid';

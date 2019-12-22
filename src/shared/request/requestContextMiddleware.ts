@@ -1,6 +1,5 @@
-import { Injectable, NestMiddleware, Scope } from '@nestjs/common';
-import { RequestContext } from './eequestContext';
-import { createNamespace ,getNamespace} from 'node-request-context';
+import { NestMiddleware } from '@nestjs/common';
+import { RequestContext } from './requestContext';
 import * as cls from 'cls-hooked';
 
 export class RequestContextMiddleware implements NestMiddleware {

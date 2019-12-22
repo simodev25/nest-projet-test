@@ -7,8 +7,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 const { createLogger, format, transports } = require('winston')
-import { LoggingInterceptor } from './shared/logging.Interceptor';
-import { LoggerServiceBase } from './shared/loggerService';
+import { LoggingInterceptor } from './shared/logger/logging.Interceptor';
+import { LoggerServiceBase } from './shared/logger/loggerService';
 import { ScraperModule } from './scraper/scraper.module';
 import * as path from 'path';
 const { combine, timestamp, label, printf } = format;

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { format } from 'util';
 import { LoggerServiceBase } from './loggerService';
-import { ProduitsService } from '../produits/produits.service';
+import { ProduitsService } from '../../produits/produits.service';
 import { ModuleRef } from '@nestjs/core';
 import * as winston from 'winston';
 @Injectable()

@@ -25,7 +25,7 @@ import { extendArrayMetadata } from './extend-metadata.util';
 import { isFunction } from './shared.utils';
 
 import { tap } from 'rxjs/operators';
-import { LoggingInterceptor } from '../logging.Interceptor';
+import { LoggingInterceptor } from '../logger/logging.Interceptor';
 import "reflect-metadata";
 export function UseInterceptorsBis(
   ...interceptors: (NestInterceptor | Function)[]

@@ -2,7 +2,7 @@ import { AfterInsert, BaseEntity, Column, Entity, ManyToOne, PrimaryColumn, Prim
 import { TaskStatus } from './tasks.modal';
 import { CreateTaskDto } from './dto/createTask.dto';
 import { UserEntity } from '../auth/user.entity';
-import { CacheManager } from '../shared/cacheManager';
+import { CacheManager } from '../shared/cache/cacheManager';
 import { TasksService } from './tasks.service';
 
 

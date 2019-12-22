@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { of, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { Cron, Scheduled } from 'nestjs-cron';
 
-import { LoggerServiceBase } from '../shared/loggerService';
-import { Logger } from '../shared/logger.decorator';
-import { logMethod } from '../shared/interceptors/use-interceptors.decorator';
-import { LoggingInterceptor } from '../shared/logging.Interceptor';
+import { LoggerServiceBase } from '../shared/logger/loggerService';
+import { Logger } from '../shared/logger/logger.decorator';
 
 @Injectable()
 @Scheduled()
@@ -32,7 +30,7 @@ export class ProduitsService  {
     this.logger.debug('initProduit');
     const produits = [];
     for (let i = 0; i < 10000; i++) {
-      const produit = { 'id': 22, 'name': 'etettete.js', 'store': 'store1' };
+      const produit = { 'id': 22, 'name': 'etettete', 'store': 'store1' };
       produits.push(produit);
     }
 

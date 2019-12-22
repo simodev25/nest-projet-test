@@ -1,43 +1,23 @@
-import {
-  Body,
-  CacheInterceptor,
-  Controller,
-  Delete,
-  Get,
-  Inject,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/createTask.dto';
 import { TaskFilterDTO } from './dto/task-filter.dto';
 import { TaskStatusValidationPipe } from './pipes/Task-Status-Validation.Pipe';
 import { GetUser } from '../auth/get-user';
 import { GetTask } from './get-task';
-import { AuthGuard } from '@nestjs/passport';
 import { TaskGuardService } from './taskguardservice';
 import { ClientProxy } from '@nestjs/microservices';
-import { ScopeService } from '../shared/scope-service.service';
-import { RequestContextMiddleware } from '../shared/RequestContextMiddleware';
-import { RequestContext } from '../shared/eequestContext';
+
 import { NextFunction } from 'express';
-import { CacheInterceptorController } from '../shared/cacheInterceptor';
 
-import { LoggingInterceptor } from '../shared/logging.Interceptor';
-import { logMethod, logReflect, UseInterceptorsBis } from '../shared/interceptors/use-interceptors.decorator';
-
+import { LoggingInterceptor } from '../shared/logger/logging.Interceptor';
+import { logMethod, logReflect } from '../shared/interceptors/use-interceptors.decorator';
 
 @Controller('tasks')
 //@UseGuards(AuthGuard('jwt'))
 export class TasksController {
 
-  constructor(private  scopeService:ScopeService ,private tasksService: TasksService, @Inject('MATH_SERVICE') private readonly client: ClientProxy) {
+  constructor(private tasksService: TasksService, @Inject('ClientProxyFactory') private readonly client: ClientProxy) {
     console.log('TasksController');
 
   }

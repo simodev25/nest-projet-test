@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScraperService } from './scraper.service';
-import { NestCrawlerModule } from 'nest-crawler/dist';
+
 
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 
@@ -9,7 +9,7 @@ describe('ScraperService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [NestCrawlerModule],
+      imports: [],
       providers: [ScraperService, ScraperAmazoneService],
     }).compile();
 

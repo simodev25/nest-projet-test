@@ -3,12 +3,12 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ValidationFiltre } from './tasks/filters/validation-filtre';
 
-import { ExceptionFactory } from './shared/exception-factory';
+import { ExceptionFactory } from './shared/Exception/exception-factory';
 import { ProduitsModule } from './produits/produits.module';
 import { Transport } from '@nestjs/common/enums/transport.enum';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-import { LoggingInterceptor } from './shared/logging.Interceptor';
-import { LoggerServiceBase } from './shared/loggerService';
+import { LoggingInterceptor } from './shared/logger/logging.Interceptor';
+import { LoggerServiceBase } from './shared/logger/loggerService';
 import * as winston from 'winston';
 import { format } from 'winston';
 import * as path from 'path';
@@ -52,7 +52,7 @@ async function bootstrap() {
 
   const scraperModule = await NestFactory.createApplicationContext(ScraperModule, {});
   const scraperService: ScraperService = scraperModule.get(ScraperService);
-  await  scraperService.scrapeAmazoneFr();
+  await  scraperService.scrapeAmazoneSearchWord('sport').subscribe(console.log);
 
 }
 
