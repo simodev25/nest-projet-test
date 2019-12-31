@@ -1,24 +1,10 @@
 import { ProductReviewsEntity } from './productReviews.entity';
 import { modelOptions, mongoose, plugin, pre, prop, Ref } from '@typegoose/typegoose';
 import { Expose } from 'class-transformer';
+import { Schema } from 'mongoose';
+import { ProductHtmlEntity } from './product.html.entity';
+import * as autopopulate from "mongoose-autopopulate";
 
-import * as autopopulate from "mongoose-autopopulate"
-
-@pre<ProductDetailEntity>('save', function(next) {
-  this.increment();
-
-  return next();
-})
-
-@pre<ProductDetailEntity>('update', function(next) {
-  this.update({}, { $inc: { __v: 1 } }, next);
-})
-
-@modelOptions({
-  schemaOptions: {
-    timestamps: true,
-  },
-})
 @plugin(autopopulate)
 export class ProductDetailEntity {
 
@@ -61,6 +47,8 @@ export class ProductDetailEntity {
   rating: number;
   @prop({ ref: ProductReviewsEntity, required: true, autopopulate: true })
   productReviews?: Ref<ProductReviewsEntity>;
+  @prop({ ref: ProductHtmlEntity, required: true, autopopulate: true, type: Schema.Types.ObjectId })
+  productHtmlSource: Ref<ProductHtmlEntity>;
 
   public equals(productDetail: ProductDetailEntity) {
 
@@ -76,3 +64,4 @@ export class ProductDetailEntity {
 
   }
 }
+

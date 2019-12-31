@@ -1,8 +1,6 @@
 version: "3"
 
-
 services:
-
   mongodb:
     image: mongo:latest
     container_name: mongodb
@@ -11,12 +9,17 @@ services:
       - 27017:27017
     networks:
       - scraper-compose-network
-
-  adminer:
-    image: adminer
+  torproxy:
+    image: dperson/torproxy
+    container_name: torproxy
+    hostname: torproxy
     restart: always
     ports:
-      - 8080:8080
+      - 9050:9050
+      - 9051:9051
+      - 8118:8118
+    environment:
+      PASSWORD: PASSWORD
     networks:
       - scraper-compose-network
   db:

@@ -150,16 +150,21 @@ export class Product {
   }
 
   @Expose()
-  @IsNumber()
-  @IsNotEmpty()
-  @Transform(value => parseInt(value, 10))
+  @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get reviews(): string {
     return this._reviews;
   }
-
   set reviews(value: string) {
     this._reviews = value;
   }
+
+  @Expose()
+  @Transform(value => parseFloat(value) ? parseFloat(value) : null)
+  get rating(): string {
+    return this._productDetail.rating;
+  }
+
+
 
   @Expose()
   get shipping(): string {

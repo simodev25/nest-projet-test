@@ -1,26 +1,59 @@
 import { Injectable } from '@nestjs/common';
-import { filter, map, mapTo, mergeMap, retryWhen } from 'rxjs/operators';
+import { filter, map, mapTo, max, mergeMap, retryWhen, tap } from 'rxjs/operators';
 import { from, Observable, of } from 'rxjs';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
-import { RxjsUtils } from './rxjs-utils';
+import { RxjsUtils } from '../shared/utils/rxjs-utils';
 import { plainToClass } from 'class-transformer';
-
+import { format } from 'util';
 import { ProductDetail } from './product/productDetail';
 import { ScraperHelper } from './ScraperHelper';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './product/product';
 import { ProductRepository } from './schema/product.repository';
-import { ProductDetailRepository } from './schema/productDetail.repository';
 import { ProductReviews } from './product/productReviews';
+import { Cron, Scheduled } from 'nestjs-cron';
+import { Logger } from '../shared/logger/logger.decorator';
+import { LoggerServiceBase } from '../shared/logger/loggerService';
+import { ConfigService } from '@nestjs/config';
+import { ProxyService } from './lib/proxy.service';
 
 @Injectable()
+@Scheduled()
 export class ScraperService {
-  constructor(private readonly productRepository: ProductRepository,
-              private readonly scraperAmazone: ScraperAmazoneService) {
+  constructor(@Logger({
+                context: 'ScraperMicroService',
+                prefix: 'ScraperService',
+              }) private logger: LoggerServiceBase,
+              private readonly productRepository: ProductRepository,
+              private readonly scraperAmazone: ScraperAmazoneService,
+              private readonly proxyService: ProxyService) {
 
   }
 
-  public scrapeAmazoneFr() {
+
+
+  //@Cron('5 * * * * *', { launchOnInit: true, sync: true })
+  public scrapeAmazone() {
+    const start = Date.now();
+
+    this.logger.debug('scrapeAmazone start ...');
+    ScraperHelper.KEYWORD_LIST.forEach(keyword=> {
+      this.scrapeAmazoneSearchWord(keyword).subscribe((count: any) => {
+
+        this.logger.debug(`keyword :[${keyword}] number of products processed [${count}]`);
+        this.logger.debug(format(
+          '%s %s %dms %s',
+          'scrapeAmazone',
+          'end .',
+          Date.now() - start,
+          '',
+          '',
+        ));
+      }, error1 => {
+        console.log(error1)
+        this.logger.error(error1);
+      });
+    })
+
 
   }
 
@@ -29,20 +62,19 @@ export class ScraperService {
     const country: string = 'US';
     const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
 
-    const scrapeAmazoneSearchWord = this.scraperAmazone.scrapeUrlHome(`${baseUrlAmazone}s?k=${searchWord.replace(/\\s/g, '+').trim()}`)
+    const scrapeAmazoneSearchWord = this.scraperAmazone
+      .scrapeUrlHome(`${baseUrlAmazone}s?k=${searchWord.replace(/\\s/g, '+').trim()}&i=garden`)
       .pipe(
-        retryWhen(RxjsUtils.genericRetryStrategy({
-          scalingDuration: 2000,
-          excludedStatusCodes: [500],
-        })),
         mergeMap(produit => from(produit)),
         map(produit => {
-          //  console.log(produit);
+
           const produitClass: Product = plainToClass(Product, produit);
           produitClass.searchWord = searchWord;
           produitClass.baseUrl = baseUrlAmazone;
           produitClass.country = country;
           produitClass.currency = ScraperHelper.getCurrency(country);
+
+
           return produitClass;
         }),
         mergeMap((produitClass: Product) => from(produitClass.isValideProduct()).pipe(
@@ -50,18 +82,15 @@ export class ScraperService {
           mapTo(produitClass),
         )),
         mergeMap((produitClass: Product) => {
-
+          this.logger.log(`find product asin [${produitClass.asin}]`)
           return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
-            retryWhen(RxjsUtils.genericRetryStrategy({
-              scalingDuration: 2000,
-              excludedStatusCodes: [500],
-            })),
             map((productDetail) => plainToClass(ProductDetail, productDetail)),
             mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
               filter(Boolean),
               mapTo(productDetail),
             )),
             map((productDetail: ProductDetail) => {
+              this.logger.log(`find productDetail asin [${produitClass.asin}]`)
               produitClass.productDetail = productDetail;
               return produitClass;
             }),
@@ -73,14 +102,11 @@ export class ScraperService {
           return of(produitClass.productDetail.linkReviews).pipe(
             filter((linkReviews) => linkReviews != null),
             mergeMap((linkReviews) => {
-             return  this.scraperAmazone.productReviews(linkReviews).pipe(
-                retryWhen(RxjsUtils.genericRetryStrategy({
-                  scalingDuration: 2000,
-                  excludedStatusCodes: [500],
-                })),
+              return this.scraperAmazone.productReviews(linkReviews).pipe(
                 map((productReviews) => plainToClass(ProductReviews, productReviews)),
                 map((productReviews: ProductReviews) => {
                   // produitClass.productDetail = productReviews;
+                  this.logger.log(`find productReviews asin [${produitClass.asin}]`)
                   produitClass.productDetail.productReviews = productReviews;
                   return produitClass;
                 }),
@@ -88,12 +114,15 @@ export class ScraperService {
             }),
           );
         }),
-        map((produitClass: Product) => {
+        mergeMap((produitClass: Product) => {
           productCount++;
           // console.log(produitClass)
-          this.productRepository.saveProduct(produitClass).subscribe();
-          return productCount;
+          this.logger.log(`find productDetail asin [${produitClass.asin}]`)
+          return this.productRepository.saveProduct(produitClass);
+          //  return productCount;
         }),
+        map(() => productCount),
+        max(),
       );
 
     return scrapeAmazoneSearchWord;

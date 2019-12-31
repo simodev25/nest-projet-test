@@ -2,9 +2,8 @@ import { ChildProduct } from './childProduct';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { validator } from '../../shared/utils/shared.utils';
 import { IsNotEmpty, validate } from 'class-validator';
-import { Column } from 'typeorm';
 import { ProductReviews } from './productReviews';
-@Exclude()
+
 export class ProductDetail {
   @Exclude()
   private _manufacturer: string;
@@ -34,7 +33,7 @@ export class ProductDetail {
   private _childProduct: ChildProduct[];
 
   @Exclude()
-  private _sourceHtml: string;
+   _sourceHtml: string;
 
   @Exclude()
   private _isCaptcha: boolean;
@@ -93,11 +92,6 @@ export class ProductDetail {
     this._isCaptcha = value;
   }
 
-  @Exclude()
-  get sourceHtml(): string {
-    return this._sourceHtml;
-  }
-
   @Expose()
   get link(): string {
     return this._link;
@@ -107,9 +101,6 @@ export class ProductDetail {
     this._link = value;
   }
 
-  set sourceHtml(value: string) {
-    this._sourceHtml = value;
-  }
 
   @Expose()
   @IsNotEmpty()
@@ -240,6 +231,16 @@ export class ProductDetail {
 
   set childProduct(value: ChildProduct[]) {
     this._childProduct = value;
+  }
+
+
+  @Expose()
+  get sourceHtml(): string {
+    return this._sourceHtml;
+  }
+
+  set sourceHtml(value: string) {
+    this._sourceHtml = value;
   }
 
   async isValideProduct(): Promise<boolean> {

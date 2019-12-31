@@ -4,26 +4,39 @@ import { classToPlain, plainToClass } from 'class-transformer';
 import { forkJoin, from, merge, Observable } from 'rxjs';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
-import { ModelType } from 'typegoose';
+
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { ProductDetailEntity } from './productDetail.entity';
 import { filter, map, mergeMap, tap } from 'rxjs/operators';
 import { ProductReviewsEntity } from './productReviews.entity';
 import { isNil } from '../../shared/utils/shared.utils';
 
+import { ProductHistEntity } from './product.hist.entity';
+import { ProductHtmlEntity } from './product.html.entity';
+import { Logger } from '../../shared/logger/logger.decorator';
+import { LoggerServiceBase } from '../../shared/logger/loggerService';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ProductRepository {
   constructor(
+    @Logger({
+      context: 'ScraperMicroService',
+      prefix: 'ProductRepository',
+    }) private logger: LoggerServiceBase,
+    private readonly configService: ConfigService,
     @InjectModel(ProductEntity) private readonly productEntityModel: ReturnModelType<typeof ProductEntity>,
     @InjectModel(ProductDetailEntity) private readonly productDetailEntityModel: ReturnModelType<typeof ProductDetailEntity>,
     @InjectModel(ProductReviewsEntity) private readonly productReviewsEntityModel: ReturnModelType<typeof ProductReviewsEntity>,
+    @InjectModel(ProductHistEntity) private readonly productHistEntityEntityModel: ReturnModelType<typeof ProductHistEntity>,
+    @InjectModel(ProductHtmlEntity) private readonly productHtmlEntityModel: ReturnModelType<typeof ProductHtmlEntity>,
   ) {
   }
 
   public saveProduct(product: Product): Observable<any> {
 
     const serializedProduct = classToPlain(product);
+    // console.log(product.productDetail.sourceHtml)
     const serializedProductDetail = classToPlain(product.productDetail);
     const serializedProductReviews = classToPlain(product.productDetail.productReviews);
     const productEntityDto: ProductEntity = plainToClass(ProductEntity, serializedProduct);
@@ -31,6 +44,10 @@ export class ProductRepository {
 
     const productDetailEntityDto: ProductDetailEntity = plainToClass(ProductDetailEntity, serializedProductDetail);
     const productDetailEntity = new this.productDetailEntityModel(productDetailEntityDto);
+
+    const productHtmlEntity: ProductHtmlEntity = new ProductHtmlEntity();
+    productHtmlEntity.sourceHtml = product.productDetail.sourceHtml;
+    productDetailEntity.productHtmlSource =  new this.productHtmlEntityModel(productHtmlEntity);
     productEntity.productDetail = productDetailEntity;
 
     const productReviewsEntityDto: ProductReviewsEntity = plainToClass(ProductReviewsEntity, serializedProductReviews);
@@ -47,21 +64,21 @@ export class ProductRepository {
     const save$ = source$.pipe(
       filter((productEntityfind: DocumentType<ProductEntity>) => isNil(productEntityfind)),
       map((productEntityfind: DocumentType<ProductEntity>) => {
+        this.logger.log(`save product : id :[${productEntityDto.id}]  asin :[${productEntityDto.asin}]`);
 
-        console.log(`save product : id :[${productEntityDto._id}] `);
         return productEntityDto;
       }),
       mergeMap((productEntity: DocumentType<ProductEntity>) => {
 
         return forkJoin(
           {
-            productEntity: productEntity.save(),
-            productDetailEntity: productDetailEntity.save(),
+            productEntity: from(productEntity.save()),
+            productDetailEntity: from(productDetailEntity.save()),
+            productHtmlSource: from((productDetailEntity.productHtmlSource as DocumentType<ProductHtmlEntity>).save()),
             productReviews: from(productReviewsEntity.save()),
           });
 
       }));
-    //  let updateProductDetail$ = null;
     const updateProduct$ = source$.pipe(
       filter((productEntityfind: DocumentType<ProductEntity>) => !isNil(productEntityfind)),
       tap((productEntityfind: DocumentType<ProductEntity>) => {
@@ -76,9 +93,23 @@ export class ProductRepository {
       }),
       filter((productEntityDtoUpdate: DocumentType<ProductEntity>) => !isNil(productEntityDtoUpdate)),
       mergeMap((productEntityDtoUpdate: DocumentType<ProductEntity>) => {
-        console.log(`update product : id :[${productEntityDtoUpdate.id}] `);
+        this.logger.log(`update product : id :[${productEntityDtoUpdate.id}] asin :[${productEntityDtoUpdate.asin}] `);
+        return from(productEntityDtoUpdate.save()).pipe(
+          mergeMap((productEntityDtoUpdate_: DocumentType<ProductEntity>) => {
 
-        return from(productEntityDtoUpdate.save());
+            const productHistEntityDTO: ProductHistEntity = new ProductHistEntity();
+            productHistEntityDTO.asin = productEntityDtoUpdate_.asin;
+            productHistEntityDTO.price = productEntityDtoUpdate_.price;
+            productHistEntityDTO.reviews = productEntityDtoUpdate_.reviews;
+            productHistEntityDTO.rating = productEntityDtoUpdate_.rating;
+
+            productHistEntityDTO.priceMin = productDetailEntity.priceMin;
+            productHistEntityDTO.priceMax = productDetailEntity.priceMax;
+
+            const productHistEntity: DocumentType<ProductHistEntity> = new this.productHistEntityEntityModel(productHistEntityDTO);
+            return this.saveHistotiqueProduit(productHistEntity);
+          }),
+        );
       }));
 
     const saveOrUpdate$ = merge(
@@ -93,6 +124,7 @@ export class ProductRepository {
                                productReviewsEntity: DocumentType<ProductReviewsEntity>) {
     return from(this.productDetailEntityModel.findById((productEntityfind.productDetail as ProductDetailEntity)._id))
       .pipe(
+        filter((productDetailEntityfind: DocumentType<ProductDetailEntity>) => !isNil(productDetailEntityfind)),
         tap((productDetailEntityfind: DocumentType<ProductDetailEntity>) => {
           this.updateProductReviews$(productDetailEntityfind, productReviewsEntity).subscribe();
         }),
@@ -104,7 +136,7 @@ export class ProductRepository {
         }),
         filter((productDetailtEntityDtoUpdate: DocumentType<ProductDetailEntity>) => !isNil(productDetailtEntityDtoUpdate)),
         mergeMap((productDetailtEntityDtoUpdate: DocumentType<ProductDetailEntity>) => {
-          console.log(`update productDetailt : id :[${productDetailtEntityDtoUpdate.id}] `);
+          this.logger.log(`update productDetailt : id :[${productDetailtEntityDtoUpdate.id}]  asin :[${productEntityfind.asin}]`);
 
           return from(productDetailtEntityDtoUpdate.save());
         }),
@@ -124,11 +156,15 @@ export class ProductRepository {
         }),
         filter((productReviewsEntityDtoUpdate: DocumentType<ProductReviewsEntity>) => !isNil(productReviewsEntityDtoUpdate)),
         mergeMap((productReviewsEntityDtoUpdate: DocumentType<ProductReviewsEntity>) => {
-          console.log(`update productReviews : id :[${productReviewsEntityDtoUpdate.id}] `);
+          this.logger.log(`update productReviews : id :[${productReviewsEntityDtoUpdate.id}]`);
 
           return from(productReviewsEntityDtoUpdate.save());
         }),
       );
   }
 
+  private saveHistotiqueProduit(productHistEntity: DocumentType<ProductHistEntity>) {
+
+    return from(productHistEntity.save());
+  }
 }

@@ -1,391 +1,405 @@
 import { HttpService, Injectable } from '@nestjs/common';
 import { IScraper } from './IScraper';
 
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
+import { catchError, map, mergeMap, retryWhen, tap } from 'rxjs/operators';
 import { ScraperHelper } from '../ScraperHelper';
 import * as scrapeIt from 'scrape-it';
 import { AxiosResponse } from 'axios';
 import { ImenuHome } from './ImenuHome';
 import { Exception } from '../../shared/Exception/exception';
 import { deleteSpace, getValueFromParameters, isNil, parseDateFromJson, validator } from '../../shared/utils/shared.utils';
+import { RxjsUtils } from '../../shared/utils/rxjs-utils';
+import { NetworkService } from '../../shared/request/network.service';
 
 @Injectable()
 export class ScraperAmazoneService implements IScraper {
-  constructor(private readonly httpService: HttpService) {
+  constructor(private readonly httpService: NetworkService, private readonly scraperHelper: ScraperHelper) {
   }
 
 // scraping the specific page
 
-  public scrapeMenuHome(link: string): Observable<any> {
-
-    return this.httpService.get(link, ScraperHelper.requestConfig).pipe(
-      map((res: AxiosResponse) => {
-        const data: ImenuHome = scrapeIt.scrapeHTML(res.data, {
-          isCaptcha: {
-            selector: 'form                                                                                                                                                                                 ',
-            how: 'html',
-            convert: (x: string) => {
-              return x.indexOf('Captcha') > -1;
-            },
-          },
-          searchWords: {
-            listItem: 'select option',
-            data: {
-              searchWord: {
-                how: 'text',
-                convert: (x: string) => `${x}`,
-              },
-            },
-          },
-        });
-        return data;
-      }),
-      map(data => {
-
-          if (!!data.searchWords && data.searchWords.length === 0) {
-            if (data.isCaptcha) {
-              throw new Exception('scrapeMenuHome : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-            }
-
-            throw new Exception({
-              message: 'scrapeAmazoneUrlHome: error will be picked up by retryWhen',
-              link: link,
-            }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-          }
-
-          return data.searchWords;
-        },
-      ));
-
-  }
-
   // scraping the specific page
   public scrapeUrlHome(link: string): Observable<any> {
+    let renewTorSession: boolean = false;
+    const result$ = of(1).pipe(
+      mergeMap(x => {
+        return this.httpService.getTor(link, this.scraperHelper.requestConfig(), renewTorSession).pipe(
+          catchError((err) => {
+            return of(null);
+          }),
+          tap((res: any) => {
+            if (isNil(res)) {
+              renewTorSession = true;
+              throw new Exception('scrapeAmazoneUrlHome : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
+            }
+          }),
 
-    return this.httpService.get(link, ScraperHelper.requestConfig).pipe(
-      map((res: AxiosResponse) => {
-        const data: any = scrapeIt.scrapeHTML(res.data,
-          {
-            isCaptcha: {
-              selector: 'form                                                                                                                                                                                 ',
-              how: 'html',
-              convert: (x: string) => {
-                return x.indexOf('Captcha') > -1;
-              },
-            },
-            sourceHtml: {
-              selector: 'div.s-result-list                                                                                                                                                                                   ',
-              how: 'html',
-              convert: (x: string) => {
-                //TODO
-                return 'x';
-              },
-            },
-            produits: {
-              listItem: 'div.s-result-item',
-              data: {
-                asin: {//Amazon Standard Identification Number
-                  attr: 'data-asin',
-                  //  convert: (x: string) => `${x}`,
-                },
-                title: {//manufacturer principale
-                  selector: 'span.a-text-normal',
+          map((res: any) => {
+            //  console.log(res)
+            const data: any = scrapeIt.scrapeHTML(res,
+              {
+                isCaptcha: {
+                  selector: 'form                                                                                                                                                                                 ',
                   how: 'html',
-                  //  convert: (x: string) => x,
-                },
-                image: {//image principale
-                  selector: 'img',
-                  attr: 'src',
-                  convert: (x: string) => `${x}`,
-                },
-                link: {//link principale
-                  selector: 'div span:nth-child(2) a',
-                  attr: 'href',
-                  convert: (x: string) => `https://www.amazon.com${x}`,
-                },
-                reviews: {//image principale
-                  selector: 'div span:nth-child(2) a span',
-                  how: 'html',
-                  convert: (x: string) => isNil(x) ? 0 : x.replace(',', ''),
-                },
-                shipping: {//shipping
-                  selector: 'i.a-icon-prime',
-                  attr: 'aria-label',
-                  convert: (x: string) => x,
-                },
-                price: {//price
-                  selector: 'span.a-price span.a-offscreen',
-                  how: 'html',
-                  convert: (x: string) => isNil(x) ? 0 : x.replace('$', ''),
-                },
-                images: {//image tail
-                  selector: 'img',
-                  attr: 'srcset',
                   convert: (x: string) => {
+                    return x ? x.indexOf('Captcha') > -1 : false;
+                  },
+                },
+                sourceHtml: {
+                  selector: 'div.s-result-list                                                                                                                                                                                   ',
+                  how: 'html',
+                  convert: (x: string) => {
+                    //TODO
+                    return 'x';
+                  },
+                },
+                produits: {
+                  listItem: 'div.s-result-item',
+                  data: {
+                    asin: {//Amazon Standard Identification Number
+                      attr: 'data-asin',
+                      //  convert: (x: string) => `${x}`,
+                    },
+                    title: {//manufacturer principale
+                      selector: 'span.a-text-normal',
+                      how: 'html',
+                      //  convert: (x: string) => x,
+                    },
+                    image: {//image principale
+                      selector: 'img',
+                      attr: 'src',
+                      convert: (x: string) => `${x}`,
+                    },
+                    link: {//link principale
+                      selector: 'div span:nth-child(2) a',
+                      attr: 'href',
+                      convert: (x: string) => `https://www.amazon.com${x}`,
+                    },
+                    reviews: {//image principale
+                      selector: 'div span:nth-child(2) a span',
+                      how: 'html',
+                      convert: (x: string) => isNil(x) ? 0 : x.replace(',', ''),
+                    },
+                    shipping: {//shipping
+                      selector: 'i.a-icon-prime',
+                      attr: 'aria-label',
+                      convert: (x: string) => x,
+                    },
+                    price: {//price
+                      selector: 'span.a-price span.a-offscreen',
+                      how: 'html',
+                      convert: (x: string) => isNil(x) ? 0 : x.replace('$', ''),
+                    },
+                    images: {//image tail
+                      selector: 'img',
+                      attr: 'srcset',
+                      convert: (x: string) => {
 
-                    const imagestemps = x.split(',');
-                    const images: any[] = [];
-                    for (let i = 0; i < imagestemps.length; i++) {
-                      const imagestempssplit = imagestemps[i].split(' ');
-                      if (validator.isURL(imagestempssplit[1])) {
-                        images.push({
-                          image: String(imagestempssplit[1]),
-                          size: String(imagestempssplit[2]),
-                        });
-                      }
+                        const imagestemps = x.split(',');
+                        const images: any[] = [];
+                        for (let i = 0; i < imagestemps.length; i++) {
+                          const imagestempssplit = imagestemps[i].split(' ');
+                          if (validator.isURL(imagestempssplit[1])) {
+                            images.push({
+                              image: String(imagestempssplit[1]),
+                              size: String(imagestempssplit[2]),
+                            });
+                          }
 
-                    }
-                    return images;
+                        }
+                        return images;
+                      },
+                    },
                   },
                 },
               },
-            },
-          },
+            );
+            return data;
+          }),
+          map(data => {
+
+            if (isNil(data)) {
+              renewTorSession = true;
+              throw new Exception({
+                message: 'scrapeAmazoneUrlHome: error will be picked up by retryWhen',
+                link,
+              }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
+            } else if (!!data.produits && data.produits.length === 0) {
+              if (data.isCaptcha) {
+                renewTorSession = true;
+                throw new Exception('scrapeAmazoneUrlHome : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+              }
+
+            }
+
+            return data['produits'];
+          }),
         );
-        return data;
       }),
-      map(data => {
-
-        if (!!data.produits && data.produits.length === 0) {
-          if (data.isCaptcha) {
-            throw new Exception('scrapeAmazoneUrlHome : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-          }
-
-          throw new Exception({
-            message: 'scrapeAmazoneUrlHome: error will be picked up by retryWhen',
-            link: link,
-          }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-        }
-
-        return data['produits'];
-      }),
+      retryWhen(RxjsUtils.genericRetryStrategy({
+        scalingDuration: 2000,
+        excludedStatusCodes: [500],
+      })),
     );
+
+    return result$;
 
   }
 
   public productDetail(link: string, baseUrlAmazone: string): Observable<any> {
+    let renewTorSession: boolean = false;
     const linkDetail: string = link;
-    return this.httpService.get(linkDetail, ScraperHelper.requestConfig).pipe(
-      map((res: AxiosResponse) => {
-        const data: any = scrapeIt.scrapeHTML(res.data, {
-          isCaptcha: {
-            selector: 'form                                                                                                                                                                                 ',
-            how: 'html',
-            convert: (x: string) => {
-              return x.indexOf('Captcha') > -1;
-            },
-          },
-          /*sourceHtml: {
-            selector: 'html                                                                                                                                                                                   ',
-            how: 'html',
-            convert: (x: string) => {
-              return x;
-            },
-          },*/
-          category: {
-            selector: 'div.a-padding-medium                                                                                                                                                                                   ',
-            how: 'text',
-            trim: true,
-            convert: (x: string) => {
-              let category = x.trim().replace(/^\s*\n/gm, '').split('›');
-              category = category.map(x => {
-                return x.replace(/^\s*\n/gm, '').trim();
-              });
+    const result$ = of(1).pipe(
+      mergeMap(x => {
+        return this.httpService.getTor(linkDetail, this.scraperHelper.requestConfig(), renewTorSession).pipe(
+          map((res: any) => {
 
-              return category;
-            },
-          },
-          manufacturer: {
-            selector: 'html                                                                                                                                                                                   ',
-            how: 'html',
-            convert: (x: string) => {
-              return this.manufacturer(x);
-            },
-          },
-          productTitle: {//
-            selector: 'span.a-size-large',
-            how: 'html',
-          },
-          customerRatings: {
-            selector: '#averageCustomerReviews span.a-size-base',
-            how: 'html',
-            convert: (x: string) => x ? x.match(/(\d+)/)[0] : null,
-          },
+            const data: any = scrapeIt.scrapeHTML(res, {
+              isCaptcha: {
+                selector: 'form                                                                                                                                                                                 ',
+                how: 'html',
+                convert: (x: string) => {
+                  return x ? x.indexOf('Captcha') > -1 : false;
+                },
+              },
+              sourceHtml: {
+                selector: 'html                                                                                                                                                                                   ',
+                how: 'html',
+                convert: (x: string) => {
+                  return x;
+                },
+              },
+              category: {
+                selector: 'div.a-padding-medium                                                                                                                                                                                   ',
+                how: 'text',
+                trim: true,
+                convert: (x: string) => {
+                  let category = x.trim().replace(/^\s*\n/gm, '').split('›');
+                  category = category.map(x => {
+                    return x.replace(/^\s*\n/gm, '').trim();
+                  });
 
-          answeredQuestions: {
-            selector: '.askATFLink span                                                                                                                                                                                           ',
-            how: 'html',
-            convert: (x: string) => x ? x.match(/(\d+)/)[0] : null,
-          },
-          crossedprice: {
-            selector: 'span.priceBlockStrikePriceString                                                                                                                                                                                           ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          price: {
-            selector: 'span.priceBlockBuyingPriceString                                                                                                                                                                                           ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          price01: {
-            selector: 'span.priceBlockSalePriceString                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          price02: {
-            selector: 'strong.priceLarge                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          }, priceMin: {
-            selector: 'strong.priceLarge                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          }, priceMax: {
-            selector: 'strong.priceLarge                                                                                                                                                                                       ',
-            how: 'html',
-            convert: (x: string) => x,
-          },
-          images: {
-            selector: 'html                                                                                                                                                                                   ',
-            how: 'html',
-            convert: (x: string) => {
-              return this.imagesProduct(x);
-            },
-          },
-          childProduct: {
-            selector: 'form#twister                                                                                                                                                                                  ',
-            how: 'html',
-            convert: (x: string) => {
-              return this.childProduct(x,
-                linkDetail);
-            },
-          },
-          rating: {
-            selector: 'i.a-star-4-5',
-            how: 'text',
-            convert: (x: string) => {
-              return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
-            },
-          },
-          linkReviews: {
-            selector: 'a[data-hook=\'see-all-reviews-link-foot\']',
-            attr: 'href',
-            convert: (x: string) => {
-              return x ? `${baseUrlAmazone}${x}&pageNumber=1&filterByStar=five_star` : null;
-            },
-          },
-        });
-        return data;
+                  return category;
+                },
+              },
+              manufacturer: {
+                selector: 'html                                                                                                                                                                                   ',
+                how: 'html',
+                convert: (x: string) => {
+                  return this.manufacturer(x);
+                },
+              },
+              productTitle: {//
+                selector: 'span.a-size-large',
+                how: 'html',
+              },
+              customerRatings: {
+                selector: '#averageCustomerReviews span.a-size-base',
+                how: 'html',
+                convert: (x: string) => x ? x.match(/(\d+)/)[0] : null,
+              },
+
+              answeredQuestions: {
+                selector: '.askATFLink span                                                                                                                                                                                           ',
+                how: 'html',
+                convert: (x: string) => x ? x.match(/(\d+)/)[0] : null,
+              },
+              crossedprice: {
+                selector: 'span.priceBlockStrikePriceString                                                                                                                                                                                           ',
+                how: 'html',
+                convert: (x: string) => x,
+              },
+              price: {
+                selector: 'span.priceBlockBuyingPriceString                                                                                                                                                                                           ',
+                how: 'html',
+                convert: (x: string) => x,
+              },
+              price01: {
+                selector: 'span.priceBlockSalePriceString                                                                                                                                                                                       ',
+                how: 'html',
+                convert: (x: string) => x,
+              },
+              price02: {
+                selector: 'strong.priceLarge                                                                                                                                                                                       ',
+                how: 'html',
+                convert: (x: string) => x,
+              }, priceMin: {
+                selector: 'strong.priceLarge                                                                                                                                                                                       ',
+                how: 'html',
+                convert: (x: string) => x,
+              }, priceMax: {
+                selector: 'strong.priceLarge                                                                                                                                                                                       ',
+                how: 'html',
+                convert: (x: string) => x,
+              },
+              images: {
+                selector: 'html                                                                                                                                                                                   ',
+                how: 'html',
+                convert: (x: string) => {
+                  return this.imagesProduct(x);
+                },
+              },
+              childProduct: {
+                selector: 'form#twister                                                                                                                                                                                  ',
+                how: 'html',
+                convert: (x: string) => {
+                  return this.childProduct(x,
+                    linkDetail);
+                },
+              },
+              rating: {
+                selector: 'i.a-star-4-5',
+                how: 'text',
+                convert: (x: string) => {
+                  return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
+                },
+              },
+              linkReviews: {
+                selector: 'a[data-hook=\'see-all-reviews-link-foot\']',
+                attr: 'href',
+                convert: (x: string) => {
+                  return x ? `${baseUrlAmazone}${x}&pageNumber=1&filterByStar=five_star` : null;
+                },
+              },
+            });
+            return data;
+          }),
+          map(data => {
+
+            if (isNil(data)) {
+              renewTorSession = true;
+              throw new Exception({
+                message: 'productDetail: error will be picked up by retryWhen',
+                link,
+              }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
+            }
+            if (!!data) {
+              if (data['isCaptcha']) {
+                throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+              }
+              //  throw new Exception('productDetail: error will be picked up by retryWhen');
+            }
+
+            data['link'] = link;
+            return data;
+          }),
+        );
       }),
-      map(data => {
-
-        //   console.log(data.manufacturer)
-        if (!!data) {
-          if (data['isCaptcha']) {
-            throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-          }
-          //  throw new Exception('productDetail: error will be picked up by retryWhen');
-        }
-
-        data['link'] = link;
-        return data;
-      }),
-    );
-
+      retryWhen(RxjsUtils.genericRetryStrategy({
+        scalingDuration: 2000,
+        excludedStatusCodes: [500],
+      })));
+    return result$;
   }
 
   public productReviews(link: string): Observable<any> {
+    let renewTorSession: boolean = false;
     const linkDetail: string = link;
-    return this.httpService.get(linkDetail, ScraperHelper.requestConfig).pipe(
-      map((res: AxiosResponse) => {
-        const data: any = scrapeIt.scrapeHTML(res.data, {
-          isCaptcha: {
-            selector: 'form                                                                                                                                                                                 ',
-            how: 'html',
-            convert: (x: string) => {
-              return x.indexOf('Captcha') > -1;
-            },
-          },
-          /*sourceHtml: {
-            selector: 'html                                                                                                                                                                                   ',
-            how: 'html',
-            convert: (x: string) => {
-              return x;
-            },
-          },*/
-          reviews: {
-            selector: '.a-spacing-medium span.a-size-base.a-color-secondary                                                                                                                                                                                  ',
-            how: 'text',
-            trim: true,
-            convert: (x: string) => {
+    const result$ = of(1).pipe(
+      mergeMap(x => {
+        return this.httpService.getTor(linkDetail, this.scraperHelper.requestConfig(), renewTorSession).pipe(
+          map((res: any) => {
+            const data: any = scrapeIt.scrapeHTML(res, {
+              isCaptcha: {
+                selector: 'form                                                                                                                                                                                 ',
+                how: 'html',
+                convert: (x: string) => {
+                  return x ? x.indexOf('Captcha') > -1 : false;
+                },
+              },
+              /*sourceHtml: {
+                selector: 'html                                                                                                                                                                                   ',
+                how: 'html',
+                convert: (x: string) => {
+                  return x;
+                },
+              },*/
+              reviews: {
+                selector: '.a-spacing-medium span.a-size-base.a-color-secondary                                                                                                                                                                                  ',
+                how: 'text',
+                trim: true,
+                convert: (x: string) => {
 
-              return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
-            },
-          },
-          rating: {
-            selector: 'span[data-hook=\'rating-out-of-text\']                                                                                                                                                                               ',
-            how: 'text',
-            trim: true,
-            convert: (x: string) => {
+                  return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
+                },
+              },
+              rating: {
+                selector: 'span[data-hook=\'rating-out-of-text\']                                                                                                                                                                               ',
+                how: 'text',
+                trim: true,
+                convert: (x: string) => {
 
-              return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
-            },
-          },
-          ratings: {
-            selector: 'table#histogramTable                                                                                                                                                                            ',
-            how: 'html',
-            trim: true,
-            convert: (x: string) => {
-
-              return this.getRatingsProduct(x);
-            },
-          },
-          topCritical: {
-            selector: 'div.critical-review                                                                                                                                                                            ',
-            how: 'html',
-            trim: true,
-            convert: (x: string) => {
-
-              return this.getReview(x);
-            },
-          },
-          topPositive: {
-            selector: 'div.positive-review                                                                                                                                                                           ',
-            how: 'html',
-            trim: true,
-            convert: (x: string) => {
-
-              return this.getReview(x);
-            },
-          },
-          reviewsContent: {
-            listItem: 'div[data-hook=\'review\'] ',
-            data: {
-              reviewContent: {
-                selector: 'div.celwidget                                                                                                                                                                  ',
+                  return isNil(x) ? 0 : x.split(' ')[0].replace(',', '');
+                },
+              },
+              ratings: {
+                selector: 'table#histogramTable                                                                                                                                                                            ',
                 how: 'html',
                 trim: true,
                 convert: (x: string) => {
+
+                  return this.getRatingsProduct(x);
+                },
+              },
+              topCritical: {
+                selector: 'div.critical-review                                                                                                                                                                            ',
+                how: 'html',
+                trim: true,
+                convert: (x: string) => {
+
                   return this.getReview(x);
                 },
               },
-            },
+              topPositive: {
+                selector: 'div.positive-review                                                                                                                                                                           ',
+                how: 'html',
+                trim: true,
+                convert: (x: string) => {
 
-          },
-        });
-        return data;
+                  return this.getReview(x);
+                },
+              },
+              reviewsContent: {
+                listItem: 'div[data-hook=\'review\'] ',
+                data: {
+                  reviewContent: {
+                    selector: 'div.celwidget                                                                                                                                                                  ',
+                    how: 'html',
+                    trim: true,
+                    convert: (x: string) => {
+                      return this.getReview(x);
+                    },
+                  },
+                },
+
+              },
+            });
+            return data;
+          }),
+          map(data => {
+            if (isNil(data)) {
+              renewTorSession = true;
+              throw new Exception({
+                message: 'productReviews: error will be picked up by retryWhen',
+                link,
+              }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
+            }
+            if (!!data) {
+              if (data['isCaptcha']) {
+                throw new Exception('productReviews : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+              }
+              //  throw new Exception('productDetail: error will be picked up by retryWhen');
+            }
+            return data;
+          }),
+        );
       }),
-      map(data => {
-        if (!!data) {
-          if (data['isCaptcha']) {
-            throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-          }
-          //  throw new Exception('productDetail: error will be picked up by retryWhen');
-        }
-        return data;
-      }),
-    );
+      retryWhen(RxjsUtils.genericRetryStrategy({
+        scalingDuration: 2000,
+        excludedStatusCodes: [500],
+      })));
+    return result$;
 
   }
 
@@ -396,7 +410,7 @@ export class ScraperAmazoneService implements IScraper {
       const produitsDivElements: CheerioElement[] = $('div').toArray();
       produitsDivElements.forEach((produitsDivElement: CheerioElement) => {
 
-        let $div = ScraperHelper.parseElement(produitsDivElement);
+        const $div = ScraperHelper.parseElement(produitsDivElement);
         const produitsElements: CheerioElement[] = $div('li').toArray();
 
         produitsElements.forEach((produitsElement) => {

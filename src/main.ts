@@ -15,6 +15,7 @@ import * as path from 'path';
 import { ScraperModule } from './scraper/scraper.module';
 
 import { ScraperService } from './scraper/scraper.service';
+import { NetworkService } from './shared/request/network.service';
 
 
 async function bootstrap() {
@@ -52,8 +53,11 @@ async function bootstrap() {
 
   const scraperModule = await NestFactory.createApplicationContext(ScraperModule, {});
   const scraperService: ScraperService = scraperModule.get(ScraperService);
-  await  scraperService.scrapeAmazoneSearchWord('sport').subscribe(console.log);
-
+  const networkService: NetworkService = scraperModule.get(NetworkService);
+  //networkService.testTor();
+   scraperService.scrapeAmazone();
+  //scraperService.proxysChecker();
+  //scraperService.scrapeAmazoneSearchWord('Home & Kitchen').subscribe();
 }
 
 bootstrap();

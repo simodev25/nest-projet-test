@@ -3,8 +3,16 @@ import { EnumVariationType } from './lib/EScraper';
 import { AxiosRequestConfig } from 'axios';
 import { getRandomInt, isNil } from '../shared/utils/shared.utils';
 import { from, of } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import * as lineReader from 'line-reader';
+import * as  httpsProxyAgent from 'https-proxy-agent';
 
+@Injectable()
 export class ScraperHelper {
+
+  constructor(private readonly configService: ConfigService) {
+  }
 
   public static regex = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
   public static searchUrlBase = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
@@ -42,14 +50,29 @@ export class ScraperHelper {
     return ScraperHelper.USER_AGENT_LIST[index];
   };
 
-  public static get requestConfig(): AxiosRequestConfig {
+  public getRandomProxy() {
+    const isActive: string = this.configService.get<string>('USE_PROXY');
+
+    if (isActive === 'true') {
+
+      const index = getRandomInt(ScraperHelper.PROXY_LIST.length);
+      const proxy = ScraperHelper.PROXY_LIST[index];
+      return proxy;
+    }
+    return false;
+  };
+
+
+
+  public requestConfig(proxyParam: string = null): AxiosRequestConfig {
     const headersRequest = {
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Encoding': 'gzip, deflate, br',
+      'Accept-Encoding': 'gzip',
       'User-Agent': ScraperHelper.getRandomUserAgent(),
 
     };
-    const requestConfig: AxiosRequestConfig = { headers: headersRequest };
+
+    const requestConfig: AxiosRequestConfig = { headers: headersRequest, timeout: 40000 };
     return requestConfig;
   };
 
@@ -124,6 +147,7 @@ export class ScraperHelper {
     return cheerioStatic;
   }
 
+  public static PROXY_LIST = [];
   public static USER_AGENT_LIST = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
     'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
@@ -204,6 +228,7 @@ export class ScraperHelper {
     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 YaBrowser/18.11.1.805 Yowser/2.5 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.81 Safari/537.36',
   ];
+
   public static getCurrency(country) {
 
     switch (ScraperHelper.getBaseUrlAmazone(country)) {
@@ -225,6 +250,7 @@ export class ScraperHelper {
         return 'EUR';
     }
   }
+
   public static EXIT_CODES = {
     SUCCESS: 0,
     ERROR_USER_FUNCTION_THREW: 91,

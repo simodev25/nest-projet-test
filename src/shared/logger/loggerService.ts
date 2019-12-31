@@ -23,13 +23,7 @@ export class LoggerServiceBase implements LoggerService {
   }
 
   log(message: string): void {
-    const currentDate = new Date();
-    this.logger.info(message, {
-      timestamp: currentDate.toISOString(),
-      context: this.context,
-    });
-    this.formatedLog('info', message);
-
+    this.logger.info(this.getMessage(message), this.context);
   }
 
   setPrefix(prefix: string) {

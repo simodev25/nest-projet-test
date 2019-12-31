@@ -2,11 +2,15 @@ import { pre, prop, Ref, modelOptions } from '@typegoose/typegoose';
 import { ProductDetailEntity } from './productDetail.entity';
 import { IsMongoId, IsOptional } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { IProduct } from '../product/IProduct';
+import { plugin } from 'typegoose';
+import { Schema } from 'mongoose';
+
+const mongooseHistory = require('mongoose-history');
+const options = { customCollectionName: 'product_hist' };
+
 
 @pre<ProductEntity>('save', function(next) {
   this.increment();
-
   return next();
 })
 
@@ -15,12 +19,12 @@ import { IProduct } from '../product/IProduct';
 })
 
 @modelOptions({
-  schemaOptions:{
-    timestamps:true
-  }
+  schemaOptions: {
+    timestamps: true,
+  },
 })
-
-export class ProductEntity  {
+@plugin(mongooseHistory, options)
+export class ProductEntity {
   @IsOptional()
   @IsMongoId()
   _id: string;
@@ -60,6 +64,9 @@ export class ProductEntity  {
   @prop()
   @Expose()
   reviews: number;
+  @prop()
+  @Expose()
+  rating: number;
   @prop({
     type: Number,
     required: true,
@@ -76,7 +83,12 @@ export class ProductEntity  {
 
   public equals(product: ProductEntity) {
 
-    return this.title === product.title && this.price === product.price  && this.image === product.image && this.reviews === product.reviews;
+    return this.title === product.title
+      && this.price === product.price
+      && this.image === product.image
+      && this.reviews === product.reviews
+      && this.rating === product.rating
+      ;
 
   }
 
