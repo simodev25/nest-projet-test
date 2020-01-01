@@ -72,7 +72,7 @@ export class ScraperHelper {
 
     };
 
-    const requestConfig: AxiosRequestConfig = { headers: headersRequest, timeout: 40000 };
+    const requestConfig: AxiosRequestConfig = { headers: headersRequest, timeout: 10000 };
     return requestConfig;
   };
 

@@ -47,7 +47,7 @@ export class ProductDetailEntity {
   rating: number;
   @prop({ ref: ProductReviewsEntity, required: true, autopopulate: true })
   productReviews?: Ref<ProductReviewsEntity>;
-  @prop({ ref: ProductHtmlEntity, required: true, autopopulate: true, type: Schema.Types.ObjectId })
+  @prop({ ref: ProductHtmlEntity, required: false, autopopulate: true, type: Schema.Types.ObjectId })
   productHtmlSource: Ref<ProductHtmlEntity>;
 
   public equals(productDetail: ProductDetailEntity) {

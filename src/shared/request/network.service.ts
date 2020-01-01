@@ -30,14 +30,12 @@ export class NetworkService extends HttpService {
   public getTor(url: string, config?: AxiosRequestConfig, renewTorSession: boolean = false): Observable<string> {
 
     const torRequest = new Observable<string>(subscriber => {
-      console.log('renewTorSession',renewTorSession)
       if (renewTorSession) {
+
         tr.renewTorSession((err, success) => {
           if (err) {
-            return {
-              statusCode: 500,
-              message: 'error - could not renew tor session',
-            };
+            subscriber.next(null);
+            subscriber.complete();
           }
           return {
             statusCode: 200,
@@ -50,40 +48,37 @@ export class NetworkService extends HttpService {
       const buffer = [];
       const option = {
         url,
-        strictSSL: true,
-        agentClass: require('socks5-https-client/lib/Agent'),
-        //  gzip: true,
         header: config.headers,
-        agentOptions: {
-          socksHost: 'torproxy', // Defaults to 'localhost'.
-          socksPort: 9050, // Defaults to 1080.
-          // Optional credentials
-          //  socksUsername: 'proxyuser',
-          //  socksPassword: 'p@ssw0rd',
-        },
+
       };
 
       tr.request(option, (err, res) => {
+        if(!isNil(res)){
+
+          const encoding = res.headers['content-encoding'];
+          if (encoding !== 'gzip') {
+            subscriber.next(res.body);
+            subscriber.complete();
+          }
+        } else {
+
+          subscriber.error(err);
+        //  subscriber.complete();
+        }
 
       }).pipe(gunzip);
 
       gunzip.on('data', (data) => {
         // decompression chunk ready, add it to the buffer
         buffer.push(data.toString());
-
       }).on('end', () => {
         // response and decompression complete, join the buffer and return
-
         subscriber.next(buffer.join(''));
-        /*  fs.writeFile('./src/config/proxy.html', buffer.join(''), function(err) {
-
-          });*/
         subscriber.complete();
 
       }).on('error', (e) => {
 
-
-        subscriber.error(e);
+        subscriber.next(null);
         subscriber.complete();
 
       });
@@ -119,10 +114,7 @@ export class NetworkService extends HttpService {
         subscriber.complete();
 
       }).on('error', (e) => {
-
-        if (e.code !== 'Z_DATA_ERROR') {
-          subscriber.error(e);
-        }
+        subscriber.error(e);
 
       });
     });

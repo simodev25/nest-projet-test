@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { filter, map, mapTo, max, mergeMap, retryWhen, tap } from 'rxjs/operators';
+import { count, delay, filter, map, mapTo, max, mergeMap, reduce, retryWhen, take, tap, toArray } from 'rxjs/operators';
 import { from, Observable, of } from 'rxjs';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { RxjsUtils } from '../shared/utils/rxjs-utils';
@@ -29,31 +29,34 @@ export class ScraperService {
 
   }
 
-
-
   //@Cron('5 * * * * *', { launchOnInit: true, sync: true })
   public scrapeAmazone() {
     const start = Date.now();
-
     this.logger.debug('scrapeAmazone start ...');
-    ScraperHelper.KEYWORD_LIST.forEach(keyword=> {
-      this.scrapeAmazoneSearchWord(keyword).subscribe((count: any) => {
 
-        this.logger.debug(`keyword :[${keyword}] number of products processed [${count}]`);
-        this.logger.debug(format(
-          '%s %s %dms %s',
-          'scrapeAmazone',
-          'end .',
-          Date.now() - start,
-          '',
-          '',
-        ));
-      }, error1 => {
-        console.log(error1)
-        this.logger.error(error1);
-      });
-    })
+    ScraperHelper.KEYWORD_LIST.pipe(delay(1000),take(20), mergeMap((keyword: string) => {
 
+      return this.scrapeAmazoneSearchWord(keyword).pipe(
+        map((count: any) => {
+          this.logger.debug(`keyword :[${keyword}] number of products processed [${count}]`);
+          return count;
+        }));
+    })).pipe(reduce((acc, val) => acc + val)).subscribe((count) => {
+      this.logger.debug(`Number of ALL products processed [${count}]`);
+
+    },error1 => {
+
+      console.log(error1)
+    },()=>{
+      this.logger.debug(format(
+        '%s %s %dms %s',
+        'scrapeAmazone',
+        'end .',
+        Date.now() - start,
+        '',
+        '',
+      ));
+    });
 
   }
 
@@ -74,7 +77,6 @@ export class ScraperService {
           produitClass.country = country;
           produitClass.currency = ScraperHelper.getCurrency(country);
 
-
           return produitClass;
         }),
         mergeMap((produitClass: Product) => from(produitClass.isValideProduct()).pipe(
@@ -82,7 +84,7 @@ export class ScraperService {
           mapTo(produitClass),
         )),
         mergeMap((produitClass: Product) => {
-          this.logger.log(`find product asin [${produitClass.asin}]`)
+          this.logger.log(`find product asin [${produitClass.asin}]`);
           return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
             map((productDetail) => plainToClass(ProductDetail, productDetail)),
             mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
@@ -90,14 +92,13 @@ export class ScraperService {
               mapTo(productDetail),
             )),
             map((productDetail: ProductDetail) => {
-              this.logger.log(`find productDetail asin [${produitClass.asin}]`)
+              this.logger.log(`find productDetail asin [${produitClass.asin}]`);
               produitClass.productDetail = productDetail;
               return produitClass;
             }),
           );
 
         }),
-
         mergeMap((produitClass: Product) => {
           return of(produitClass.productDetail.linkReviews).pipe(
             filter((linkReviews) => linkReviews != null),
@@ -106,7 +107,7 @@ export class ScraperService {
                 map((productReviews) => plainToClass(ProductReviews, productReviews)),
                 map((productReviews: ProductReviews) => {
                   // produitClass.productDetail = productReviews;
-                  this.logger.log(`find productReviews asin [${produitClass.asin}]`)
+                  this.logger.log(`find productReviews asin [${produitClass.asin}]`);
                   produitClass.productDetail.productReviews = productReviews;
                   return produitClass;
                 }),
@@ -117,7 +118,7 @@ export class ScraperService {
         mergeMap((produitClass: Product) => {
           productCount++;
           // console.log(produitClass)
-          this.logger.log(`find productDetail asin [${produitClass.asin}]`)
+          this.logger.log(`find productDetail asin [${produitClass.asin}]`);
           return this.productRepository.saveProduct(produitClass);
           //  return productCount;
         }),
