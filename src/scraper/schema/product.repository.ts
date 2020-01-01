@@ -1,7 +1,7 @@
 import { ProductEntity } from './product.entity';
 import { Product } from '../product/product';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { forkJoin, from, merge, Observable } from 'rxjs';
+import { forkJoin, from, merge, Observable, pipe } from 'rxjs';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 
@@ -45,9 +45,9 @@ export class ProductRepository {
     const productDetailEntityDto: ProductDetailEntity = plainToClass(ProductDetailEntity, serializedProductDetail);
     const productDetailEntity = new this.productDetailEntityModel(productDetailEntityDto);
 
-    const productHtmlEntity: ProductHtmlEntity = new ProductHtmlEntity();
-    productHtmlEntity.sourceHtml = product.productDetail.sourceHtml;
-    productDetailEntity.productHtmlSource =  new this.productHtmlEntityModel(productHtmlEntity);
+    //   const productHtmlEntity: ProductHtmlEntity = new ProductHtmlEntity();
+    // productHtmlEntity.sourceHtml = product.productDetail.sourceHtml;
+    //productDetailEntity.productHtmlSource =  new this.productHtmlEntityModel(productHtmlEntity);
     productEntity.productDetail = productDetailEntity;
 
     const productReviewsEntityDto: ProductReviewsEntity = plainToClass(ProductReviewsEntity, serializedProductReviews);
@@ -74,7 +74,7 @@ export class ProductRepository {
           {
             productEntity: from(productEntity.save()),
             productDetailEntity: from(productDetailEntity.save()),
-            productHtmlSource: from((productDetailEntity.productHtmlSource as DocumentType<ProductHtmlEntity>).save()),
+            //     productHtmlSource: from((productDetailEntity.productHtmlSource as DocumentType<ProductHtmlEntity>).save()),
             productReviews: from(productReviewsEntity.save()),
           });
 
@@ -126,7 +126,7 @@ export class ProductRepository {
       .pipe(
         filter((productDetailEntityfind: DocumentType<ProductDetailEntity>) => !isNil(productDetailEntityfind)),
         tap((productDetailEntityfind: DocumentType<ProductDetailEntity>) => {
-          this.updateProductReviews$(productDetailEntityfind, productReviewsEntity).subscribe();
+          this.updateProductReviews$(productDetailEntityfind, productReviewsEntity).pipe(filter((data) => !isNil(productDetailEntityfind.productReviews))).subscribe();
         }),
         map((productDetailEntityfind: DocumentType<ProductDetailEntity>) => {
           const productDetailFindserialized: ProductDetailEntity = productDetailEntityfind.toJSON() as ProductDetailEntity;

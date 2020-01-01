@@ -26,9 +26,11 @@ export class ScraperAmazoneService implements IScraper {
       mergeMap(x => {
         return this.httpService.getTor(link, this.scraperHelper.requestConfig(), renewTorSession).pipe(
           catchError((err) => {
+
             return of(null);
           }),
           tap((res: any) => {
+
             if (isNil(res)) {
               renewTorSession = true;
               throw new Exception('scrapeAmazoneUrlHome : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
@@ -132,15 +134,12 @@ export class ScraperAmazoneService implements IScraper {
               }
 
             }
-
+            renewTorSession = false;
             return data['produits'];
           }),
         );
       }),
-      retryWhen(RxjsUtils.genericRetryStrategy({
-        scalingDuration: 2000,
-        excludedStatusCodes: [500],
-      })),
+      retryWhen(RxjsUtils.genericRetryStrategy()),
     );
 
     return result$;
@@ -153,6 +152,17 @@ export class ScraperAmazoneService implements IScraper {
     const result$ = of(1).pipe(
       mergeMap(x => {
         return this.httpService.getTor(linkDetail, this.scraperHelper.requestConfig(), renewTorSession).pipe(
+          catchError((err) => {
+
+            return of(null);
+          }),
+          tap((res: any) => {
+
+            if (isNil(res)) {
+              renewTorSession = true;
+              throw new Exception('productDetail : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
+            }
+          }),
           map((res: any) => {
 
             const data: any = scrapeIt.scrapeHTML(res, {
@@ -276,11 +286,12 @@ export class ScraperAmazoneService implements IScraper {
             }
             if (!!data) {
               if (data['isCaptcha']) {
+                renewTorSession = true;
                 throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
               }
               //  throw new Exception('productDetail: error will be picked up by retryWhen');
             }
-
+            renewTorSession = false;
             data['link'] = link;
             return data;
           }),
@@ -299,6 +310,17 @@ export class ScraperAmazoneService implements IScraper {
     const result$ = of(1).pipe(
       mergeMap(x => {
         return this.httpService.getTor(linkDetail, this.scraperHelper.requestConfig(), renewTorSession).pipe(
+          catchError((err) => {
+
+            return of(null);
+          }),
+          tap((res: any) => {
+
+            if (isNil(res)) {
+              renewTorSession = true;
+              throw new Exception('productReviews : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
+            }
+          }),
           map((res: any) => {
             const data: any = scrapeIt.scrapeHTML(res, {
               isCaptcha: {
@@ -387,10 +409,12 @@ export class ScraperAmazoneService implements IScraper {
             }
             if (!!data) {
               if (data['isCaptcha']) {
+                renewTorSession = true;
                 throw new Exception('productReviews : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
               }
               //  throw new Exception('productDetail: error will be picked up by retryWhen');
             }
+            renewTorSession = false;
             return data;
           }),
         );

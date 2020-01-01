@@ -6,8 +6,8 @@ export class RxjsUtils {
 
   public static genericRetryStrategy = (
     {
-      maxRetryAttempts = 100,
-      scalingDuration = 1000,
+      maxRetryAttempts = 10,
+      scalingDuration = 3000,
       excludedStatusCodes = [],
     }: {
       maxRetryAttempts?: number;
@@ -18,18 +18,22 @@ export class RxjsUtils {
     return attempts.pipe(
       mergeMap((error: Exception, i) => {
         const retryAttempt = i + 1;
-console.log(error)
+
         if(error instanceof Exception){
           // if maximum number of retries have been met
           // or response is a status code we don't wish to retry, throw error
           if (retryAttempt > maxRetryAttempts || excludedStatusCodes.find(e => e === error.getStatus())) {
             return throwError(error);
           }
-          // console.error(error);
+
           console.log(`[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
           // retry after 1s, 2s, etc...
         } else {
-          return throwError(error);
+          if (retryAttempt > maxRetryAttempts ) {
+            return throwError(error);
+          }
+          console.error(error);
+          console.log(`[error CODE : ${error}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
         }
 
         return timer( retryAttempt * scalingDuration);//retryAttempt * scalingDuration
