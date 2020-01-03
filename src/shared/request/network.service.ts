@@ -39,8 +39,12 @@ export class NetworkService extends HttpService {
 
         tr.renewTorSession((err, success) => {
           if (err) {
+<<<<<<< HEAD
             console.log(err)
             subscriber.error(err);
+=======
+            subscriber.next(null);
+>>>>>>> master
             subscriber.complete();
           }
           return {
@@ -59,6 +63,19 @@ export class NetworkService extends HttpService {
       };
 
       tr.request(option, (err, res) => {
+        if(!isNil(res)){
+
+          const encoding = res.headers['content-encoding'];
+          if (encoding !== 'gzip') {
+            subscriber.next(res.body);
+            subscriber.complete();
+          }
+        } else {
+
+          subscriber.error(err);
+        //  subscriber.complete();
+        }
+
         if(!isNil(res)){
 
           const encoding = res.headers['content-encoding'];

@@ -18,7 +18,11 @@ export class RxjsUtils {
     return attempts.pipe(
       mergeMap((error: any, i) => {
         const retryAttempt = i + 1;
+<<<<<<< HEAD
 //console.log(error)
+=======
+
+>>>>>>> master
         if(error instanceof Exception){
           // if maximum number of retries have been met
           // or response is a status code we don't wish to retry, throw error
@@ -33,7 +37,11 @@ export class RxjsUtils {
             return throwError(error);
           }
           console.error(error);
+<<<<<<< HEAD
           console.log(`[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
+=======
+          console.log(`[error CODE : ${error}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
+>>>>>>> master
         }
 
         return timer( retryAttempt * scalingDuration);//retryAttempt * scalingDuration
