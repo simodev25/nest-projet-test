@@ -1,15 +1,14 @@
 var tr = require('tor-request');
-var zlib = require("zlib");
-tr.TorControlPort.password = "PASSWORD"
+var zlib = require('zlib');
+tr.TorControlPort.password = 'PASSWORD';
 requestIP();
 
 
-tr.setTorAddress('127.0.0.1', 9051);
+tr.setTorAddress('torproxy', 9051);
 
 
 requestIP();
-tr.newTorSession( (err) =>
-{
+tr.newTorSession((err) => {
 
   requestIP();
   return;
@@ -20,31 +19,31 @@ function requestIP() {
   var gunzip = zlib.createGunzip();
   var buffer = [];
   tr.request({
-    url: 'https://www.amazon.com/s?k=Tablets',
-    strictSSL: true,
-    agentClass: require('socks5-https-client/lib/Agent'),
-    gzip: true,
-    agentOptions: {
-      socksHost: 'my-tor-proxy-host', // Defaults to 'localhost'.
-      socksPort: 9050, // Defaults to 1080.
-      // Optional credentials
-    //  socksUsername: 'proxyuser',
-    //  socksPassword: 'p@ssw0rd',
+    url: 'https://api.myip.com',
+    // strictSSL: true,
+    //  agentClass: require('socks5-https-client/lib/Agent'),
+    headers: {
+      'accept-encoding': 'gzip',
+    },
+
+  }, function(error, res, body) {
+
+    if (!error && response.statusCode == 200) {
+      // If response is gzip, unzip first
+      var encoding = response.headers['content-encoding']
+      if (encoding && encoding.indexOf('gzip') >= 0) {
+        zlib.gunzip(body, function(err, dezipped) {
+          var json_string = dezipped.toString('utf-8');
+          var json = JSON.parse(json_string);
+          console.log(json)
+        });
+      } else {
+         console.log(body)
+      }
     }
-  }, function(err, res) {
-    console.log(err || res.body);
-  }).pipe(gunzip)
 
-  gunzip.on('data', function(data) {
-    // decompression chunk ready, add it to the buffer
-    buffer.push(data.toString())
-
-  }).on("end", function() {
-    // response and decompression complete, join the buffer and return
-    console.log( buffer.join(""));
-
-  }).on("error", function(e) {
-    console.log(e);
-  })
+  }).on('error', function(e) {
+    console.log("error",e);
+  });
 
 }

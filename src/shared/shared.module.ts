@@ -51,17 +51,17 @@ const optionsTypegoose = {
         useFindAndModify: false,
         useUnifiedTopology: false,
         reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
-        reconnectInterval: 500, // Reconnect every 500ms
+        reconnectInterval: 1000, // Reconnect every 500ms
         bufferMaxEntries: 0,
-        connectTimeoutMS: 10000,
-        socketTimeoutMS: 45000,
+        connectTimeoutMS: 20000,
+        socketTimeoutMS: 45000
       }),
       inject: [ConfigService],
     }),
 
     CacheModule.register({
       store: redisStore,
-      host: 'localhost',
+      host: 'redis',
       port: 6379,
       ttl: 60 * 10, // seconds
       max: 10, // maximum number of items in cache

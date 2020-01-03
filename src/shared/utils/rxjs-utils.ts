@@ -16,7 +16,7 @@ export class RxjsUtils {
     } = {},
   ) => (attempts: Observable<any>) => {
     return attempts.pipe(
-      mergeMap((error: Exception, i) => {
+      mergeMap((error: any, i) => {
         const retryAttempt = i + 1;
 //console.log(error)
         if(error instanceof Exception){
@@ -33,7 +33,7 @@ export class RxjsUtils {
             return throwError(error);
           }
           console.error(error);
-          console.log(`[error CODE : ${error}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
+          console.log(`[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
         }
 
         return timer( retryAttempt * scalingDuration);//retryAttempt * scalingDuration

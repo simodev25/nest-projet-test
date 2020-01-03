@@ -30,7 +30,6 @@ export class ScraperAmazoneService implements IScraper {
             return of(null);
           }),
           tap((res: any) => {
-
             if (isNil(res)) {
               renewTorSession = true;
               throw new Exception('scrapeAmazoneUrlHome : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);

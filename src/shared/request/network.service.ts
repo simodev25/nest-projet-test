@@ -3,9 +3,11 @@ import { AXIOS_INSTANCE_TOKEN } from '@nestjs/common/http/http.constants';
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 const tr = require('tor-request');
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { isNil } from '../utils/shared.utils';
 import * as fs from 'fs';
+import { catchError, retryWhen } from 'rxjs/operators';
+import { RxjsUtils } from '../utils/rxjs-utils';
 
 const zlib = require('zlib');
 
@@ -24,6 +26,9 @@ export class NetworkService extends HttpService {
     super();
 
     tr.TorControlPort.password = 'PASSWORD';
+    tr.TorControlPort.host = 'torproxy';
+    tr.TorControlPort.port = '9051';
+    tr.setTorAddress('torproxy', '9050');
 
   }
 
@@ -34,7 +39,8 @@ export class NetworkService extends HttpService {
 
         tr.renewTorSession((err, success) => {
           if (err) {
-            subscriber.next(null);
+            console.log(err)
+            subscriber.error(err);
             subscriber.complete();
           }
           return {
@@ -83,7 +89,16 @@ export class NetworkService extends HttpService {
 
       });
     });
-    return torRequest;
+    return  torRequest.pipe(
+      retryWhen(RxjsUtils.genericRetryStrategy({
+        maxRetryAttempts: 6,
+        scalingDuration: 10000,
+      })),
+      catchError((err) => {
+        console.log(err);
+        return of(null);
+      }));
+
   }
 
   public testTor() {
