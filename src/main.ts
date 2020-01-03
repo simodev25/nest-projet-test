@@ -51,13 +51,12 @@ async function bootstrap() {
 
    await app.listen(3001);*/
 
-  const scraperModule = await NestFactory.createApplicationContext(ScraperModule, {});
-  const scraperService: ScraperService = scraperModule.get(ScraperService);
-  const networkService: NetworkService = scraperModule.get(NetworkService);
-  //networkService.testTor();
-   scraperService.scrapeAmazone();
-  //scraperService.proxysChecker();
-  //scraperService.scrapeAmazoneSearchWord('Home & Kitchen').subscribe();
+  const scraperModule = await NestFactory.createMicroservice(ScraperModule, {});
+
+  await scraperModule.listen(() => {
+
+    log.verbose('microservice successfully started');
+  })
 }
 
 bootstrap();

@@ -1,161 +1,195 @@
-import { HttpService, Inject, Injectable } from '@nestjs/common';
-import { AXIOS_INSTANCE_TOKEN } from '@nestjs/common/http/http.constants';
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { HttpService, Injectable } from '@nestjs/common';
+import { AxiosRequestConfig } from 'axios';
 
-const tr = require('tor-request');
-import { Observable, of } from 'rxjs';
-import { isNil } from '../utils/shared.utils';
-import * as fs from 'fs';
-import { catchError, retryWhen } from 'rxjs/operators';
-import { RxjsUtils } from '../utils/rxjs-utils';
+import { Observable, Subject, throwError, timer } from 'rxjs';
+import { getRandomInt, isNil } from '../utils/shared.utils';
+import { filter, map, mergeMap, retryWhen, tap } from 'rxjs/operators';
+import { Exception } from '../Exception/exception';
+import { ScraperHelper } from '../../scraper/ScraperHelper';
 
-const zlib = require('zlib');
+enum StatusRenew {
+  EN_COUR = 'EN_COUR',
+  STOP = 'STOP',
 
-export enum HTTPMethod {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
+}
+
+interface IProxy {
+  countRequest: number;
+  countError: number;
+  dateInit: number;
+  host: string;
+  timedOut?: boolean;
+  renewSession: StatusRenew;
 }
 
 @Injectable()
-export class NetworkService extends HttpService {
+export class NetworkService  {
   private renewTorSessionTimeout = 1000 * 30;// 30 second timeout on session renew
-  private renewTorSessionTime = Date.now() - this.renewTorSessionTimeout;
+  private torProxy: Map<string, IProxy> = new Map<string, IProxy>();
+  private torSession$: Subject<IProxy> = new Subject<IProxy>();
+  private tr = require('tor-request');
 
   constructor() {
-    super();
+    this.tr.TorControlPort.password = 'PASSWORD';
+    this.tr.TorControlPort.port = '9051';
 
-    tr.TorControlPort.password = 'PASSWORD';
-    tr.TorControlPort.host = 'torproxy';
-    tr.TorControlPort.port = '9051';
-    tr.setTorAddress('torproxy', '9050');
+    this.initProxys();
 
+    this.torSession$.pipe(
+      filter((proxy: IProxy) => {
+        const now = Date.now();
+        const delta = now - proxy.dateInit;
+        return delta > this.renewTorSessionTimeout && proxy.renewSession === StatusRenew.STOP;
+      }),
+      map((proxy: IProxy) => {
+        console.log(`renewTorSession *****************************************`);
+        console.log('this.proxy', proxy);
+        this.tr.TorControlPort.host = proxy.host;
+        proxy.renewSession = StatusRenew.EN_COUR;
+        this.tr.renewTorSession((err, success) => {
+          if (err) {
+            proxy.renewSession = StatusRenew.STOP;
+            console.log(`renewTorSession  END error  *****************************************`);
+            throw new Exception('renewTorSession : error', ScraperHelper.EXIT_CODES.ERROR_PROXY);
+          }
+          proxy.countError = 0;
+          proxy.timedOut = false;
+          proxy.dateInit = Date.now();
+          proxy.renewSession = StatusRenew.STOP;
+          console.log(`renewTorSession  END   *****************************************`);
+
+        });
+      }),
+    ).subscribe();
   }
 
   public getTor(url: string, config?: AxiosRequestConfig, renewTorSession: boolean = false): Observable<string> {
-
+    const proxy = this.getProxy();
+    console.log(this.torProxy.values());
     const torRequest = new Observable<string>(subscriber => {
-      if (renewTorSession) {
 
-        tr.renewTorSession((err, success) => {
-          if (err) {
-            console.log(err)
-            subscriber.error(err);
-            subscriber.complete();
-          }
-          return {
-            statusCode: 200,
-            message: 'success',
-          };
-        });
-      }
-
-      const gunzip = zlib.createUnzip();
-      const buffer = [];
       const option = {
         url,
         header: config.headers,
-
+        gzip: true,
+        secureProtocol: 'TLSv1_2_method',
+        tunnel: false,
+        followRedirect: false,
       };
 
-      tr.request(option, (err, res) => {
-        if(!isNil(res)){
+      if (isNil(proxy)) {
+        throw new Exception('request to :', ScraperHelper.EXIT_CODES.ERROR_PROXY_EMPTY);
+      }
+      this.tr.setTorAddress(proxy.host, '9050');
+      proxy.countRequest++;
+      this.tr.request(option, (err, res) => {
+        if (!isNil(res)) {
+          subscriber.next(res.body);
 
-          const encoding = res.headers['content-encoding'];
-          if (encoding !== 'gzip') {
-            subscriber.next(res.body);
-            subscriber.complete();
-          }
+          subscriber.complete();
         } else {
-
+          proxy.countError++;
           subscriber.error(err);
-        //  subscriber.complete();
+          //  subscriber.complete();
         }
-
-      }).pipe(gunzip);
-
-      gunzip.on('data', (data) => {
-        // decompression chunk ready, add it to the buffer
-        buffer.push(data.toString());
-      }).on('end', () => {
-        // response and decompression complete, join the buffer and return
-        subscriber.next(buffer.join(''));
-        subscriber.complete();
-
-      }).on('error', (e) => {
-
-        subscriber.next(null);
-        subscriber.complete();
 
       });
     });
-    return  torRequest.pipe(
-      retryWhen(RxjsUtils.genericRetryStrategy({
+    return torRequest.pipe(
+      tap(res => {
+        if (ScraperHelper.isCaptcha(res)) {
+          this.torSession$.next(proxy);
+          throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+        }
+        return res;
+      }),
+      retryWhen(this.scrapeRetryStrategy({
         maxRetryAttempts: 6,
-        scalingDuration: 10000,
+        scalingDuration: this.renewTorSessionTimeout,
+        proxy,
       })),
-      catchError((err) => {
-        console.log(err);
-        return of(null);
-      }));
-
-  }
-
-  public testTor() {
-
-    const torRequest = new Observable<string>(subscriber => {
-
-      const gunzip = zlib.createGunzip();
-      const buffer = [];
-      const option = {
-        url: 'https://www.amazon.com/s?k=tablet',
-        headers: {
-          'accept-encoding': 'gzip',
-        },
-
-      };
-
-      tr.request(option, (err, res) => {
-      }).pipe(gunzip);
-
-      gunzip.on('data', (data) => {
-        // decompression chunk ready, add it to the buffer
-        buffer.push(data.toString());
-
-      }).on('end', () => {
-        // response and decompression complete, join the buffer and return
-
-        subscriber.next(buffer.join(''));
-        subscriber.complete();
-
-      }).on('error', (e) => {
-        subscriber.error(e);
-
-      });
-    });
-    torRequest.subscribe(console.log, error1 => console.log(error1), () => console.log('compplte'));
-
-  }
-
-  private requestNewTorSession() {
-    const now = Date.now();
-    const delta = now - this.renewTorSessionTime;
-
-    this.renewTorSessionTime = now;
-
-    tr.renewTorSession((err, success) => {
-        if (err) {
-          return {
-            statusCode: 500,
-            message: 'error - could not renew tor session',
-          };
-        }
-        return {
-          statusCode: 200,
-          message: 'success',
-        };
-      },
     );
+
+  }
+
+  private scrapeRetryStrategy = (
+    {
+      maxRetryAttempts = 10,
+      scalingDuration = 3000,
+      excludedStatusCodes = [],
+      proxy,
+    }: {
+      maxRetryAttempts?: number;
+      scalingDuration?: number;
+      excludedStatusCodes?: number[];
+      proxy?: IProxy;
+    } = {},
+  ) => (attempts: Observable<any>) => {
+    return attempts.pipe(
+      mergeMap((error: any, i) => {
+        const retryAttempt = i + 1;
+        if (error instanceof Exception) {
+          // if maximum number of retries have been met
+          // or response is a status code we don't wish to retry, throw error
+          if (retryAttempt > maxRetryAttempts) {
+            return throwError(error);
+          }
+
+          console.log(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
+          // retry after 1s, 2s, etc...
+        } else {
+          if (!isNil(error.options) && !isNil(error.options.command)) {
+            //  console.log('*************************************');
+            // console.log('this.proxy', this.proxy);
+            // console.log('scrapeRetryStrategy: Proxy connection timed out ', error);
+            proxy.timedOut = true;
+            error.code = ScraperHelper.EXIT_CODES.ERROR_PROXY;
+            //    console.log('*************************************');
+          } else if (!isNil(error.code) && error.code === 'ECONNRESET') {
+            //  console.log('*************************************');
+            //   console.log('this.proxy', this.proxy);
+            //  console.log('scrapeRetryStrategy:socket hang up', error);
+
+            //  console.log('*************************************');
+          } else {
+            //  console.log('*************************************');
+            //   console.log('this.proxy', this.proxy);
+            //   console.log('scrapeRetryStrategy:', error);
+            //  console.log('*************************************');
+          }
+          if (retryAttempt > maxRetryAttempts) {
+            return throwError(error);
+          }
+
+          console.log(`scrapeRetryStrategy[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
+        }
+
+        return timer(maxRetryAttempts * scalingDuration);
+      }),
+    );
+  };
+
+  private initProxys() {
+    const now = Date.now();
+    for (let i = 1; i <= 10; i++) {
+      this.torProxy.set(`torproxy${i}`, { countRequest: 0, countError: 0, host: `torproxy${i}`, dateInit: now, renewSession: StatusRenew.STOP });
+    }
+
+
+  }
+
+  private getProxy(): IProxy {
+    const index = getRandomInt(this.torProxy.size);
+    const proxy: string[] = [];
+    for (const nextProxy of this.torProxy.values()) {
+      if (nextProxy.timedOut) {
+        this.torSession$.next(nextProxy);
+      } else {
+        proxy.push(nextProxy.host);
+      }
+
+    }
+    return this.torProxy.get(proxy[index]);
 
   }
 

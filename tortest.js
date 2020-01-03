@@ -4,15 +4,10 @@ tr.TorControlPort.password = 'PASSWORD';
 requestIP();
 
 
-tr.setTorAddress('torproxy', 9051);
+tr.setTorAddress('tcpproxy', 9055);
 
 
 requestIP();
-tr.newTorSession((err) => {
-
-  requestIP();
-  return;
-});
 
 
 function requestIP() {

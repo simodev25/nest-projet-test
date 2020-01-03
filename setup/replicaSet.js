@@ -1,12 +1,13 @@
-rsconf = {
-  _id : "rs0",
-  members: [
-    { _id : 0, host : "mongo-rs0-1:27017" },
-    { _id : 1, host : "mongo-rs0-2:27017" },
-    { _id : 2, host : "mongo-rs0-3:27017" }
-  ]
-}
+rs.initiate();
 
-rs.initiate(rsconf);
+var cfg=rs.conf();
 
-rs.conf();
+cfg.members[0].host="mongo-0.mongo:27017";
+
+rs.add("mongo-1.mongo:27017");
+
+rs.add("mongo-2.mongo:27017");
+
+rs.reconfig(cfg, { force: true });
+
+rs.status();

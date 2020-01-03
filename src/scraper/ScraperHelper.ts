@@ -2,11 +2,9 @@ import * as cheerio from 'cheerio';
 import { EnumVariationType } from './lib/EScraper';
 import { AxiosRequestConfig } from 'axios';
 import { getRandomInt, isNil } from '../shared/utils/shared.utils';
-import { from, of } from 'rxjs';
+import { from } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
-import * as lineReader from 'line-reader';
-import * as  httpsProxyAgent from 'https-proxy-agent';
 
 @Injectable()
 export class ScraperHelper {
@@ -45,6 +43,10 @@ export class ScraperHelper {
     return cheerio.load(element, { ignoreWhitespace: true });
   }
 
+  public static isCaptcha(contents: string): boolean {
+
+    return contents.indexOf('api-services-support@amazon.com') > -1;
+  }
   public static getRandomUserAgent = () => {
     const index = getRandomInt(ScraperHelper.USER_AGENT_LIST.length);
     return ScraperHelper.USER_AGENT_LIST[index];
@@ -69,6 +71,7 @@ export class ScraperHelper {
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
       'Accept-Encoding': 'gzip',
       'User-Agent': ScraperHelper.getRandomUserAgent(),
+       'Connection': 'keep-alive',
 
     };
 
@@ -252,10 +255,13 @@ export class ScraperHelper {
   }
 
   public static EXIT_CODES = {
-    SUCCESS: 0,
-    ERROR_USER_FUNCTION_THREW: 91,
-    ERROR_UNKNOWN: 92,
-    ERROR_CAPTCHA: 93,
+    SUCCESS: 'SUCCESS',
+    ERROR_USER_FUNCTION_THREW: 'ERROR_USER_FUNCTION_THREW',
+    ERROR_UNKNOWN: 'ERROR_UNKNOWN',
+    ERROR_CAPTCHA: 'ERROR_CAPTCHA',
+    ERROR_PROXY: 'ERROR_PROXY',
+    ERROR_PROXY_TIME_OUT: 'ERROR_PROXY_TIME_OUT',
+    ERROR_PROXY_EMPTY: 'ERROR_PROXY_EMPTY',
   };
 
   public static DEFAULT_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36'; // eslint-disable-line max-len

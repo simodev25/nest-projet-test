@@ -1,0 +1,136 @@
+version: "3"
+
+services:
+  mongo-rs0-1:
+    image: "mongo-start"
+    hostname: mongo-rs0-1
+    build: ./mongodb/mongo-rs0-1
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb/mongo-rs0-1/data:/data/db
+    depends_on:
+      - "mongo-rs0-2"
+      - "mongo-rs0-3"
+    networks:
+      - scraper-compose-network
+  mongo-rs0-2:
+    image: "mongo"
+    hostname: mongo-rs0-2
+    command: --replSet rs0  --oplogSize 128
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongodb/mongo-rs0-2/data:/data/db
+    networks:
+      - scraper-compose-network
+  mongo-rs0-3:
+    image: "mongo"
+    hostname: mongo-rs0-3
+    command: --replSet rs0  --oplogSize 128
+    ports:
+      - "27019:27017"
+    volumes:
+      - ./mongodb/mongo-rs0-3/data:/data/db
+    networks:
+      - scraper-compose-network
+  setup-rs:
+    image: "setup-rs"
+    build: ./setup
+    depends_on:
+      - "mongo-rs0-1"
+    restart: always
+  torproxy1:
+    image: dperson/torproxy
+    hostname: torproxy1
+    restart: always
+    expose:
+      - 9050
+      - 9051
+    environment:
+      PASSWORD: PASSWORD
+    networks:
+      - scraper-compose-network
+  torproxy2:
+    image: dperson/torproxy
+    hostname: torproxy2
+    restart: always
+    expose:
+      - 9050
+      - 9051
+    environment:
+      PASSWORD: PASSWORD
+    networks:
+      - scraper-compose-network
+  torproxy3:
+    image: dperson/torproxy
+    hostname: torproxy3
+    restart: always
+    expose:
+      - 9050
+      - 9051
+    environment:
+      PASSWORD: PASSWORD
+    networks:
+      - scraper-compose-network
+  torproxy4:
+    image: dperson/torproxy
+    hostname: torproxy4
+    restart: always
+    expose:
+      - 9050
+      - 9051
+    environment:
+      PASSWORD: PASSWORD
+    networks:
+      - scraper-compose-network
+  torproxy5:
+    image: dperson/torproxy
+    hostname: torproxy5
+    restart: always
+    expose:
+      - 9050
+      - 9051
+    environment:
+      PASSWORD: PASSWORD
+    networks:
+      - scraper-compose-network
+  tcpproxy:
+    build: ./tengine-docker
+    hostname: tcpproxy
+    depends_on:
+      - torproxy1
+      - torproxy2
+      - torproxy3
+    ports:
+      - '9055:9055'
+    networks:
+      - scraper-compose-network
+  redis:
+    image: 'bitnami/redis:5.0'
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    hostname: redis
+    networks:
+      - scraper-compose-network
+  scraper:
+    image: 'scraper'
+    volumes:
+      - .:/usr/src/app
+    build: .
+    ports:
+      - '3000'
+    hostname: host-scraper
+    networks:
+      - scraper-compose-network
+    depends_on:
+      - "redis"
+      - "torproxy1"
+      - "mongo-rs0-1"
+networks:
+  scraper-compose-network:
+    driver: bridge

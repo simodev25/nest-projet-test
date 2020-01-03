@@ -5,7 +5,7 @@ export class Exception extends Error {
 
   constructor(
     private readonly response: string | object,
-    private readonly status: number = 0,
+    private readonly status: string = '',
   ) {
     super();
     this.message = response;
@@ -15,7 +15,7 @@ export class Exception extends Error {
     return this.response;
   }
 
-  public getStatus(): number {
+  public getStatus(): string {
     return this.status;
   }
 

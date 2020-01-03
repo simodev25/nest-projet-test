@@ -1,41 +1,28 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IScraper } from './IScraper';
 
-import { Observable, of, timer } from 'rxjs';
-import { catchError, map, mergeMap, retryWhen, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, mergeMap } from 'rxjs/operators';
 import { ScraperHelper } from '../ScraperHelper';
 import * as scrapeIt from 'scrape-it';
-import { AxiosResponse } from 'axios';
-import { ImenuHome } from './ImenuHome';
-import { Exception } from '../../shared/Exception/exception';
 import { deleteSpace, getValueFromParameters, isNil, parseDateFromJson, validator } from '../../shared/utils/shared.utils';
-import { RxjsUtils } from '../../shared/utils/rxjs-utils';
-import { NetworkService } from '../../shared/request/network.service';
+import { ProxyService } from './proxy.service';
 
 @Injectable()
 export class ScraperAmazoneService implements IScraper {
-  constructor(private readonly httpService: NetworkService, private readonly scraperHelper: ScraperHelper) {
+  public static renewTorSession: boolean = false;
+
+  constructor(private readonly httpService: ProxyService) {
   }
 
 // scraping the specific page
 
   // scraping the specific page
   public scrapeUrlHome(link: string): Observable<any> {
-    let renewTorSession: boolean = false;
+
     const result$ = of(1).pipe(
       mergeMap(x => {
-        return this.httpService.getTor(link, this.scraperHelper.requestConfig(), renewTorSession).pipe(
-          catchError((err) => {
-
-            return of(null);
-          }),
-          tap((res: any) => {
-            if (isNil(res)) {
-              renewTorSession = true;
-              throw new Exception('scrapeAmazoneUrlHome : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-            }
-          }),
-
+        return this.httpService.getTor(link).pipe(
           map((res: any) => {
             //  console.log(res)
             const data: any = scrapeIt.scrapeHTML(res,
@@ -119,26 +106,11 @@ export class ScraperAmazoneService implements IScraper {
             return data;
           }),
           map(data => {
-
-            if (isNil(data)) {
-              renewTorSession = true;
-              throw new Exception({
-                message: 'scrapeAmazoneUrlHome: error will be picked up by retryWhen',
-                link,
-              }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-            } else if (!!data.produits && data.produits.length === 0) {
-              if (data.isCaptcha) {
-                renewTorSession = true;
-                throw new Exception('scrapeAmazoneUrlHome : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-              }
-
-            }
-            renewTorSession = false;
             return data['produits'];
           }),
         );
       }),
-      retryWhen(RxjsUtils.genericRetryStrategy()),
+
     );
 
     return result$;
@@ -146,22 +118,11 @@ export class ScraperAmazoneService implements IScraper {
   }
 
   public productDetail(link: string, baseUrlAmazone: string): Observable<any> {
-    let renewTorSession: boolean = false;
+
     const linkDetail: string = link;
     const result$ = of(1).pipe(
       mergeMap(x => {
-        return this.httpService.getTor(linkDetail, this.scraperHelper.requestConfig(), renewTorSession).pipe(
-          catchError((err) => {
-
-            return of(null);
-          }),
-          tap((res: any) => {
-
-            if (isNil(res)) {
-              renewTorSession = true;
-              throw new Exception('productDetail : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-            }
-          }),
+        return this.httpService.getTor(linkDetail).pipe(
           map((res: any) => {
 
             const data: any = scrapeIt.scrapeHTML(res, {
@@ -176,7 +137,8 @@ export class ScraperAmazoneService implements IScraper {
                 selector: 'html                                                                                                                                                                                   ',
                 how: 'html',
                 convert: (x: string) => {
-                  return x;
+                  //TODO
+                  return 'x';
                 },
               },
               category: {
@@ -275,51 +237,22 @@ export class ScraperAmazoneService implements IScraper {
             return data;
           }),
           map(data => {
-
-            if (isNil(data)) {
-              renewTorSession = true;
-              throw new Exception({
-                message: 'productDetail: error will be picked up by retryWhen',
-                link,
-              }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-            }
-            if (!!data) {
-              if (data['isCaptcha']) {
-                renewTorSession = true;
-                throw new Exception('productDetail : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-              }
-              //  throw new Exception('productDetail: error will be picked up by retryWhen');
-            }
-            renewTorSession = false;
             data['link'] = link;
             return data;
           }),
         );
       }),
-      retryWhen(RxjsUtils.genericRetryStrategy({
-        scalingDuration: 2000,
-        excludedStatusCodes: [500],
-      })));
+    );
     return result$;
   }
 
   public productReviews(link: string): Observable<any> {
-    let renewTorSession: boolean = false;
+
     const linkDetail: string = link;
     const result$ = of(1).pipe(
       mergeMap(x => {
-        return this.httpService.getTor(linkDetail, this.scraperHelper.requestConfig(), renewTorSession).pipe(
-          catchError((err) => {
 
-            return of(null);
-          }),
-          tap((res: any) => {
-
-            if (isNil(res)) {
-              renewTorSession = true;
-              throw new Exception('productReviews : error will be picked up by retryWhen [data => null]', ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-            }
-          }),
+        return this.httpService.getTor(linkDetail).pipe(
           map((res: any) => {
             const data: any = scrapeIt.scrapeHTML(res, {
               isCaptcha: {
@@ -399,29 +332,11 @@ export class ScraperAmazoneService implements IScraper {
             return data;
           }),
           map(data => {
-            if (isNil(data)) {
-              renewTorSession = true;
-              throw new Exception({
-                message: 'productReviews: error will be picked up by retryWhen',
-                link,
-              }, ScraperHelper.EXIT_CODES.ERROR_UNKNOWN);
-            }
-            if (!!data) {
-              if (data['isCaptcha']) {
-                renewTorSession = true;
-                throw new Exception('productReviews : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-              }
-              //  throw new Exception('productDetail: error will be picked up by retryWhen');
-            }
-            renewTorSession = false;
             return data;
           }),
         );
       }),
-      retryWhen(RxjsUtils.genericRetryStrategy({
-        scalingDuration: 2000,
-        excludedStatusCodes: [500],
-      })));
+    );
     return result$;
 
   }
@@ -460,7 +375,7 @@ export class ScraperAmazoneService implements IScraper {
   private getReview(contents: string): any {
     const reviewProduct: any = {};
     if (contents != null) {
-      let $: CheerioStatic = ScraperHelper.parseHtml(contents);
+      const $: CheerioStatic = ScraperHelper.parseHtml(contents);
 
       reviewProduct.date = parseDateFromJson($('span.review-date').text());
       reviewProduct.text = $('span.a-size-base').text();

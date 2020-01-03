@@ -22,7 +22,7 @@ export class RxjsUtils {
         if(error instanceof Exception){
           // if maximum number of retries have been met
           // or response is a status code we don't wish to retry, throw error
-          if (retryAttempt > maxRetryAttempts || excludedStatusCodes.find(e => e === error.getStatus())) {
+          if (retryAttempt > maxRetryAttempts ) {
             return throwError(error);
           }
 

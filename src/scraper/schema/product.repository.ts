@@ -95,13 +95,13 @@ export class ProductRepository {
       mergeMap((productEntityDtoUpdate: DocumentType<ProductEntity>) => {
         this.logger.log(`update product : id :[${productEntityDtoUpdate.id}] asin :[${productEntityDtoUpdate.asin}] `);
         return from(productEntityDtoUpdate.save()).pipe(
-          mergeMap((productEntityDtoUpdate_: DocumentType<ProductEntity>) => {
+          mergeMap((productEntityDtoUpdate$: DocumentType<ProductEntity>) => {
 
             const productHistEntityDTO: ProductHistEntity = new ProductHistEntity();
-            productHistEntityDTO.asin = productEntityDtoUpdate_.asin;
-            productHistEntityDTO.price = productEntityDtoUpdate_.price;
-            productHistEntityDTO.reviews = productEntityDtoUpdate_.reviews;
-            productHistEntityDTO.rating = productEntityDtoUpdate_.rating;
+            productHistEntityDTO.asin = productEntityDtoUpdate$.asin;
+            productHistEntityDTO.price = productEntityDtoUpdate$.price;
+            productHistEntityDTO.reviews = productEntityDtoUpdate$.reviews;
+            productHistEntityDTO.rating = productEntityDtoUpdate$.rating;
 
             productHistEntityDTO.priceMin = productDetailEntity.priceMin;
             productHistEntityDTO.priceMax = productDetailEntity.priceMax;
