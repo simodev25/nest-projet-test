@@ -41,3 +41,9 @@ mongodb/mongo-rs0-3/data/
 mongodb/mongo-rs0-1/data/
 
 *.log 
+
+*.log 
+
+*.log 
+
+ScraperMicroService-info.log 
