@@ -2,7 +2,7 @@ name: Build and Publish Docker
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-latest 
+    runs-on: node:alpine3.10 
     steps:
     - uses: actions/checkout@master
     - name: Publish Docker
