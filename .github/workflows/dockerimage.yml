@@ -12,5 +12,5 @@ jobs:
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
     - name: Build the Docker image
-      run: docker build . --file ./job-scraper/Dockerfile
+      run: docker build . --file ./job-scraper/Dockerfile --tag job-scraper:$(date +%s)
 
