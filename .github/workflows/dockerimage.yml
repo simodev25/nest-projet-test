@@ -5,12 +5,13 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
     - uses: actions/checkout@master
-    - name: Publish to Docker Repository
-      uses: elgohr/Publish-Docker-Github-Action@master
+    - name: Publish Docker
+      uses: elgohr/Publish-Docker-Github-Action@2.12
       with:
         name: simo25docker/job-scrape
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
-    - name: Build the Docker image
-      run: docker build ../../job-scraper/Dockerfile --tag job-scraper:$(date +%s)
+        registry: docker.pkg.github.com
+        workdir: job-scraper        
+
 
