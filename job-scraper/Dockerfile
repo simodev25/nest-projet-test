@@ -17,7 +17,6 @@ COPY . .
 RUN yarn add --dev typescript
 RUN yarn build
 
-RUN ls
 
 #
 # ---- Release ----

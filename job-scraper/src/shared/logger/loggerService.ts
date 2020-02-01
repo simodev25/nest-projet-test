@@ -77,9 +77,8 @@ export class LoggerServiceBase implements LoggerService {
   }
 
   public loggerOptions(context) {
-    console.log(`${this.configService.get('LOG_DIR')}/${context}-info.log `)
+console.dir(this)
     return {
-      level: 'info',
       format: format.combine(
         format.colorize(),
         format.timestamp({
@@ -88,15 +87,22 @@ export class LoggerServiceBase implements LoggerService {
         format.label({ label: path.basename(process.mainModule.filename) }),
         format.printf(info => `${info.label} ${info.timestamp} ${info.level}: ${info.message}`),
       ),
-
       transports: [
 
         new winston.transports.File({
-
-          filename: `/var/log/${context}-info.log `,
+          level: 'debug',
+          filename: `${this.configService.get('LOG_DIR')}${context}-debug.log `,
 
         }),
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({
+          level: 'info',
+          filename: `${this.configService.get('LOG_DIR')}${context}-info.log `,
+
+        }),
+        new winston.transports.File({
+            filename: `${this.configService.get('LOG_DIR')}${context}-error.log `, level: 'error',
+          },
+        ),
       ],
     };
 
