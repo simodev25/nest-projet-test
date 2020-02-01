@@ -7,7 +7,6 @@ jobs:
     - uses: actions/checkout@master
     - name: Publish to Docker Repository
       uses: elgohr/Publish-Docker-Github-Action@master
-      run: docker build . --file job-scraper/Dockerfile
       with:
         name: simo25docker/scraperProxy
         username: ${{ secrets.LOGIN_DOCKER }}
