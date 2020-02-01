@@ -14,7 +14,7 @@ COPY yarn.lock .
 # ---- Build ----
 FROM base AS build
 COPY . .
-yarn add --dev typescript
+RUN yarn add --dev typescript
 RUN yarn build
 
 RUN ls
