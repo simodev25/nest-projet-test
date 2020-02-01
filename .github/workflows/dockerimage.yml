@@ -8,7 +8,7 @@ jobs:
     - name: Publish to Docker Repository
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: simo25docker/scraperProxy
+        name: simo25docker/job-scrape
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
     - name: Build the Docker image
