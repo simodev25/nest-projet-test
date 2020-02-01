@@ -12,7 +12,6 @@ import { ProductReviews } from './product/productReviews';
 import { Logger } from '../shared/logger/logger.decorator';
 import { LoggerServiceBase } from '../shared/logger/loggerService';
 import { isNil } from '../shared/utils/shared.utils';
-import { InjectSchedule, Schedule } from 'nest-schedule';
 import { ConfigService } from '@nestjs/config';
 
 class Keywords {
@@ -52,7 +51,6 @@ export class ScraperService implements OnModuleInit {
               }) private logger: LoggerServiceBase,
               private readonly productRepository: ProductRepository,
               private readonly scraperAmazone: ScraperAmazoneService,
-              @InjectSchedule() private readonly schedule: Schedule,
               private readonly configService: ConfigService) {
 
   }
