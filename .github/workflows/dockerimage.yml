@@ -8,7 +8,7 @@ jobs:
     - name: Publish Docker
       uses: elgohr/Publish-Docker-Github-Action@2.12
       with:
-        name: simo25docker/job-scrape
+        name: simo25docker/job-scraper
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
         workdir: job-scraper   
