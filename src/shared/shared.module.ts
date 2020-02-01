@@ -9,7 +9,7 @@ import { TypegooseModule } from 'nestjs-typegoose';
 import { NetworkService } from './request/network.service';
 import { AXIOS_INSTANCE_TOKEN } from '@nestjs/common/http/http.constants';
 import axios, { AxiosRequestConfig } from 'axios';
-
+var MongoClient = require('mongodb').MongoClient;
 const environment = 'local';
 
 const optionsTypegoose = {
@@ -47,8 +47,15 @@ const optionsTypegoose = {
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get('MONGODB_URI'),
-        //replicaSet: 'rs0',
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+        useUnifiedTopology: false,
+        reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
+        reconnectInterval: 1000, // Reconnect every 500ms
+        bufferMaxEntries: 0,
+        connectTimeoutMS: 20000,
+        socketTimeoutMS: 45000,
       }),
       inject: [ConfigService],
     }),
