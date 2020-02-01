@@ -1,0 +1,13 @@
+name: Build and Publish Docker
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Publish to Docker Repository
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: simo25docker/job-scraper
+        username: ${{ secrets.LOGIN_DOCKER }}
+        password: ${{ secrets.PASSWORD_DOCKER }}
