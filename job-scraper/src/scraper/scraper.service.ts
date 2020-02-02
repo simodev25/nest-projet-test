@@ -83,7 +83,14 @@ export class ScraperService implements OnModuleInit {
           '',
           '',
         )}`);
-
+        console.log(`number of ALL products  processed [${count}] scrapeAmazone end in  ${format(
+          '%s %s %dms %s',
+          '',
+          '',
+          Date.now() - this.jobScrape.startTime,
+          '',
+          '',
+        )}`);
         process.exit();
       }
       return hasNext === true;
