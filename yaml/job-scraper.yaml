@@ -1,14 +1,14 @@
-apiVersion: batch/v1
+apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: job-scraper
 spec:
   schedule: "*/10 * * * *"
-    jobTemplate:
-      spec:
-        template:
-          spec:
-            containers:
-              - name: job-scraper
-                image: simo25docker/job-scraper
-            restartPolicy: Never
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: job-scraper
+              image: simo25docker/job-scraper
+          restartPolicy: Never
