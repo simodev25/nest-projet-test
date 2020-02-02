@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: job-scraper
 spec:
-  schedule: "*/1 * * * *"
+  schedule: "*/10 * * * *"
   startingDeadlineSeconds: 60
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
