@@ -1,0 +1,11 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-scraper
+spec:
+  template:
+    spec:
+      containers:
+        - name: job-scraper
+          image: simo25docker/job-scraper
+      restartPolicy: Never

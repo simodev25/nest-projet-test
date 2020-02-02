@@ -77,7 +77,7 @@ export class LoggerServiceBase implements LoggerService {
   }
 
   public loggerOptions(context) {
-console.dir(this)
+
     return {
       format: format.combine(
         format.colorize(),
@@ -95,6 +95,7 @@ console.dir(this)
 
         }),
         new winston.transports.File({
+          silent: process.env.NODE_ENV === 'production' ? true : false,
           level: 'info',
           filename: `${this.configService.get('LOG_DIR')}${context}-info.log `,
 
