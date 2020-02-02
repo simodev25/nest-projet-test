@@ -64,11 +64,9 @@ export class ScraperService implements OnModuleInit {
     this.scrapeAmazone();
   }
 
-
-
   private scrapeAmazone() {
 
-    let count: number = 0
+    let count: number = 0;
 
     this.scrapeKeyword$.pipe(filter((hasNext: boolean) => {
       if (!isNil(this.scrapeSearchWord$)) {
@@ -91,7 +89,6 @@ export class ScraperService implements OnModuleInit {
       return hasNext === true;
 
     })).subscribe((hasNext: boolean) => {
-
 
       const keyword = this.keywords.next();
       this.logger.debug(` scrape keyword :[${keyword}] start`);
@@ -127,7 +124,7 @@ export class ScraperService implements OnModuleInit {
   public scrapeJobStart(): void {
     const KEYWORD_LIST = ['nintendoswitch', 'ps4', 'laptop', 'kindle', 'ssd', 'fidgetspinner', 'tablet', 'headphones', 'ipad', 'switch', 'fitbit', 'iphone', 'iphone7', 'tv', 'gameofthrones', 'lego', 'harrypotter', 'iphone6', 'alexa', 'books', 'bluetoothheadphones', 'monitor', 'iphonex', 'xboxone', 'externalharddrive', 'firestick', 'playstation4', 'instantpot', 'iphone6s', 'microsdcard', 'shoes', 'starwars', 'samsung', 'backpack', 'ps4pro', 'mouse', 'wirelessheadphones', 'drone', 'applewatch', 'smartwatch', 'echo', 'samsunggalaxys8', 'iphone8', 'powerbank', 'roku', 'keyboard', 'xiaomi', 'redmi4', 'gtx1060', 'redmi4a', 'gtx1070', 'airpods', 'bluetoothspeakers', 'ps4controller', 'gtx1080', 'ps4games', 'waterbottle', 'smartphone', 'gamingmouse', 'toiletpaper', 'earphones', 'camera', 'echodot', 'hdmicable', 'airfryer', 'laptops', 'gamingchair', 'wirelessmouse', 'huawei', 'kindlefire', 'doctorwho', 'amazon', 'printer', 'sdcard', 'gopro', 'xboxonecontroller', 'chromecast', 'xboxonex', 'desk', 'primevideo', 'vans', 'watch', 'pokemon', 'notebook', 'giftcard', 'iphone7plus', 'gamingpc', 'samsunggalaxys7', 'nike', 'popsocket', 'iphonecharger', 'officechair', 'windows10', 'anker', 'mousepad', 'iphone7case', 'iphonese', 'wirelessearbuds', 'earbuds', 'mobile'];
 
-    this.keywords = new Keywords(KEYWORD_LIST);
+    this.keywords = new Keywords(KEYWORD_LIST.slice(0, 2));
     this.jobScrape.status = JobScrapeStatus.START;
     this.jobScrape.startTime = Date.now();
     this.scrapeKeyword$.next(this.keywords.hasNext());

@@ -35,6 +35,7 @@ spec:
         resources:
           requests:
             storage: 10Gi
+
 ---
 apiVersion: batch/v1
 kind: Job
@@ -43,7 +44,15 @@ metadata:
 spec:
   template:
     spec:
+      terminationGracePeriodSeconds: 100
       containers:
         - name: replset-scripte
           image: simo25docker/replset-scripte
+          lifecycle:
+            postStart:
+              exec:
+                command: ["sleep", "70"]
+            preStop:
+              exec:
+                command: ["chmod", "+x", "./setup.sh"]
       restartPolicy: Never
