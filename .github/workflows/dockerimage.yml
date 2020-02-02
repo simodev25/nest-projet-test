@@ -12,5 +12,13 @@ jobs:
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
         workdir: job-scraper   
+    - name: Publish replSet Scripte
+      uses: elgohr/Publish-Docker-Github-Action@2.12
+      with:
+        name: simo25docker/replset-scripte
+        username: ${{ secrets.LOGIN_DOCKER }}
+        password: ${{ secrets.PASSWORD_DOCKER }}
+        workdir: setup   
+
 
 
