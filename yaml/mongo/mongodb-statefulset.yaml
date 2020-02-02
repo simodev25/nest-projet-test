@@ -44,6 +44,7 @@ metadata:
 spec:
   template:
     spec:
+      ttlSecondsAfterFinished: 100
       terminationGracePeriodSeconds: 100
       containers:
         - name: replset-scripte
