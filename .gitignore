@@ -47,3 +47,7 @@ mongodb/mongo-rs0-1/data/
 *.log 
 
 ScraperMicroService-info.log 
+
+*.log 
+
+*.log 
