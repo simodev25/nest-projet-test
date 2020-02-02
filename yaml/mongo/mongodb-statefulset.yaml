@@ -25,13 +25,25 @@ spec:
           ports:
             - containerPort: 27017
           volumeMounts:
-            - name: mongo-volume
+            - name: fast
               mountPath: /data/db
   volumeClaimTemplates:
     - metadata:
-        name: mongo-volume
+        name: fast
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 1Gi
+            storage: 10Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: replset-scripte
+spec:
+  template:
+    spec:
+      containers:
+        - name: replset-scripte
+          image: simo25docker/replset-scripte
+      restartPolicy: Never
