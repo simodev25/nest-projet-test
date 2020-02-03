@@ -1,6 +1,6 @@
 import { DynamicModule, HttpModule, Module } from '@nestjs/common';
 
-import { LoggerServiceBase } from './logger/loggerService';
+import { ScraperLoggerService } from './logger/loggerService';
 import { createLoggerProviders } from './logger/logger.providers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypegooseModule } from 'nestjs-typegoose';
@@ -33,8 +33,8 @@ const environment = 'local';
       inject: [ConfigService],
     }),
   ],
-  providers: [LoggerServiceBase],
-  exports: [LoggerServiceBase],
+  providers: [ScraperLoggerService],
+  exports: [ScraperLoggerService],
 })
 export class SharedModule {
 
@@ -43,8 +43,8 @@ export class SharedModule {
 
     return {
       module: SharedModule,
-      providers: [LoggerServiceBase, ...prefixedLoggerProviders, ConfigService],
-      exports: [LoggerServiceBase, ...prefixedLoggerProviders, ConfigService],
+      providers: [ScraperLoggerService, ...prefixedLoggerProviders, ConfigService],
+      exports: [ScraperLoggerService, ...prefixedLoggerProviders, ConfigService],
     };
   }
 }

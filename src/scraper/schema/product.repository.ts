@@ -21,8 +21,8 @@ import { ConfigService } from '@nestjs/config';
 export class ProductRepository {
   constructor(
     @Logger({
-      context: 'ScraperMicroService',
-      prefix: 'ProductRepository',
+      context: 'scraperMicroService',
+      prefix: 'productRepository',
     }) private logger: LoggerServiceBase,
     private readonly configService: ConfigService,
     @InjectModel(ProductEntity) private readonly productEntityModel: ReturnModelType<typeof ProductEntity>,

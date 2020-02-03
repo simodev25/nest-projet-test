@@ -9,7 +9,7 @@ import { ProductDetailEntity } from './schema/productDetail.entity';
 import { ProductReviewsEntity } from './schema/productReviews.entity';
 import { ProductHistEntity } from './schema/product.hist.entity';
 import { ProductHtmlEntity } from './schema/product.html.entity';
-import { LoggerServiceBase } from '../shared/logger/loggerService';
+import { ScraperLoggerService } from '../shared/logger/loggerService';
 import { SharedModule } from '../shared/shared.module';
 import { ConfigService } from '@nestjs/config';
 import { ScraperHelper } from './ScraperHelper';
@@ -23,7 +23,7 @@ import { ProxyService } from './lib/proxy.service';
       ProductEntity, ProductDetailEntity, ProductReviewsEntity, ProductHistEntity, ProductHtmlEntity]),
 
     ],
-  providers: [ScraperAmazoneService, ScraperHelper, ScraperService, ProductRepository, LoggerServiceBase, ConfigService, ProxyService],
+  providers: [ScraperAmazoneService, ScraperHelper, ScraperService, ProductRepository, ScraperLoggerService, ConfigService, ProxyService],
 })
 export class ScraperModule {
 }

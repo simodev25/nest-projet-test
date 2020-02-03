@@ -47,8 +47,8 @@ enum JobScrapeStatus {
 export class ScraperService implements OnModuleInit {
 
   constructor(@Logger({
-                context: 'ScraperMicroService',
-                prefix: 'ScraperService',
+                context: 'scraperMicroService',
+                prefix: 'scraperService',
               }) private logger: LoggerServiceBase,
               private readonly productRepository: ProductRepository,
               private readonly scraperAmazone: ScraperAmazoneService,

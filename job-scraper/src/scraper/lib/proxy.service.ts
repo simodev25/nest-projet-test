@@ -11,6 +11,8 @@ import { getRandomInt, isNil } from '../../shared/utils/shared.utils';
 
 
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '../../shared/logger/logger.decorator';
+import { ScraperLoggerService } from '../../shared/logger/loggerService';
 
 enum StatusRenew {
   EN_COUR = 'EN_COUR',
@@ -39,7 +41,11 @@ export class ProxyService {
     return this.proxyencour;
   }
 
-  constructor(private readonly scraperHelper: ScraperHelper,
+  constructor(@Logger({
+                context: 'scraperMicroService',
+                prefix: 'scraperService',
+              }) private logger: ScraperLoggerService,
+              private readonly scraperHelper: ScraperHelper,
               private readonly configService: ConfigService) {
     this.tr.TorControlPort.password = 'PASSWORD';
     this.tr.TorControlPort.port = this.configService.get('TOR_PORT_CONTROL');
@@ -145,16 +151,16 @@ export class ProxyService {
           // if maximum number of retries have been met
           // or response is a status code we don't wish to retry, throw error
           if (error.getStatus() === ScraperHelper.EXIT_CODES.ERROR_PROXY_EMPTY) {
-            console.log(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
+            this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
             return timer(scalingDuration);
           }
           if (error.getStatus() === ScraperHelper.EXIT_CODES.ERROR_CAPTCHA) {
-            console.log(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
+            this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
             return timer(scalingDuration);
           }
 
 
-          console.log(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
+          this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
           // retry after 1s, 2s, etc...
         } else {
           if (!isNil(error.options) && !isNil(error.options.command)) {
@@ -171,7 +177,7 @@ export class ProxyService {
             return throwError(error);
           }
 
-          console.log(`scrapeRetryStrategy[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
+          this.logger.error(`scrapeRetryStrategy[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
         }
 
         return timer( scalingDuration);

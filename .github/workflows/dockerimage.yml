@@ -5,7 +5,7 @@ jobs:
     runs-on: [ubuntu-latest]
     steps:
     - uses: actions/checkout@master
-    - name: Publish Docker
+    - name: Publish job scraper
       uses: elgohr/Publish-Docker-Github-Action@2.12
       with:
         name: simo25docker/job-scraper

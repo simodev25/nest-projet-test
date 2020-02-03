@@ -14,16 +14,16 @@ import { isNil } from '../../shared/utils/shared.utils';
 import { ProductHistEntity } from './product.hist.entity';
 import { ProductHtmlEntity } from './product.html.entity';
 import { Logger } from '../../shared/logger/logger.decorator';
-import { LoggerServiceBase } from '../../shared/logger/loggerService';
+import { ScraperLoggerService } from '../../shared/logger/loggerService';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ProductRepository {
   constructor(
     @Logger({
-      context: 'ScraperMicroService',
-      prefix: 'ProductRepository',
-    }) private logger: LoggerServiceBase,
+      context: 'scraperMicroService',
+      prefix: 'productRepository',
+    }) private logger: ScraperLoggerService,
     private readonly configService: ConfigService,
     @InjectModel(ProductEntity) private readonly productEntityModel: ReturnModelType<typeof ProductEntity>,
     @InjectModel(ProductDetailEntity) private readonly productDetailEntityModel: ReturnModelType<typeof ProductDetailEntity>,

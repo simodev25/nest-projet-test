@@ -1,14 +1,13 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import * as winston from 'winston';
-import * as path from 'path';
 import { format, Logger } from 'winston';
-import { LoggerOptions } from 'winston';
+import * as path from 'path';
 import * as chalk from 'chalk';
 import * as PrettyError from 'pretty-error';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class LoggerServiceBase implements LoggerService {
+export class ScraperLoggerService implements LoggerService {
   private prefix?: string;
   private context?: string;
   private inject?: string;
@@ -101,7 +100,8 @@ export class LoggerServiceBase implements LoggerService {
 
         }),
         new winston.transports.File({
-            filename: `${this.configService.get('LOG_DIR')}${context}-error.log `, level: 'error',
+            filename: `${this.configService.get('LOG_DIR')}${context}-error.log `,
+            level: 'error',
           },
         ),
       ],

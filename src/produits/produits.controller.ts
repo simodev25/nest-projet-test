@@ -10,8 +10,8 @@ import { Logger } from '../shared/logger/logger.decorator';
 export class ProduitsController {
 
   constructor( @Logger({
-    context: 'ProduitsMicroService',
-    prefix: 'ProduitsController',
+    context: 'produitsMicroService',
+    prefix: 'produitsController',
   }) private logger: LoggerServiceBase, private produitsService: ProduitsService) {
 
   }

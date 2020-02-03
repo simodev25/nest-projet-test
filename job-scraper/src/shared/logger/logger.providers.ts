@@ -1,10 +1,10 @@
 import { prefixesForLoggers } from './logger.decorator';
 import { Provider } from '@nestjs/common';
-import { LoggerServiceBase } from './loggerService';
+import { ScraperLoggerService } from './loggerService';
 import * as winston from 'winston';
 
-function loggerFactory(logger: LoggerServiceBase, log: any, injectkey: string) {
-  const logger_: LoggerServiceBase = new LoggerServiceBase(logger.config);
+function loggerFactory(logger: ScraperLoggerService, log: any, injectkey: string) {
+  const logger_: ScraperLoggerService = new ScraperLoggerService(logger.config);
   if (log.prefix) {
     logger_.setPrefix(log.prefix);
   }
@@ -17,15 +17,15 @@ function loggerFactory(logger: LoggerServiceBase, log: any, injectkey: string) {
   return logger_;
 }
 
-function createLoggerProvider(log: any): Provider<LoggerServiceBase> {
+function createLoggerProvider(log: any): Provider<ScraperLoggerService> {
   return {
     provide: `LoggerService${log.context}${log.prefix}`,
     useFactory: logger => loggerFactory(logger, log, `LoggerService${log.context}${log.prefix}`),
-    inject: [LoggerServiceBase],
+    inject: [ScraperLoggerService],
   };
 }
 
-export function createLoggerProviders(): Array<Provider<LoggerServiceBase>> {
-  console.log(prefixesForLoggers);
+export function createLoggerProviders(): Array<Provider<ScraperLoggerService>> {
+
   return prefixesForLoggers.map(log => createLoggerProvider(log));
 }

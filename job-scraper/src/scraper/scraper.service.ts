@@ -10,9 +10,11 @@ import { Product } from './product/product';
 import { ProductRepository } from './schema/product.repository';
 import { ProductReviews } from './product/productReviews';
 import { Logger } from '../shared/logger/logger.decorator';
-import { LoggerServiceBase } from '../shared/logger/loggerService';
+import { ScraperLoggerService } from '../shared/logger/loggerService';
 import { isNil } from '../shared/utils/shared.utils';
 import { ConfigService } from '@nestjs/config';
+import { throws } from 'assert';
+import { Exception } from '../shared/Exception/exception';
 
 class Keywords {
   private counter: number = 0;
@@ -46,9 +48,9 @@ enum JobScrapeStatus {
 export class ScraperService implements OnModuleInit {
 
   constructor(@Logger({
-                context: 'ScraperMicroService',
-                prefix: 'ScraperService',
-              }) private logger: LoggerServiceBase,
+                context: 'scraperMicroService',
+                prefix: 'scraperService',
+              }) private logger: ScraperLoggerService,
               private readonly productRepository: ProductRepository,
               private readonly scraperAmazone: ScraperAmazoneService,
               private readonly configService: ConfigService) {
@@ -117,6 +119,7 @@ export class ScraperService implements OnModuleInit {
         this.logger.error(error);
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
+        this.logger.error(error)
         process.exit(1);
       }), () => {
         this.scrapeKeyword$.next(this.keywords.hasNext());
@@ -201,7 +204,9 @@ export class ScraperService implements OnModuleInit {
         }),
         map((produitClass: Product) => {
           productCount++;
-          this.productRepository.saveProduct(produitClass).subscribe();
+          this.productRepository.saveProduct(produitClass).subscribe(()=>{},(error => {
+            throw new Exception(error);
+          }));
           return productCount;
 
         }),
