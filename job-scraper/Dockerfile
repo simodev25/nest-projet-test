@@ -14,8 +14,7 @@ COPY yarn.lock .
 # ---- Build ----
 FROM base AS build
 COPY . .
-RUN yarn add --dev typescript
-RUN yarn install --production
+RUN yarn install
 RUN yarn build
 
 
