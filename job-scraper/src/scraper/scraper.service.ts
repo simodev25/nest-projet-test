@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { filter, map, mapTo, max, mergeMap, switchMap } from 'rxjs/operators';
+import { filter, map, mapTo, max, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { from, Observable, of, Subject, Subscription } from 'rxjs';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { plainToClass } from 'class-transformer';
@@ -15,6 +15,7 @@ import { isNil } from '../shared/utils/shared.utils';
 import { ConfigService } from '@nestjs/config';
 import { throws } from 'assert';
 import { Exception } from '../shared/Exception/exception';
+import { MerchantwordsService } from './merchantwords.service';
 
 class Keywords {
   private counter: number = 0;
@@ -53,7 +54,7 @@ export class ScraperService implements OnModuleInit {
               }) private logger: ScraperLoggerService,
               private readonly productRepository: ProductRepository,
               private readonly scraperAmazone: ScraperAmazoneService,
-              private readonly configService: ConfigService) {
+              private readonly merchantwordsService: MerchantwordsService) {
 
   }
 
@@ -119,7 +120,7 @@ export class ScraperService implements OnModuleInit {
         this.logger.error(error);
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
-        this.logger.error(error)
+        this.logger.error(error);
         process.exit(1);
       }), () => {
         this.scrapeKeyword$.next(this.keywords.hasNext());
@@ -127,17 +128,22 @@ export class ScraperService implements OnModuleInit {
 
     });
 
-    this.scrapeJobStart();
+    // this.scrapeJobStart();
 
   }
 
   public scrapeJobStart(): void {
-    const KEYWORD_LIST = ['nintendoswitch', 'ps4', 'laptop', 'kindle', 'ssd', 'fidgetspinner', 'tablet', 'headphones', 'ipad', 'switch', 'fitbit', 'iphone', 'iphone7', 'tv', 'gameofthrones', 'lego', 'harrypotter', 'iphone6', 'alexa', 'books', 'bluetoothheadphones', 'monitor', 'iphonex', 'xboxone', 'externalharddrive', 'firestick', 'playstation4', 'instantpot', 'iphone6s', 'microsdcard', 'shoes', 'starwars', 'samsung', 'backpack', 'ps4pro', 'mouse', 'wirelessheadphones', 'drone', 'applewatch', 'smartwatch', 'echo', 'samsunggalaxys8', 'iphone8', 'powerbank', 'roku', 'keyboard', 'xiaomi', 'redmi4', 'gtx1060', 'redmi4a', 'gtx1070', 'airpods', 'bluetoothspeakers', 'ps4controller', 'gtx1080', 'ps4games', 'waterbottle', 'smartphone', 'gamingmouse', 'toiletpaper', 'earphones', 'camera', 'echodot', 'hdmicable', 'airfryer', 'laptops', 'gamingchair', 'wirelessmouse', 'huawei', 'kindlefire', 'doctorwho', 'amazon', 'printer', 'sdcard', 'gopro', 'xboxonecontroller', 'chromecast', 'xboxonex', 'desk', 'primevideo', 'vans', 'watch', 'pokemon', 'notebook', 'giftcard', 'iphone7plus', 'gamingpc', 'samsunggalaxys7', 'nike', 'popsocket', 'iphonecharger', 'officechair', 'windows10', 'anker', 'mousepad', 'iphone7case', 'iphonese', 'wirelessearbuds', 'earbuds', 'mobile'];
 
-    this.keywords = new Keywords(KEYWORD_LIST.slice(0, 2));
-    this.jobScrape.status = JobScrapeStatus.START;
-    this.jobScrape.startTime = Date.now();
-    this.scrapeKeyword$.next(this.keywords.hasNext());
+    this.logger.log(`scrapeJobStart...`);
+    this.logger.log(`getAllMerchantwords...`);
+    this.merchantwordsService.getAllMerchantwords().subscribe((keywords: string[]) => {
+      this.logger.log(`number of ALL Merchantwords   [${keywords.length}] `);
+      this.keywords = new Keywords(keywords);
+      this.jobScrape.status = JobScrapeStatus.START;
+      this.jobScrape.startTime = Date.now();
+      this.scrapeKeyword$.next(this.keywords.hasNext());
+    });
+
 
   }
 
@@ -150,7 +156,7 @@ export class ScraperService implements OnModuleInit {
     const scrapeAmazoneSearchWord = this.scraperAmazone
       .scrapeUrlHome(`${baseUrlAmazone}s?k=${searchWord.replace(/\\s/g, '+').trim()}&i=garden`)
       .pipe(
-        switchMap(produit => from(produit)),
+        mergeMap(produit => from(produit)),
         map(produit => {
 
           const produitClass: Product = plainToClass(Product, produit);
@@ -158,7 +164,7 @@ export class ScraperService implements OnModuleInit {
           produitClass.baseUrl = baseUrlAmazone;
           produitClass.country = country;
           produitClass.currency = ScraperHelper.getCurrency(country);
-
+          produitClass.site = baseUrlAmazone;
           return produitClass;
         }),
         mergeMap((produitClass: Product) => from(produitClass.isValideProduct()).pipe(
@@ -174,7 +180,9 @@ export class ScraperService implements OnModuleInit {
               filter(Boolean),
               mapTo(productDetail),
             )),
+
             map((productDetail: ProductDetail) => {
+
               this.logger.log(`find productDetail asin [${produitClass.asin}]  in ${Date.now() - start}ms`);
               produitClass.productDetail = productDetail;
               return produitClass;
@@ -204,7 +212,8 @@ export class ScraperService implements OnModuleInit {
         }),
         map((produitClass: Product) => {
           productCount++;
-          this.productRepository.saveProduct(produitClass).subscribe(()=>{},(error => {
+          this.productRepository.saveProduct(produitClass).subscribe(() => {
+          }, (error => {
             throw new Exception(error);
           }));
           return productCount;

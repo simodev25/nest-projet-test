@@ -15,6 +15,8 @@ export class Product {
   @Exclude()
   private _currency: string;
   @Exclude()
+  private _site: string;
+  @Exclude()
   private _asin: string;
   @Exclude()
   private _searchWord: string;
@@ -42,7 +44,8 @@ export class Product {
   @Expose()
   //@IsNotEmpty()
   get category(): string[] {
-    return  (this._productDetail ? this._productDetail.category : null);
+
+    return  (this._productDetail ? this._productDetail.categorys : null);
   }
 
   set category(value: string[]) {
@@ -62,6 +65,16 @@ export class Product {
 
   set currency(value: string) {
     this._currency = value;
+  }
+
+  @Expose()
+  @IsNotEmpty()
+  get site(): string {
+    return this._site;
+  }
+
+  set site(value: string) {
+    this._site = value;
   }
 
   set baseUrl(value: string) {

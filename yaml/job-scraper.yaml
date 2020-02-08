@@ -6,7 +6,8 @@ spec:
   schedule: "*/1 * * * *"
   startingDeadlineSeconds: 60
   concurrencyPolicy: Forbid
-
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
       template:
@@ -14,5 +15,31 @@ spec:
           containers:
             - name: job-scraper
               image: simo25docker/job-scraper
+              env:
+                - name: JOB
+                  value: "scrapeJob"
           restartPolicy: Never
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: job-merchantwords
+spec:
+  schedule: "*/10 * * * *"
+  startingDeadlineSeconds: 60
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: job-merchantwords
+              image: simo25docker/job-scraper
+              env:
+                - name: JOB
+                  value: "merchantwordsJob"
+          restartPolicy: Never
+
 

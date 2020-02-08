@@ -1,16 +1,27 @@
 import { NestFactory } from '@nestjs/core';
-import { Transport } from '@nestjs/microservices';
 import { ScraperModule } from './scraper/scraper.module';
+import { ScraperService } from './scraper/scraper.service';
+import { MerchantwordsService } from './scraper/merchantwords.service';
 
 async function bootstrap() {
 
-  const scraperModule = await NestFactory.createMicroservice(ScraperModule, {
-    transport: Transport.TCP,
+  const scraperModule = await NestFactory.createApplicationContext(ScraperModule);
 
-  });
-  scraperModule.listen(() => console.log('scraper Microservice is listening'));
+  const scraperService: ScraperService = scraperModule.get(ScraperService);
+  const merchantwordsService: MerchantwordsService = scraperModule.get(MerchantwordsService);
+  //scraperService.scrapeJobStart();
+  switch (process.env.JOB) {
 
+    case 'merchantwordsJob' :
+      merchantwordsService.merchantwordsJobStart();
+      break;
 
+    case 'scrapeJob':
+      scraperService.scrapeJobStart();
+      break;
+  }
+
+  // merchantwordsService.getAllMerchantwords().subscribe(console.log)
 }
 
 bootstrap();

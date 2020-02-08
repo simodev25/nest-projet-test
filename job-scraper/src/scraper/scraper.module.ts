@@ -14,16 +14,19 @@ import { SharedModule } from '../shared/shared.module';
 import { ConfigService } from '@nestjs/config';
 import { ScraperHelper } from './ScraperHelper';
 import { ProxyService } from './lib/proxy.service';
-
+import { MerchantwordsEntity } from './schema/merchantwords.entity';
+import { MerchantwordsService } from './merchantwords.service';
+import { ScraperMerchantwordsService } from './lib/scraper.merchantwords.service';
+import { MerchantwordsRepository } from './schema/merchantwords.repository';
 
 @Module({
   imports: [
     SharedModule.forRoot(),
     TypegooseModule.forFeature([
-      ProductEntity, ProductDetailEntity, ProductReviewsEntity, ProductHistEntity, ProductHtmlEntity]),
+      ProductEntity, ProductDetailEntity, MerchantwordsEntity, ProductReviewsEntity, ProductHistEntity, ProductHtmlEntity]),
 
-    ],
-  providers: [ScraperAmazoneService, ScraperHelper, ScraperService, ProductRepository, ScraperLoggerService, ConfigService, ProxyService],
+  ],
+  providers: [ScraperAmazoneService, ScraperHelper, ScraperService, MerchantwordsRepository, ProductRepository, ScraperLoggerService, ConfigService, ProxyService, MerchantwordsService, ScraperMerchantwordsService],
 })
 export class ScraperModule {
 }

@@ -41,6 +41,10 @@ export class ProductDetailEntity {
   @prop()
   images: string[];
   @prop()
+  categorys: string[];
+  @prop()
+  descriptions: string[];
+  @prop()
   linkReviews: string;
   @prop()
   @Expose()

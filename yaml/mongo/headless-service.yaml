@@ -18,7 +18,7 @@ kind: Service
 metadata:
   name: mongo-0
   labels:
-    app: mongo-0
+    app: mongo
 spec:
   ports:
     -
@@ -33,7 +33,7 @@ kind: Service
 metadata:
   name: mongo-1
   labels:
-    app: mongo-1
+    app: mongo
 spec:
   ports:
     -
@@ -48,7 +48,7 @@ kind: Service
 metadata:
   name: mongo-2
   labels:
-    app: mongo-2
+    app: mongo
 spec:
   ports:
     -

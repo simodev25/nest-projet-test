@@ -12,7 +12,7 @@ export class ScraperHelper {
   constructor(private readonly configService: ConfigService) {
   }
 
-  public static regex = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
+  public static regexImages = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
   public static searchUrlBase = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
 
   public static getBaseUrlAmazone = (country) => {
@@ -45,7 +45,7 @@ export class ScraperHelper {
 
   public static isCaptcha(contents: string): boolean {
 
-    return contents.indexOf('api-services-support@amazon.com') > -1;
+    return contents.indexOf('api-services-support@amazon.com') > -1 || contents.indexOf('why_captcha_headline') > -1;
   }
   public static getRandomUserAgent = () => {
     const index = getRandomInt(ScraperHelper.USER_AGENT_LIST.length);

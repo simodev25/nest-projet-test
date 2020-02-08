@@ -33,12 +33,13 @@ export class ProductDetail {
   private _childProduct: ChildProduct[];
 
   @Exclude()
-   _sourceHtml: string;
-
+  _sourceHtml: string;
   @Exclude()
   private _isCaptcha: boolean;
   @Exclude()
-  private _category: string[];
+  private _categorys: string[];
+  @Exclude()
+  private _descriptions: string[];
   @Exclude()
   private _linkReviews: string;
   @Exclude()
@@ -74,13 +75,23 @@ export class ProductDetail {
   }
 
   @Expose()
-  get category(): string[] {
-    return this._category;
+  get categorys(): string[] {
+    return this._categorys;
   }
 
-  set category(value: string[]) {
+  set categorys(value: string[]) {
 
-    this._category = value;
+    this._categorys = value;
+  }
+
+  @Expose()
+  get descriptions(): string[] {
+    return this._descriptions;
+  }
+
+  set descriptions(value: string[]) {
+
+    this._descriptions = value;
   }
 
   @Exclude()

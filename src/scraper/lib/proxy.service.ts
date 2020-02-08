@@ -106,7 +106,14 @@ export class ProxyService {
         }
 
       });
+      this.tr.request({
+        url: 'https://api.myip.com',
+        // strictSSL: true,
+        //  agentClass: require('socks5-https-client/lib/Agent'),
 
+      }, function(error, res, body) {
+        console.log(body);
+      });
 
     });
     return torRequest.pipe(

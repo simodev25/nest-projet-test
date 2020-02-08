@@ -1,13 +1,7 @@
-import { pre, prop, Ref, modelOptions } from '@typegoose/typegoose';
+import { modelOptions, pre, prop, Ref } from '@typegoose/typegoose';
 import { ProductDetailEntity } from './productDetail.entity';
 import { IsMongoId, IsOptional } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { plugin } from 'typegoose';
-import { Schema } from 'mongoose';
-
-const mongooseHistory = require('mongoose-history');
-const options = { customCollectionName: 'product_hist' };
-
 
 @pre<ProductEntity>('save', function(next) {
   this.increment();
@@ -23,7 +17,6 @@ const options = { customCollectionName: 'product_hist' };
     timestamps: true,
   },
 })
-@plugin(mongooseHistory, options)
 export class ProductEntity {
   @IsOptional()
   @IsMongoId()
@@ -41,6 +34,8 @@ export class ProductEntity {
   searchWord: string;
   @prop()
   currency: string;
+  @prop()
+  site: string;
   @prop({
     type: String,
     required: true,

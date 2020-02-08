@@ -9,10 +9,11 @@ import { ScraperHelper } from '../../scraper/ScraperHelper';
 import { Exception } from '../../shared/Exception/exception';
 import { getRandomInt, isNil } from '../../shared/utils/shared.utils';
 
-
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '../../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../../shared/logger/loggerService';
+
+const request = require('request');
 
 enum StatusRenew {
   EN_COUR = 'EN_COUR',
@@ -89,7 +90,7 @@ export class ProxyService {
         url,
         header: this.scraperHelper.requestConfig(),
         gzip: true,
-      //  secureProtocol: 'TLSv1_2_method',
+        secureProtocol: 'TLSv1_2_method',
         tunnel: false,
         time: true,
         followAllRedirects: true,
@@ -101,7 +102,57 @@ export class ProxyService {
 
       this.tr.setTorAddress(this.proxy.host, this.configService.get('TOR_PORT'));
       this.proxy.countRequest++;
+     // console.log(option)
       this.tr.request(option, (err, res) => {
+
+        if (!isNil(res)) {
+          subscriber.next(res.body);
+          subscriber.complete();
+        } else {
+          this.proxy.countError++;
+          subscriber.error(err);
+        }
+
+      });
+
+    });
+    return torRequest.pipe(
+      tap((res: any) => {
+        if (ScraperHelper.isCaptcha(res)) {
+        //  this.torSession$.next(this.proxy);
+          throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+        }
+        return res;
+      }),
+      retryWhen(this.scrapeRetryStrategy({
+        maxRetryAttempts: 10,
+        scalingDuration: this.renewTorSessionTimeout,
+      })),
+    );
+
+  }
+
+  public get(url: string): Observable<string> {
+    const proxy = this.getProxy();
+    const torRequest = new Observable<string>(subscriber => {
+
+      const option = {
+        url,
+        header: this.scraperHelper.requestConfig(),
+        gzip: true,
+        secureProtocol: 'TLSv1_2_method',
+        tunnel: false,
+        time: true,
+        followAllRedirects: true,
+      };
+
+      if (isNil(this.proxy)) {
+        throw new Exception('request tor :', ScraperHelper.EXIT_CODES.ERROR_PROXY_EMPTY);
+      }
+
+      this.tr.setTorAddress(this.proxy.host, this.configService.get('TOR_PORT'));
+      this.proxy.countRequest++;
+      request(option, (err, res) => {
 
         if (!isNil(res)) {
           subscriber.next(res.body);
@@ -118,7 +169,7 @@ export class ProxyService {
     return torRequest.pipe(
       tap((res: any) => {
         if (ScraperHelper.isCaptcha(res)) {
-        //  this.torSession$.next(this.proxy);
+          //  this.torSession$.next(this.proxy);
           throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
         }
         return res;
@@ -151,16 +202,15 @@ export class ProxyService {
           // if maximum number of retries have been met
           // or response is a status code we don't wish to retry, throw error
           if (error.getStatus() === ScraperHelper.EXIT_CODES.ERROR_PROXY_EMPTY) {
-            this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
+            this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${scalingDuration}ms`);
             return timer(scalingDuration);
           }
           if (error.getStatus() === ScraperHelper.EXIT_CODES.ERROR_CAPTCHA) {
-            this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
+            this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${scalingDuration}ms`);
             return timer(scalingDuration);
           }
 
-
-          this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${ scalingDuration}ms`);
+          this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${scalingDuration}ms`);
           // retry after 1s, 2s, etc...
         } else {
           if (!isNil(error.options) && !isNil(error.options.command)) {
@@ -170,7 +220,7 @@ export class ProxyService {
             return timer(scalingDuration);
 
           } else if (!isNil(error.code) && error.code === 'ECONNRESET') {
-            return timer( scalingDuration);
+            return timer(scalingDuration);
           }
 
           if (retryAttempt > maxRetryAttempts) {
@@ -180,7 +230,7 @@ export class ProxyService {
           this.logger.error(`scrapeRetryStrategy[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
         }
 
-        return timer( scalingDuration);
+        return timer(scalingDuration);
       }),
     );
   };
