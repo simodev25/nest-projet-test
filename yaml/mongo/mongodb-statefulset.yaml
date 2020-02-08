@@ -44,14 +44,14 @@ metadata:
 spec:
   template:
     spec:
-      terminationGracePeriodSeconds: 100
+      terminationGracePeriodSeconds: 200
       containers:
         - name: replset-scripte
           image: simo25docker/replset-scripte
           lifecycle:
             postStart:
               exec:
-                command: ["sleep", "70"]
+                command: ["sleep", "200"]
             preStop:
               exec:
                 command: ["chmod", "+x", "./setup.sh"]

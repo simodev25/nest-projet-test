@@ -13,7 +13,7 @@ import { getRandomInt, isNil } from '../../shared/utils/shared.utils';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '../../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../../shared/logger/loggerService';
-
+const request=require('request')
 enum StatusRenew {
   EN_COUR = 'EN_COUR',
   STOP = 'STOP',
@@ -119,6 +119,56 @@ export class ProxyService {
       tap((res: any) => {
         if (ScraperHelper.isCaptcha(res)) {
         //  this.torSession$.next(this.proxy);
+          throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+        }
+        return res;
+      }),
+      retryWhen(this.scrapeRetryStrategy({
+        maxRetryAttempts: 10,
+        scalingDuration: this.renewTorSessionTimeout,
+      })),
+    );
+
+  }
+
+  public get(url: string): Observable<string> {
+    const proxy = this.getProxy();
+    const torRequest = new Observable<string>(subscriber => {
+
+      const option = {
+        url,
+        header: this.scraperHelper.requestConfig(),
+        gzip: true,
+        //  secureProtocol: 'TLSv1_2_method',
+        tunnel: false,
+        time: true,
+        followAllRedirects: true,
+      };
+
+      if (isNil(this.proxy)) {
+        throw new Exception('request tor :', ScraperHelper.EXIT_CODES.ERROR_PROXY_EMPTY);
+      }
+
+      this.tr.setTorAddress(this.proxy.host, this.configService.get('TOR_PORT'));
+      this.proxy.countRequest++;
+      request(option, (err, res) => {
+
+        if (!isNil(res)) {
+          subscriber.next(res.body);
+          subscriber.complete();
+        } else {
+          this.proxy.countError++;
+          subscriber.error(err);
+        }
+
+      });
+
+
+    });
+    return torRequest.pipe(
+      tap((res: any) => {
+        if (ScraperHelper.isCaptcha(res)) {
+          //  this.torSession$.next(this.proxy);
           throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
         }
         return res;

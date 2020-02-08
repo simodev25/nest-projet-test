@@ -40,7 +40,7 @@ export class ProductRepository {
     const serializedProductDetail = classToPlain(product.productDetail);
     const serializedProductReviews = classToPlain(product.productDetail.productReviews);
     const productEntityDto: ProductEntity = plainToClass(ProductEntity, serializedProduct);
-    const productEntity = new this.productEntityModel(productEntityDto);
+    const productEntityModel = new this.productEntityModel(productEntityDto);
 
     const productDetailEntityDto: ProductDetailEntity = plainToClass(ProductDetailEntity, serializedProductDetail);
     const productDetailEntity = new this.productDetailEntityModel(productDetailEntityDto);
@@ -48,31 +48,31 @@ export class ProductRepository {
     //   const productHtmlEntity: ProductHtmlEntity = new ProductHtmlEntity();
     // productHtmlEntity.sourceHtml = product.productDetail.sourceHtml;
     //productDetailEntity.productHtmlSource =  new this.productHtmlEntityModel(productHtmlEntity);
-    productEntity.productDetail = productDetailEntity;
+    productEntityModel.productDetail = productDetailEntity;
 
     const productReviewsEntityDto: ProductReviewsEntity = plainToClass(ProductReviewsEntity, serializedProductReviews);
     const productReviewsEntity = new this.productReviewsEntityModel(productReviewsEntityDto);
 
-    productEntity.productDetail.productReviews = productReviewsEntity;
+    productEntityModel.productDetail.productReviews = productReviewsEntity;
 
-    return this.saveOrUpdateProduct(productEntity, productDetailEntity, productReviewsEntity);
+    return this.saveOrUpdateProduct(productEntityModel, productDetailEntity, productReviewsEntity);
 
   }
 
-  public saveOrUpdateProduct(productEntityDto: DocumentType<ProductEntity>, productDetailEntity: DocumentType<ProductDetailEntity>, productReviewsEntity: DocumentType<ProductReviewsEntity>): Observable<any> {
-    const source$ = from(this.productEntityModel.findOne({ asin: productEntityDto.asin }));
+  public saveOrUpdateProduct(productEntityModel: DocumentType<ProductEntity>, productDetailEntity: DocumentType<ProductDetailEntity>, productReviewsEntity: DocumentType<ProductReviewsEntity>): Observable<any> {
+    const source$ = from(this.productEntityModel.findOne({ asin: productEntityModel.asin }));
     const save$ = source$.pipe(
       filter((productEntityfind: DocumentType<ProductEntity>) => isNil(productEntityfind)),
       map((productEntityfind: DocumentType<ProductEntity>) => {
-        this.logger.log(`save product : id :[${productEntityDto.id}]  asin :[${productEntityDto.asin}]`);
+        this.logger.log(`save product : id :[${productEntityModel.id}]  asin :[${productEntityModel.asin}]`);
 
-        return productEntityDto;
+        return productEntityModel;
       }),
-      mergeMap((productEntity: DocumentType<ProductEntity>) => {
+      mergeMap((productEntityModel$: DocumentType<ProductEntity>) => {
 
         return forkJoin(
           {
-            productEntity: from(productEntity.save()),
+            productEntity: from(productEntityModel$.save()),
             productDetailEntity: from(productDetailEntity.save()),
             //     productHtmlSource: from((productDetailEntity.productHtmlSource as DocumentType<ProductHtmlEntity>).save()),
             productReviews: from(productReviewsEntity.save()),
@@ -87,7 +87,7 @@ export class ProductRepository {
       map((productEntityfind: DocumentType<ProductEntity>) => {
         const productEntityFindserialized: ProductEntity = productEntityfind.toJSON() as ProductEntity;
         const productEntityDtoUpdate: DocumentType<ProductEntity> = Object.assign(productEntityfind,
-          plainToClass(ProductEntity, productEntityDto.toJSON(), { excludeExtraneousValues: true })) as DocumentType<ProductEntity>;
+          plainToClass(ProductEntity, productEntityModel.toJSON(), { excludeExtraneousValues: true })) as DocumentType<ProductEntity>;
 
         return productEntityDtoUpdate.equals(productEntityFindserialized as ProductEntity) ? null : productEntityDtoUpdate;
       }),

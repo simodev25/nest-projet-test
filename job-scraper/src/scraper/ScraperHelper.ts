@@ -12,7 +12,7 @@ export class ScraperHelper {
   constructor(private readonly configService: ConfigService) {
   }
 
-  public static regex = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
+  public static regexImages = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
   public static searchUrlBase = /(https:)[A-Z0-9a-z-\.\/_]*(?:jpg|gif|png)/mg;
 
   public static getBaseUrlAmazone = (country) => {
