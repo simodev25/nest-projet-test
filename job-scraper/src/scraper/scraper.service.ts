@@ -175,6 +175,7 @@ export class ScraperService implements OnModuleInit {
           const start = Date.now();
           this.logger.log(`find product asin [${produitClass.asin}]`);
           return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
+
             map((productDetail) => plainToClass(ProductDetail, productDetail)),
             mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
               filter(Boolean),
