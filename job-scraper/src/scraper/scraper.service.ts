@@ -117,7 +117,6 @@ export class ScraperService implements OnModuleInit {
 
         })).subscribe(() => {
       }, (error => {
-        this.logger.error(error);
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
         this.logger.error(error);
@@ -175,6 +174,7 @@ export class ScraperService implements OnModuleInit {
           const start = Date.now();
           this.logger.log(`find product asin [${produitClass.asin}]`);
           return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
+
             map((productDetail) => plainToClass(ProductDetail, productDetail)),
             mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
               filter(Boolean),

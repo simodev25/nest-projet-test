@@ -67,6 +67,11 @@ export class MerchantwordsService {
           '',
           '',
         )}`);
+        process.exit();
+      }, (error ) => {
+
+        this.logger.error(error);
+        process.exit(1);
       });
   }
 
