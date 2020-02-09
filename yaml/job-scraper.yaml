@@ -18,14 +18,14 @@ spec:
               env:
                 - name: JOB
                   value: "scrapeJob"
-          restartPolicy: Never
+          restartPolicy: OnFailure
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: job-merchantwords
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "0 1 * * *"
   startingDeadlineSeconds: 60
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
@@ -40,6 +40,6 @@ spec:
               env:
                 - name: JOB
                   value: "merchantwordsJob"
-          restartPolicy: Never
+          restartPolicy: OnFailure
 
 

@@ -25,30 +25,15 @@ spec:
           ports:
             - containerPort: 27017
           volumeMounts:
-            - name: fast
+            - name: gp2
               mountPath: /data/db
   volumeClaimTemplates:
     - metadata:
-        name: fast
+        name: gp2
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
             storage: 10Gi
 
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: replset-scripte
-spec:
-  template:
-    spec:
-      terminationGracePeriodSeconds: 200
-      containers:
-        - name: replset-scripte
-          image: simo25docker/replset-scripte
-          command: ['sh', '-c',"chmod +x setup.sh;./setup.sh"]
 
-
-      restartPolicy: Never

@@ -5,7 +5,7 @@ import { ProductRepository } from './schema/product.repository';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { ConfigService } from '@nestjs/config';
 import { ScraperMerchantwordsService } from './lib/scraper.merchantwords.service';
-import { map, max, switchMap, toArray } from 'rxjs/operators';
+import { map, max, mergeMap, switchMap, toArray } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { Product } from './product/product';
 import { plainToClass } from 'class-transformer';
@@ -39,22 +39,23 @@ export class MerchantwordsService {
     scrapeAmazoneSearchWord.pipe(
       switchMap(searchWords => from(searchWords)),
       map(searchWord => {
-
+        this.logger.debug(`plainToClass in :${searchWord}`);
         const merchantword: Merchantwords = plainToClass(Merchantwords, searchWord);
         merchantword.country = country;
         merchantword.currency = ScraperHelper.getCurrency(country);
         merchantword.site = baseUrlAmazone;
+        this.logger.debug(`plainToClass out :${searchWord}`);
         return merchantword;
       }),
 
-      map((merchantword: Merchantwords) => {
+      mergeMap((merchantword: Merchantwords) => {
+        this.logger.debug(`saveMerchantword in :${merchantword.wordsSearch}`);
+        return this.merchantwordsRepository.saveMerchantword(merchantword);
+        this.logger.debug(`saveMerchantword out :${merchantword.wordsSearch}`);
+      }),
+      map(searchWord => {
         wordsCount++;
-        this.merchantwordsRepository.saveMerchantword(merchantword).subscribe(() => {
-        }, (error => {
-          throw new Exception(error);
-        }));
         return wordsCount;
-
       }),
       max(),
     )
@@ -68,7 +69,7 @@ export class MerchantwordsService {
           '',
         )}`);
         process.exit();
-      }, (error ) => {
+      }, (error) => {
 
         this.logger.error(error);
         process.exit(1);
