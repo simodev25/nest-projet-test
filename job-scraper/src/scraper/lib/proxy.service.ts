@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-
 import { Observable, Subject, throwError, timer } from 'rxjs';
 
 import { filter, map, mergeMap, retryWhen, tap } from 'rxjs/operators';
@@ -102,7 +101,7 @@ export class ProxyService {
 
       this.tr.setTorAddress(this.proxy.host, this.configService.get('TOR_PORT'));
       this.proxy.countRequest++;
-     // console.log(option)
+      // console.log(option)
       this.tr.request(option, (err, res) => {
 
         if (!isNil(res)) {
@@ -119,7 +118,7 @@ export class ProxyService {
     return torRequest.pipe(
       tap((res: any) => {
         if (ScraperHelper.isCaptcha(res)) {
-        //  this.torSession$.next(this.proxy);
+          //  this.torSession$.next(this.proxy);
           throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
         }
         return res;
@@ -163,7 +162,6 @@ export class ProxyService {
         }
 
       });
-
 
     });
     return torRequest.pipe(
@@ -223,13 +221,11 @@ export class ProxyService {
             return timer(scalingDuration);
           }
 
-          if (retryAttempt > maxRetryAttempts) {
-            return throwError(error);
-          }
-
           this.logger.error(`scrapeRetryStrategy[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
         }
-
+        if (retryAttempt > maxRetryAttempts) {
+          return throwError(error);
+        }
         return timer(scalingDuration);
       }),
     );

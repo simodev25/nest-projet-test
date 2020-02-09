@@ -1138,3 +1138,4 @@ main.js 2020-02-07 19:41:44 [31merror[39m: [scraperMicroService][scraperServic
 main.js 2020-02-07 19:41:46 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 2: retrying in 1000ms
 main.js 2020-02-07 19:41:48 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 2: retrying in 1000ms
 main.js 2020-02-07 19:41:48 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-13 22:46:47 [31merror[39m: [scraperMicroService][scraperService]  RangeError: Maximum call stack size exceeded

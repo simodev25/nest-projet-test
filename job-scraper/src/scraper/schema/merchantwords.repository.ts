@@ -26,13 +26,11 @@ export class MerchantwordsRepository {
   }
 
   public saveMerchantword(merchantwords: Merchantwords): Observable<any> {
-
+    this.logger.debug(`searchWord in :${merchantwords.wordsSearch}`);
     const serializedMerchantwords = classToPlain(merchantwords);
     const merchantwordsEntity: MerchantwordsEntity = plainToClass(MerchantwordsEntity, serializedMerchantwords);
     const merchantwordsModel = new this.merchantwordsEntityModel(merchantwordsEntity);
-    from(this.merchantwordsEntityModel.findOne({
-      wordsSearch: merchantwords.wordsSearch,
-    }));
+
     const source$ = from(this.merchantwordsEntityModel.findOne({
       wordsSearch: merchantwords.wordsSearch,
     }));
@@ -45,6 +43,7 @@ export class MerchantwordsRepository {
     );
 
     const update$ = source$.pipe(
+
       filter((merchantwordsEntity$: DocumentType<MerchantwordsEntity>) => {
         return !isNil(merchantwordsEntity$) && merchantwordsEntity$.vollume.toString() !== merchantwordsEntity.vollume.toString();
       }),

@@ -5,7 +5,7 @@ import { ProductRepository } from './schema/product.repository';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { ConfigService } from '@nestjs/config';
 import { ScraperMerchantwordsService } from './lib/scraper.merchantwords.service';
-import { map, max, switchMap, toArray } from 'rxjs/operators';
+import { map, max, mergeMap, switchMap, toArray } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { Product } from './product/product';
 import { plainToClass } from 'class-transformer';
@@ -38,21 +38,19 @@ export class MerchantwordsService {
       .scrapeUrlHome(`${this.configService.get('MERCHANTWORDS_URL')}${country.toLowerCase()}//sort-lowest`);
     scrapeAmazoneSearchWord.pipe(
       switchMap(searchWords => from(searchWords)),
-      map(searchWord => {
+      map((searchWord: any) => {
 
         const merchantword: Merchantwords = plainToClass(Merchantwords, searchWord);
         merchantword.country = country;
         merchantword.currency = ScraperHelper.getCurrency(country);
         merchantword.site = baseUrlAmazone;
+        //  this.logger.debug(`plainToClass out :${searchWord.wordsSearch}`);
         return merchantword;
       }),
-
+      mergeMap((merchantword: Merchantwords) => this.merchantwordsRepository.saveMerchantword(merchantword)),
       map((merchantword: Merchantwords) => {
         wordsCount++;
-        this.merchantwordsRepository.saveMerchantword(merchantword).subscribe(() => {
-        }, (error => {
-          throw new Exception(error);
-        }));
+
         return wordsCount;
 
       }),
@@ -68,10 +66,20 @@ export class MerchantwordsService {
           '',
         )}`);
         process.exit();
-      }, (error ) => {
+      }, (error) => {
 
         this.logger.error(error);
         process.exit(1);
+      }, () =>  {
+        this.logger.debug(`number of ALL products  processed [${wordsCount}] scrapeAmazone end in  ${format(
+          '%s %s %dms %s',
+          '',
+          '',
+          Date.now() - endTime,
+          '',
+          '',
+        )}`);
+        process.exit();
       });
   }
 

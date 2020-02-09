@@ -143,7 +143,6 @@ export class ScraperService implements OnModuleInit {
       this.scrapeKeyword$.next(this.keywords.hasNext());
     });
 
-
   }
 
   public scrapeSearchWord(searchWord: string): Observable<number> {
@@ -174,7 +173,6 @@ export class ScraperService implements OnModuleInit {
           const start = Date.now();
           this.logger.log(`find product asin [${produitClass.asin}]`);
           return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
-
             map((productDetail) => plainToClass(ProductDetail, productDetail)),
             mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
               filter(Boolean),
@@ -210,12 +208,14 @@ export class ScraperService implements OnModuleInit {
             }),
           );
         }),
-        map((produitClass: Product) => {
+        mergeMap((produitClass: Product) => {
+          this.logger.log(`saveProduct asin [${produitClass.asin}] in `);
+          return this.productRepository.saveProduct(produitClass);
+        }),
+        map((produitClass: any) => {
+          this.logger.log(`saveProduct asin [${produitClass.asin}] out `);
           productCount++;
-          this.productRepository.saveProduct(produitClass).subscribe(() => {
-          }, (error => {
-            throw new Exception(error);
-          }));
+
           return productCount;
 
         }),
