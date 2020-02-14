@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "JOB=merchantwordsJob nest start --watch",
+    "start:dev": "JOB=scrapeJob nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "NODE_ENV=production node main.js",
     "start:proddev": "NODE_ENV=local node dist/main.js",
