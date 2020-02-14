@@ -81,12 +81,12 @@ export class ProductRepository {
       }));
     const updateProduct$ = source$.pipe(
       filter((productEntityfind: DocumentType<ProductEntity>) => !isNil(productEntityfind)),
-      tap((productEntityfind: DocumentType<ProductEntity>) => {
-        this.updateProductDetail$(productEntityfind, productDetailEntity, productReviewsEntity).subscribe();
+      mergeMap((productEntityfind$: DocumentType<ProductEntity>) => {
+        return this.updateProductDetail$(productEntityfind$, productDetailEntity, productReviewsEntity);
       }),
-      map((productEntityfind: DocumentType<ProductEntity>) => {
-        const productEntityFindserialized: ProductEntity = productEntityfind.toJSON() as ProductEntity;
-        const productEntityDtoUpdate: DocumentType<ProductEntity> = Object.assign(productEntityfind,
+      map((productEntityfind$: DocumentType<ProductEntity>) => {
+        const productEntityFindserialized: ProductEntity = productEntityfind$.toJSON() as ProductEntity;
+        const productEntityDtoUpdate: DocumentType<ProductEntity> = Object.assign(productEntityfind$,
           plainToClass(ProductEntity, productEntityModel.toJSON(), { excludeExtraneousValues: true })) as DocumentType<ProductEntity>;
 
         return productEntityDtoUpdate.equals(productEntityFindserialized as ProductEntity) ? null : productEntityDtoUpdate;
@@ -121,12 +121,12 @@ export class ProductRepository {
 
   private updateProductDetail$(productEntityfind: DocumentType<ProductEntity>,
                                productDetailEntity: DocumentType<ProductDetailEntity>,
-                               productReviewsEntity: DocumentType<ProductReviewsEntity>) {
+                               productReviewsEntity: DocumentType<ProductReviewsEntity>): Observable<ProductEntity> {
     return from(this.productDetailEntityModel.findById((productEntityfind.productDetail as ProductDetailEntity)._id))
       .pipe(
         filter((productDetailEntityfind: DocumentType<ProductDetailEntity>) => !isNil(productDetailEntityfind)),
-        tap((productDetailEntityfind: DocumentType<ProductDetailEntity>) => {
-          this.updateProductReviews$(productDetailEntityfind, productReviewsEntity).pipe(filter((data) => !isNil(productDetailEntityfind.productReviews))).subscribe();
+        mergeMap((productDetailEntityfind: DocumentType<ProductDetailEntity>) => {
+          return this.updateProductReviews$(productDetailEntityfind, productReviewsEntity).pipe(filter((data) => !isNil(productDetailEntityfind.productReviews))).pipe(map(()=>productDetailEntityfind));
         }),
         map((productDetailEntityfind: DocumentType<ProductDetailEntity>) => {
           const productDetailFindserialized: ProductDetailEntity = productDetailEntityfind.toJSON() as ProductDetailEntity;
@@ -138,7 +138,7 @@ export class ProductRepository {
         mergeMap((productDetailtEntityDtoUpdate: DocumentType<ProductDetailEntity>) => {
           this.logger.log(`update productDetailt : id :[${productDetailtEntityDtoUpdate.id}]  asin :[${productEntityfind.asin}]`);
 
-          return from(productDetailtEntityDtoUpdate.save());
+          return from(productDetailtEntityDtoUpdate.save()).pipe(map(() => productEntityfind));
         }),
       );
   }
