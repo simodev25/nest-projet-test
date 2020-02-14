@@ -52,7 +52,6 @@ export class MerchantwordsService {
         wordsCount++;
 
         return wordsCount;
-
       }),
       max(),
     )
