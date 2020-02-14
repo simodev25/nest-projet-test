@@ -72,9 +72,7 @@ export class ScraperService implements OnModuleInit {
     let count: number = 0;
 
     this.scrapeKeyword$.pipe(filter((hasNext: boolean) => {
-      if (!isNil(this.scrapeSearchWord$)) {
-        this.scrapeSearchWord$.unsubscribe();
-      }
+     
       if (hasNext === false) {
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
@@ -214,12 +212,8 @@ export class ScraperService implements OnModuleInit {
         }),
         map((produitClass: any) => {
           this.logger.log(`saveProduct asin [${produitClass.asin}] out `);
-          productCount++;
-
-          return productCount;
-
+          return ++productCount;
         }),
-        map(() => productCount),
         max(),
       );
 
