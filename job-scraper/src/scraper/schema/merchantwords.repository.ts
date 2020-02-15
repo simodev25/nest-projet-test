@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { Logger } from '../../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../../shared/logger/loggerService';
 import { ConfigService } from '@nestjs/config';
-import { from, merge, Observable } from 'rxjs';
+import { forkJoin, from, merge, Observable, of } from 'rxjs';
 import { Merchantwords } from '../product/merchantwords';
 import { InjectModel } from 'nestjs-typegoose';
 import { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import { MerchantwordsEntity } from './merchantwords.entity';
 import { classToClass, classToClassFromExist, classToPlain, plainToClass } from 'class-transformer';
-import { filter, map, mergeMap, tap } from 'rxjs/operators';
+import { defaultIfEmpty, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { ProductEntity } from './product.entity';
 import { isNil } from '../../shared/utils/shared.utils';
 
@@ -43,7 +43,7 @@ export class MerchantwordsRepository {
     );
 
     const update$ = source$.pipe(
-
+      defaultIfEmpty(new MerchantwordsEntity()),
       filter((merchantwordsEntity$: DocumentType<MerchantwordsEntity>) => {
         return !isNil(merchantwordsEntity$) && merchantwordsEntity$.vollume.toString() !== merchantwordsEntity.vollume.toString();
       }),
@@ -52,9 +52,13 @@ export class MerchantwordsRepository {
         this.logger.log(`update merchantwordsEntity$ : id :[${merchantwordsEntity$.id}] wordsSearch :[${merchantwordsEntity$.wordsSearch}] `);
       }),
     );
+
+    const default$: any = of(null);
+
     const saveOrUpdate$ = merge(
       save$,
       update$,
+      default$,
     );
     return saveOrUpdate$;
   }

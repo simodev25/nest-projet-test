@@ -46,7 +46,8 @@ export class ProductDetail {
   private _rating: string;
   @Exclude()
   private _productReviews: ProductReviews;
-  @Exclude()
+
+  @Expose()
   get productReviews(): ProductReviews {
     return this._productReviews;
   }
@@ -236,6 +237,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @Type(() => ChildProduct)
   get childProduct(): ChildProduct[] {
     return this._childProduct;
   }
@@ -245,7 +247,7 @@ export class ProductDetail {
   }
 
 
-  @Expose()
+  @Exclude()
   get sourceHtml(): string {
     return this._sourceHtml;
   }

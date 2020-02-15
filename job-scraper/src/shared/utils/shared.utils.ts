@@ -241,7 +241,7 @@ export const FORBIDDEN_USERNAMES_REGEXPS = [
   'auth', 'authentication', 'avatar', 'backup', 'balancer-manager', 'banner', 'banners', 'beta',
   'billing', 'bin', 'blog', 'blogs', 'board', 'book', 'bookmark', 'bot', 'bots', 'bug', 'business',
   'cache', 'cadastro', 'calendar', 'call', 'campaign', 'cancel', 'captcha', 'career', 'careers',
-  'cart', 'categories', 'category', 'cgi', 'cgi-bin', 'changelog', 'chat', 'check', 'checking',
+  'cart', 'categories', 'categorys', 'cgi', 'cgi-bin', 'changelog', 'chat', 'check', 'checking',
   'checkout', 'client', 'cliente', 'clients', 'code', 'codereview', 'comercial', 'comment',
   'comments', 'communities', 'community', 'company', 'compare', 'compras', 'config', 'configuration',
   'connect', 'contact', 'contact-us', 'contact_us', 'contactus', 'contest', 'contribute', 'corp',
