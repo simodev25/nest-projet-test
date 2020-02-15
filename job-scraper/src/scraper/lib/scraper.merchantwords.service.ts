@@ -15,6 +15,7 @@ export class ScraperMerchantwordsService {
 
     const result$ = this.httpService.get(link).pipe(
       map((res: any) => {
+
         const data: any = scrapeIt.scrapeHTML(res,
           {
             merchantwords: {

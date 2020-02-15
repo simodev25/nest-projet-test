@@ -69,17 +69,7 @@ export class MerchantwordsService {
 
         this.logger.error(error);
         process.exit(1);
-      }, () =>  {
-        this.logger.debug(`number of ALL products  processed [${wordsCount}] scrapeAmazone end in  ${format(
-          '%s %s %dms %s',
-          '',
-          '',
-          Date.now() - endTime,
-          '',
-          '',
-        )}`);
-        process.exit();
-      });
+      }, )
   }
 
   public getAllMerchantwords(): Observable<string[]> {

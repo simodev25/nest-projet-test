@@ -1,7 +1,7 @@
 import { ProductEntity } from './product.entity';
 import { Product } from '../product/product';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { forkJoin, from, merge, Observable, pipe } from 'rxjs';
+import { forkJoin, from, merge, Observable, of, pipe } from 'rxjs';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 
@@ -64,7 +64,7 @@ export class ProductRepository {
     const save$ = source$.pipe(
       filter((productEntityfind: DocumentType<ProductEntity>) => isNil(productEntityfind)),
       map((productEntityfind: DocumentType<ProductEntity>) => {
-        this.logger.log(`save product : id :[${productEntityModel.id}]  asin :[${productEntityModel.asin}]`);
+        this.logger.debug(`save product : id :[${productEntityModel.id}]  asin :[${productEntityModel.asin}]`);
 
         return productEntityModel;
       }),
@@ -93,7 +93,7 @@ export class ProductRepository {
       }),
       filter((productEntityDtoUpdate: DocumentType<ProductEntity>) => !isNil(productEntityDtoUpdate)),
       mergeMap((productEntityDtoUpdate: DocumentType<ProductEntity>) => {
-        this.logger.log(`update product : id :[${productEntityDtoUpdate.id}] asin :[${productEntityDtoUpdate.asin}] `);
+        this.logger.debug(`update product : id :[${productEntityDtoUpdate.id}] asin :[${productEntityDtoUpdate.asin}] `);
         return from(productEntityDtoUpdate.save()).pipe(
           mergeMap((productEntityDtoUpdate$: DocumentType<ProductEntity>) => {
 
@@ -111,10 +111,11 @@ export class ProductRepository {
           }),
         );
       }));
-
+    const default$: any = of(null);
     const saveOrUpdate$ = merge(
       save$,
       updateProduct$,
+      default$,
     );
     return saveOrUpdate$;
   }
@@ -136,7 +137,7 @@ export class ProductRepository {
         }),
         filter((productDetailtEntityDtoUpdate: DocumentType<ProductDetailEntity>) => !isNil(productDetailtEntityDtoUpdate)),
         mergeMap((productDetailtEntityDtoUpdate: DocumentType<ProductDetailEntity>) => {
-          this.logger.log(`update productDetailt : id :[${productDetailtEntityDtoUpdate.id}]  asin :[${productEntityfind.asin}]`);
+          this.logger.debug(`update productDetailt : id :[${productDetailtEntityDtoUpdate.id}]  asin :[${productEntityfind.asin}]`);
 
           return from(productDetailtEntityDtoUpdate.save()).pipe(map(() => productEntityfind));
         }),
@@ -156,7 +157,7 @@ export class ProductRepository {
         }),
         filter((productReviewsEntityDtoUpdate: DocumentType<ProductReviewsEntity>) => !isNil(productReviewsEntityDtoUpdate)),
         mergeMap((productReviewsEntityDtoUpdate: DocumentType<ProductReviewsEntity>) => {
-          this.logger.log(`update productReviews : id :[${productReviewsEntityDtoUpdate.id}]`);
+          this.logger.debug(`update productReviews : id :[${productReviewsEntityDtoUpdate.id}]`);
 
           return from(productReviewsEntityDtoUpdate.save());
         }),

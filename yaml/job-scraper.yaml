@@ -18,6 +18,8 @@ spec:
               env:
                 - name: JOB
                   value: "scrapeJob"
+                - name: LEVEL
+                  value: "info"
           restartPolicy: OnFailure
 ---
 apiVersion: batch/v1beta1
@@ -40,6 +42,8 @@ spec:
               env:
                 - name: JOB
                   value: "merchantwordsJob"
+                - name: LEVEL
+                  value: "info"
           restartPolicy: OnFailure
 
 
