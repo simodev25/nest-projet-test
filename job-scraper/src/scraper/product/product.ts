@@ -1,9 +1,8 @@
 import { ProductDetail } from './productDetail';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsUrl, validate } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUrl, validate } from 'class-validator';
 import { validator } from '../../shared/utils/shared.utils';
 import { IimageProduct } from './product.interface';
-
 
 // tslint:disable-next-line:variable-name
 export class Product {
@@ -36,20 +35,24 @@ export class Product {
   private _images: IimageProduct[];
 
   @Exclude()
-  private _category: string[];
+  private _categorys: string[] = [];
   @Exclude()
   private _productDetail: ProductDetail;
-
+  @Exclude()
+  private _rating: string;
 
   @Expose()
-  //@IsNotEmpty()
-  get category(): string[] {
+  get categorys(): string[] {
 
-    return  (this._productDetail ? this._productDetail.categorys : null);
+    return (this._productDetail ? this._productDetail.categorys : this._categorys);
   }
 
-  set category(value: string[]) {
-    this._category = value;
+  set categorys(value: string[]) {
+    this._categorys = value;
+  }
+
+  set category(value: string) {
+    this._categorys.push(value);
   }
 
   @Expose()
@@ -57,6 +60,7 @@ export class Product {
   get baseUrl(): string {
     return this._baseUrl;
   }
+
   @Expose()
   @IsNotEmpty()
   get currency(): string {
@@ -167,6 +171,7 @@ export class Product {
   get reviews(): string {
     return this._reviews;
   }
+
   set reviews(value: string) {
     this._reviews = value;
   }
@@ -174,10 +179,12 @@ export class Product {
   @Expose()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get rating(): string {
-    return this._productDetail.rating;
+    return this._rating || this._productDetail?.rating;
   }
 
-
+  set rating(rating: string) {
+    this._rating = rating;
+  }
 
   @Expose()
   get shipping(): string {
@@ -189,6 +196,7 @@ export class Product {
   }
 
   @Expose()
+  @Transform(value => value)
   get images(): IimageProduct[] {
     return this._images;
   }
@@ -197,21 +205,18 @@ export class Product {
     this._images = value;
   }
 
-  // @Transform(value => value)
-  //@Expose()
+  @Expose()
   @Type(() => ProductDetail)
   get productDetail(): ProductDetail {
     return this._productDetail;
   }
-
-
 
   set productDetail(value: ProductDetail) {
     this._productDetail = value;
   }
 
   async isValideProduct(): Promise<boolean> {
-   //  validate(this).then(console.log)
+    //  validate(this).then(console.log)
 
     return (await validate(this)).length > 0 ? false : true;
   }

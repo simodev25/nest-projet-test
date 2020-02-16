@@ -14,9 +14,8 @@ export class ScraperAmazoneService implements IScraper {
   constructor(private readonly httpService: ProxyService) {
   }
 
-
   public scrapeUrlHome(link: string): Observable<any> {
-
+    console.log(link);
     const result$ = of(1).pipe(
       mergeMap(x => {
         return this.httpService.getTor(link).pipe(
@@ -60,10 +59,19 @@ export class ScraperAmazoneService implements IScraper {
                       attr: 'href',
                       convert: (x: string) => `https://www.amazon.com${x}`,
                     },
-                    reviews: {//image principale
-                      selector: 'div span:nth-child(2) a span',
-                      how: 'html',
-                      convert: (x: string) => isNil(x) ? 0 : x.replace(',', ''),
+                    reviews: {
+                      selector: 'div div.a-spacing-top-micro span:nth-child(2)',
+                      attr: 'aria-label',
+                      convert: (x: string) => {
+                        return isNil(x) ? 0 : x.replace(',', '')
+                      },
+                    },
+                    rating: {
+                      selector: 'div div.a-spacing-top-micro span:nth-child(1)',
+                      attr: 'aria-label',
+                      convert: (x: string) => {
+                        return isNil(x) ? 0 : x.split(' ')[0];
+                      },
                     },
                     shipping: {//shipping
                       selector: 'i.a-icon-prime',
