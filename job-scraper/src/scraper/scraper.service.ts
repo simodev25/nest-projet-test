@@ -184,7 +184,7 @@ export class ScraperService implements OnModuleInit {
   }
 
   public scrapeSearchWordSync(searchWord: string): Observable<number> {
-    let productCount: number = 0;
+
     const scrapeAmazoneSearchWord: Observable<any> = this.scrapeSearchWord(searchWord).pipe(
       mergeMap((produitClass: Product) => {
 
@@ -198,14 +198,8 @@ export class ScraperService implements OnModuleInit {
           mapTo(produitClass),
         );
       }),
-      map((produitClass: any) => {
-        if (isNil(produitClass)) {
-          return productCount;
-        }
-        this.logger.debug(`saveProduct  out `);
-        return ++productCount;
-      }),
-      max(),
+      toArray(),
+      map((products: Product[]) => products.length),
     );
 
     return scrapeAmazoneSearchWord;
