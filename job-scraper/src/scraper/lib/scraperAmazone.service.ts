@@ -15,7 +15,6 @@ export class ScraperAmazoneService implements IScraper {
   }
 
   public scrapeUrlHome(link: string): Observable<any> {
-    console.log(link);
     const result$ = of(1).pipe(
       mergeMap(x => {
         return this.httpService.getTor(link).pipe(
