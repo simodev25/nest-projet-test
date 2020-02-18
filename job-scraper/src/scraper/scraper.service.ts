@@ -196,6 +196,9 @@ export class ScraperService implements OnModuleInit {
             return of(null);
           }),
           mapTo(produitClass),
+          tap(( produitClass$ : Product) => {
+            this.logger.debug(`saveProduct asin [${produitClass.asin}] out `);
+          }),
         );
       }),
       toArray(),
