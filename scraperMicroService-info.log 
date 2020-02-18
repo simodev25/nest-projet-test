@@ -1,0 +1,14 @@
+main.js 2020-02-18 23:24:39 [32minfo[39m: [scraperMicroService][scraperService]  scrapeJobStart...
+main.js 2020-02-18 23:24:39 [32minfo[39m: [scraperMicroService][scraperService]  getAllMerchantwords...
+main.js 2020-02-18 23:24:40 [32minfo[39m: [scraperMicroService][scraperService]  number of ALL Merchantwords   [2] 
+main.js 2020-02-18 23:24:40 [32minfo[39m: [scraperMicroService][scraperService]   scrape keyword :[wireless earbuds] start
+main.js 2020-02-18 23:24:47 [32minfo[39m: [scraperMicroService][scraperService]  number of products [35] 
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:55 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:58 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:25:01 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms

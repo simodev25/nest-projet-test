@@ -19,7 +19,7 @@ spec:
                 - name: JOB
                   value: "scrapeJob"
                 - name: LEVEL
-                  value: "info"
+                  value: "debug"
           restartPolicy: OnFailure
 ---
 apiVersion: batch/v1beta1

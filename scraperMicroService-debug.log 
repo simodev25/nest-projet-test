@@ -1,0 +1,55 @@
+main.js 2020-02-18 23:24:39 [32minfo[39m: [scraperMicroService][scraperService]  scrapeJobStart...
+main.js 2020-02-18 23:24:39 [32minfo[39m: [scraperMicroService][scraperService]  getAllMerchantwords...
+main.js 2020-02-18 23:24:40 [32minfo[39m: [scraperMicroService][scraperService]  number of ALL Merchantwords   [2] 
+main.js 2020-02-18 23:24:40 [32minfo[39m: [scraperMicroService][scraperService]   scrape keyword :[wireless earbuds] start
+main.js 2020-02-18 23:24:47 [32minfo[39m: [scraperMicroService][scraperService]  number of products [35] 
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07ZHH2V6K]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07HK8F3PM]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B082J6HPK4]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07MWCNR3W]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B01L7PSJFO]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B01LWWY3E2]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B0117RGD0K]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07PXGQC1Q]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07P7VVCDD]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B0756GB78C]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B075G56GZD]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07S5B18BZ]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07ZKTPV2D]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07Y1VRM4R]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B08397W1F7]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07TMDH9XG]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07G4MNFS1]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07SFWG1NB]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B01DWH77GC]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07QYJV3VQ]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B082TQTL5G]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B06XCQKTKR]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07X3GT9BN]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07QRPXS8Z]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B072JWYJMC]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B083SCT4FD]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B079GPFLT1]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B084G71VFP]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07QLB3W3N]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B083JDPLJS]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07W47XLFS]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07XZK1QY1]
+main.js 2020-02-18 23:24:47 [34mdebug[39m: [scraperMicroService][scraperService]  find product asin [B07M5GFPQN]
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:54 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B0756GB78C]  in 7740ms
+main.js 2020-02-18 23:24:55 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B0117RGD0K]  in 8634ms
+main.js 2020-02-18 23:24:55 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:56 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B01LWWY3E2]  in 9133ms
+main.js 2020-02-18 23:24:56 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B07G4MNFS1]  in 9690ms
+main.js 2020-02-18 23:24:58 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
+main.js 2020-02-18 23:24:59 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B07ZHH2V6K]  in 12205ms
+main.js 2020-02-18 23:24:59 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B08397W1F7]  in 12710ms
+main.js 2020-02-18 23:25:00 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B07MWCNR3W]  in 13477ms
+main.js 2020-02-18 23:25:01 [34mdebug[39m: [scraperMicroService][scraperService]  find productDetail asin [B075G56GZD]  in 14396ms
+main.js 2020-02-18 23:25:01 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
