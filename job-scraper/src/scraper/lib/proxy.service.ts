@@ -182,7 +182,7 @@ export class ProxyService {
 
   private scrapeRetryStrategy = (
     {
-      maxRetryAttempts = 100,
+      maxRetryAttempts = 20,
       scalingDuration = 30000,
       excludedStatusCodes = [],
 
