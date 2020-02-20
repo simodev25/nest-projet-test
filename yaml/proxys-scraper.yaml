@@ -55,7 +55,6 @@ metadata:
     app: scraper-torproxy
     service-name: scraper-torproxy
 spec:
-  type: LoadBalancer
   ports:
     - name: torproxy
       port: 9050
@@ -63,5 +62,6 @@ spec:
     - name: torproxycontrol
       port: 9051
       targetPort: 9051
+  clusterIP: None
   selector:
     service-name: scraper-torproxy

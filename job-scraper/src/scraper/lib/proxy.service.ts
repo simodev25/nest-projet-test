@@ -196,6 +196,9 @@ export class ProxyService {
       mergeMap((error: any, i) => {
 
         const retryAttempt = i + 1;
+        if (retryAttempt > maxRetryAttempts) {
+          return throwError(error);
+        }
         if (error instanceof Exception) {
           // if maximum number of retries have been met
           // or response is a status code we don't wish to retry, throw error
@@ -223,9 +226,7 @@ export class ProxyService {
 
           this.logger.error(`scrapeRetryStrategy[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
         }
-        if (retryAttempt > maxRetryAttempts) {
-          return throwError(error);
-        }
+
         return timer(scalingDuration);
       }),
     );

@@ -1,9 +1,0 @@
-main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:24:50 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:24:55 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:24:58 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
-main.js 2020-02-18 23:25:01 [31merror[39m: [scraperMicroService][scraperService]  scrapeRetryStrategy[error CODE : ERROR_CAPTCHA]:Attempt 1: retrying in 1000ms
