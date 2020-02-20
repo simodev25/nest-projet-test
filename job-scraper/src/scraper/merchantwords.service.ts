@@ -35,7 +35,7 @@ export class MerchantwordsService {
     const endTime = Date.now();
     const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
     const scrapeAmazoneSearchWord = this.scraperMerchantwordsService
-      .scrapeUrlHome(`${this.configService.get('MERCHANTWORDS_URL')}${country.toLowerCase()}//sort-lowest`);
+      .scrapeUrlHome(`${this.configService.get('MERCHANTWORDS_URL')}${country.toLowerCase()}/*/sort-lowest`);
     scrapeAmazoneSearchWord.pipe(
       switchMap(searchWords => from(searchWords)),
       map((searchWord: any) => {
