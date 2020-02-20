@@ -202,6 +202,9 @@ export class ScraperService implements OnModuleInit {
         );
       }),
       toArray(),
+      tap((products: Product[]) => {
+        this.logger.debug(` Products  length [${products.length}] out `);
+      }),
       map((products: Product[]) => products.length),
     );
 
