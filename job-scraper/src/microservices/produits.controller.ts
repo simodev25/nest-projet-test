@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { Logger } from '../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../shared/logger/loggerService';
 import { MerchantwordsService } from '../scraper/merchantwords.service';
+import { Merchantwords } from '../scraper/product/merchantwords';
 
 @Controller()
 export class ProduitsController {
@@ -20,9 +21,10 @@ export class ProduitsController {
 
 
   @MessagePattern({ cmd: 'getProducts' })
-  getProducts(): Observable<any> {
-    this.logger.debug(' getProducts');
-    this.merchantwordsService.getAllMerchantwords().subscribe(console.log)
-    return this.merchantwordsService.getAllMerchantwords();
+  getProducts(store: string): Observable<Merchantwords[]> {
+    console.log(store)
+    return this.merchantwordsService.getMerchantwords();
   }
+
+
 }
