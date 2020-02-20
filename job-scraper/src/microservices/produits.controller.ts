@@ -22,6 +22,7 @@ export class ProduitsController {
   @MessagePattern({ cmd: 'getProducts' })
   getProducts(): Observable<any> {
     this.logger.debug(' getProducts');
+    this.merchantwordsService.getAllMerchantwords().subscribe(console.log)
     return this.merchantwordsService.getAllMerchantwords();
   }
 }
