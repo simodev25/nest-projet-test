@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { SharedModule } from '../shared/shared.module';
 import { ScraperModule } from '../scraper/scraper.module';
+import { ProduitsController } from './produits.controller';
 
 @Module({
-  imports: [SharedModule, ScraperModule],
+  imports: [SharedModule.forRoot(), ScraperModule],
   providers: [],
-  controllers: [],
+  controllers: [ProduitsController],
 })
 export class MicroserviceModule {
 

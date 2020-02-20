@@ -73,6 +73,7 @@ export class MerchantwordsService {
   }
 
   public getAllMerchantwords(): Observable<string[]> {
+    console.log('getAllMerchantwords')
     const country: string = 'US';
     const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
     return this.merchantwordsRepository.getAllMerchantwords(baseUrlAmazone).pipe(map((merchantwords: Merchantwords) => {
