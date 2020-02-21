@@ -74,7 +74,7 @@ export class ScraperService implements OnModuleInit {
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
 
-        this.logger.log(`number of ALL products  processed [${count}] scrapeAmazone end in  ${format(
+        this.logger.log(`number of ALL products ${count}  processed scrapeAmazone end in  ${format(
           '%s %s %dms %s',
           '',
           '',
@@ -91,26 +91,30 @@ export class ScraperService implements OnModuleInit {
       const keyword = this.keywords.next();
       this.logger.log(` scrape keyword :[${keyword}] start`);
       const start = Date.now();
-      this.scrapeSearchWord$ = this.scrapeSearchWordSync(keyword).pipe(
-        map((count$: any) => {
-          count = count + count$;
-          this.logger.log(`keyword :[${keyword}] number of products processed [${count$}] ${format(
-            '%s %s %dms %s',
-            '',
-            'end .',
-            Date.now() - start,
-            '',
-            '',
-          )}`);
+      this.scrapeSearchWord$ = this.scrapeSearchWordSync(keyword)
+      /*     .pipe(
+         map((count$: any) => {
+            count = count + count$;
+            this.logger.log(`keyword :[${keyword}] number of products processed  ${format(
+              '%s %s %dms %s',
+              '',
+              'end .',
+              Date.now() - start,
+              '',
+              '',
+            )}`);
 
-        })).subscribe(() => {
+          }))*/
+        .subscribe((data) => {
+          count++;
+          this.logger.log(` number of  product :[${count}] `);
+          this.scrapeKeyword$.next(this.keywords.hasNext());
       }, (error => {
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
         this.logger.error(error);
         process.exit(1);
       }), () => {
-        this.scrapeKeyword$.next(this.keywords.hasNext());
       });
 
     });
@@ -201,11 +205,11 @@ export class ScraperService implements OnModuleInit {
           }),
         );
       }),
-      toArray(),
-      tap((products: Product[]) => {
+     // toArray(),
+   /*   tap((products: Product[]) => {
         this.logger.debug(` Products  length [${products.length}] out `);
       }),
-      map((products: Product[]) => products.length),
+      map((products: Product[]) => products.length),*/
     );
 
     return scrapeAmazoneSearchWord;

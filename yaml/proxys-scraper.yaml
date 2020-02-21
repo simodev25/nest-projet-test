@@ -55,7 +55,7 @@ metadata:
     app: scraper-torproxy
     service-name: scraper-torproxy
 spec:
-  type: LoadBalancer
+#  type: LoadBalancer
   ports:
     - name: torproxy
       port: 9050
