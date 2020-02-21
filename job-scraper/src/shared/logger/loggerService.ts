@@ -88,7 +88,7 @@ export class ScraperLoggerService implements LoggerService {
       ),
       transports: [
         new winston.transports.Console({  level: process.env.LEVEL || 'debug'}),
-        new winston.transports.File({
+        /*new winston.transports.File({
           level: 'debug',
           filename: `${this.configService.get('LOG_DIR')}${context}-debug.log `,
 
@@ -103,7 +103,7 @@ export class ScraperLoggerService implements LoggerService {
             filename: `${this.configService.get('LOG_DIR')}${context}-error.log `,
             level: 'error',
           },
-        ),
+        ),*/
       ],
     };
 
