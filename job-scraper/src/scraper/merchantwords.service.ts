@@ -1,17 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Logger } from '../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../shared/logger/loggerService';
-import { ProductRepository } from './schema/product.repository';
-import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { ConfigService } from '@nestjs/config';
 import { ScraperMerchantwordsService } from './lib/scraper.merchantwords.service';
 import { map, max, mergeMap, switchMap, toArray } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
-import { Product } from './product/product';
 import { plainToClass } from 'class-transformer';
 import { ScraperHelper } from './ScraperHelper';
 import { Merchantwords } from './product/merchantwords';
-import { Exception } from '../shared/Exception/exception';
 import { MerchantwordsRepository } from './schema/merchantwords.repository';
 import { format } from 'util';
 
@@ -87,7 +83,7 @@ export class MerchantwordsService {
 
     const country: string = 'US';
     const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
-    return this.merchantwordsRepository.getMerchantwords(baseUrlAmazone).pipe(map((merchantwords: Merchantwords) => {
+    return this.merchantwordsRepository.getAllMerchantwords(baseUrlAmazone).pipe(map((merchantwords: Merchantwords) => {
         return merchantwords;
       }),
       toArray(),

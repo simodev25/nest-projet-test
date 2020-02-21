@@ -1,4 +1,3 @@
-import { prop } from '@typegoose/typegoose';
 import { Expose } from 'class-transformer';
 
 export class Merchantwords {

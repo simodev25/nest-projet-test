@@ -78,18 +78,5 @@ export class MerchantwordsRepository {
     );
   }
 
-  public getMerchantwords(site: string): Observable<Merchantwords> {
 
-    return from(this.merchantwordsEntityModel.find({
-        site,
-      }).limit(parseInt(this.configService.get('MERCHANTWORDS_LIMIT'))).sort({ vollume: -1 }),
-    ).pipe(
-      mergeMap((merchantwordsEntitys$: MerchantwordsEntity[]) => {
-        return from(merchantwordsEntitys$).pipe(map((merchantwordsEntity$: DocumentType<MerchantwordsEntity>) => {
-          const merchantwordsEntity: MerchantwordsEntity = plainToClass(MerchantwordsEntity, merchantwordsEntity$.toObject());
-          return classToPlain(merchantwordsEntity, { strategy: 'excludeAll' }) as Merchantwords;
-        }));
-      }),
-    );
-  }
 }

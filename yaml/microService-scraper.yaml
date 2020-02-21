@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: scraper-microservice
+  labels:
+    service-name: scraper-microservice
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      service-name: scraper-microservice
+  template:
+    metadata:
+      name: scraper-microservice
+      labels:
+        service-name: scraper-microservice
+    spec:
+      containers:
+        - name: scraper-microservice
+          image: simo25docker/job-scraper
+          env:
+            - name: JOB
+              value: "scrapeJob"
+            - name: LEVEL
+              value: "debug"
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scraper-torproxy
+  labels:
+    app: scraper-torproxy
+    service-name: scraper-torproxy
+spec:
+  # type: LoadBalancer
+  ports:
+    - name: torproxy
+      port: 9050
+      targetPort: 9050
+    - name: torproxycontrol
+      port: 9051
+      targetPort: 9051
+  selector:
+    service-name: scraper-torproxy

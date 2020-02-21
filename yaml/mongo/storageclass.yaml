@@ -2,6 +2,6 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1beta1
 metadata:
   name: fast
-provisioner: kubernetes.io/aws-ebs
+provisioner: kubernetes.io/gce-pd
 parameters:
-  type: gp2
+  type: pd-ssd

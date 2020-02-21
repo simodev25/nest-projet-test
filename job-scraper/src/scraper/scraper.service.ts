@@ -109,6 +109,7 @@ export class ScraperService implements OnModuleInit {
           '',
         )}`);
         this.logger.log(`scrapeKeyword$next ...`);
+        count = 0;
         this.scrapeKeyword$.next(this.keywords.hasNext());
       });
 
@@ -195,7 +196,7 @@ export class ScraperService implements OnModuleInit {
             return of(null);
           }),
           mapTo(produitClass),
-          tap(( produitClass$ : Product) => {
+          tap((produitClass$: Product) => {
             this.logger.debug(`saveProduct asin [${produitClass.asin}] out `);
           }),
         );

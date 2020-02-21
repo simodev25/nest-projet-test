@@ -6,27 +6,32 @@ import { MicroserviceModule } from './microservices/microservice.module';
 
 async function bootstrap() {
 
-  const scraperModule = await NestFactory.createApplicationContext(ScraperModule);
 
-  const scraperService: ScraperService = scraperModule.get(ScraperService);
-  const merchantwordsService: MerchantwordsService = scraperModule.get(MerchantwordsService);
-  //scraperService.scrapeJobStart();
   switch (process.env.JOB) {
 
     case 'merchantwordsJob' :
+      const scraperModulemerchantwordsJob = await NestFactory.createApplicationContext(ScraperModule);
+      const merchantwordsService: MerchantwordsService = scraperModulemerchantwordsJob.get(MerchantwordsService);
       merchantwordsService.merchantwordsJobStart();
       break;
 
     case 'scrapeJob':
+      const scraperModulescrapeJob = await NestFactory.createApplicationContext(ScraperModule);
+      const scraperService: ScraperService = scraperModulescrapeJob.get(ScraperService);
       scraperService.scrapeJobStart();
       break;
+
+    case 'scrapeMicroservice':
+      const scraperMicroservice = await NestFactory.createMicroservice(MicroserviceModule, {});
+
+      await scraperMicroservice.listen(() => {
+
+        console.log('microservice successfully started');
+      });
+      break;
+
   }
- /* const scraperMicroservice = await NestFactory.createMicroservice(MicroserviceModule, {});
 
-  await scraperMicroservice.listen(() => {
-
-    console.log('microservice successfully started');
-  })*/
   // merchantwordsService.getAllMerchantwords().subscribe(console.log)
 }
 

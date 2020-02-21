@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 
 import { Logger } from '../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../shared/logger/loggerService';
-import { MerchantwordsService } from '../scraper/merchantwords.service';
 import { Merchantwords } from '../scraper/product/merchantwords';
 import { ScraperService } from '../scraper/scraper.service';
 

@@ -1,101 +1,11 @@
 version: "3"
 
 services:
-  mongo-rs0-1:
+  mongo:
     image: mongo:latest
     hostname: scraper-mongo
     ports:
       - "27017:27017"
-    networks:
-      - scraper-compose-network
-  torproxy1:
-    build: ./torproxy
-    hostname: torproxy1
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy2:
-    build: ./torproxy
-    hostname: torproxy2
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy3:
-    build: ./torproxy
-    hostname: torproxy3
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy4:
-    build: ./torproxy
-    hostname: torproxy4
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy5:
-    build: ./torproxy
-    hostname: torproxy5
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy6:
-    build: ./torproxy
-    hostname: torproxy6
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy7:
-    build: ./torproxy
-    hostname: torproxy7
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy8:
-    build: ./torproxy
-    hostname: torproxy8
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy9:
-    build: ./torproxy
-    hostname: torproxy9
-    restart: always
-    expose:
-      - 9050
-      - 9051
-    networks:
-      - scraper-compose-network
-  torproxy10:
-    build: ./torproxy
-    hostname: torproxy10
-    restart: always
-    expose:
-      - 9050
-      - 9051
     networks:
       - scraper-compose-network
   redis:
@@ -109,22 +19,6 @@ services:
     hostname: redis
     networks:
       - scraper-compose-network
-  scraper:
-    image: 'scraper-microservice'
-    volumes:
-      - .:/usr/src/app
-    build: .
-    ports:
-      - '3000'
-    hostname: scraper-microservice
-    environment:
-      - NODE_TLS_REJECT_UNAUTHORIZED=1
-      - NODE_MAX_MEM=8192
-    networks:
-      - scraper-compose-network
-    depends_on:
-      - "redis"
-      - "mongo-rs0-1"
 networks:
   scraper-compose-network:
     driver: bridge
