@@ -11,7 +11,7 @@ async function bootstrap() {
   const scraperService: ScraperService = scraperModule.get(ScraperService);
   const merchantwordsService: MerchantwordsService = scraperModule.get(MerchantwordsService);
   //scraperService.scrapeJobStart();
-  /*switch (process.env.JOB) {
+  switch (process.env.JOB) {
 
     case 'merchantwordsJob' :
       merchantwordsService.merchantwordsJobStart();
@@ -20,13 +20,13 @@ async function bootstrap() {
     case 'scrapeJob':
       scraperService.scrapeJobStart();
       break;
-  }*/
-  const scraperMicroservice = await NestFactory.createMicroservice(MicroserviceModule, {});
+  }
+ /* const scraperMicroservice = await NestFactory.createMicroservice(MicroserviceModule, {});
 
   await scraperMicroservice.listen(() => {
 
     console.log('microservice successfully started');
-  })
+  })*/
   // merchantwordsService.getAllMerchantwords().subscribe(console.log)
 }
 
