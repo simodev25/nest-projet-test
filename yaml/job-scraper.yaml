@@ -27,7 +27,7 @@ kind: CronJob
 metadata:
   name: job-merchantwords
 spec:
-  schedule: "0 1 * * *"
+  schedule: "*/1 * * * *"
   startingDeadlineSeconds: 60
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3

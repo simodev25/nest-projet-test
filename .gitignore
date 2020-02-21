@@ -65,3 +65,5 @@ scraperMicroService-error.log
 scraperMicroService-error.log 
 
 scraperMicroService-info.log 
+
+scraperMicroService-debug.log 

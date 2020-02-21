@@ -27,6 +27,7 @@ import { MerchantwordsRepository } from './schema/merchantwords.repository';
 
   ],
   providers: [ScraperAmazoneService, ScraperHelper, ScraperService, MerchantwordsRepository, ProductRepository, ScraperLoggerService, ConfigService, ProxyService, MerchantwordsService, ScraperMerchantwordsService],
+  exports: [MerchantwordsService, ScraperService],
 })
 export class ScraperModule {
 }
