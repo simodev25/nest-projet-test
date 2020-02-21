@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { catchError, filter, map, mapTo, max, mergeMap, take, tap, timeout, toArray } from 'rxjs/operators';
-import { from, Observable, of, Subject, Subscription } from 'rxjs';
+import { catchError, filter, map, mapTo, max, mergeMap, scan, take, tap, timeout, toArray } from 'rxjs/operators';
+import { concat, from, Observable, of, Subject, Subscription } from 'rxjs';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { classToPlain, plainToClass } from 'class-transformer';
 import { format } from 'util';
@@ -91,25 +91,23 @@ export class ScraperService implements OnModuleInit {
       const keyword = this.keywords.next();
       this.logger.log(` scrape keyword :[${keyword}] start`);
       const start = Date.now();
-      this.scrapeSearchWord$ = this.scrapeSearchWordSync(keyword).pipe(
-        map((count$: any) => {
-          count = count + count$;
-          this.logger.log(`keyword :[${keyword}] number of products processed [${count$}] ${format(
-            '%s %s %dms %s',
-            '',
-            'end .',
-            Date.now() - start,
-            '',
-            '',
-          )}`);
-
-        })).subscribe(() => {
+      this.scrapeSearchWord$ = this.scrapeSearchWordSync(keyword).subscribe((count$: any) => {
+        count = count + count$;
+        this.logger.log(`keyword :[${keyword}] number of products processed [${count}]`);
       }, (error => {
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
         this.logger.error(error);
         process.exit(1);
       }), () => {
+        this.logger.log(`keyword :[${keyword}] number of products processed [${count}] ${format(
+          '%s %s %dms %s',
+          '',
+          'end .',
+          Date.now() - start,
+          '',
+          '',
+        )}`);
         this.logger.log(`scrapeKeyword$next ...`);
         this.scrapeKeyword$.next(this.keywords.hasNext());
       });
@@ -202,11 +200,16 @@ export class ScraperService implements OnModuleInit {
           }),
         );
       }),
-      toArray(),
+      scan((a, c) => [...a, c], []),
       tap((products: Product[]) => {
-        this.logger.debug(`saveProduct asin [${products.length}] out `);
+        this.logger.debug(`saveProduct length [${products.length}] out `);
       }),
       map((products: Product[]) => products.length),
+      timeout(50000),
+      catchError(error => {
+        this.logger.error(`............... timeout `);
+        return of(null);
+      }),
     );
 
     return scrapeAmazoneSearchWord;
