@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ProductsController } from './products.controller';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { ProductsModule } from './products/products.module';
 
 @Module({
-  imports: [ProductsModule],
-  controllers: [AppController],
-  providers: [AppService,
+  controllers: [ProductsController],
+  providers: [
     {
       provide: 'ScraperProxyFactory',
       useFactory: () => {
@@ -19,5 +16,6 @@ import { ProductsModule } from './products/products.module';
       },
     }],
 })
-export class AppModule {
+export class ProductsModule {
+
 }

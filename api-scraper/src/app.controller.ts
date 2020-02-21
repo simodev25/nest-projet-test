@@ -4,7 +4,7 @@ import { ClientProxy } from '@nestjs/microservices';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService, @Inject('ClientProxyFactory') private readonly client: ClientProxy) {
+  constructor(private readonly appService: AppService, @Inject('ScraperProxyFactory') private readonly client: ClientProxy) {
   }
 
   @Get()

@@ -7,6 +7,7 @@ import { Logger } from '../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../shared/logger/loggerService';
 import { MerchantwordsService } from '../scraper/merchantwords.service';
 import { Merchantwords } from '../scraper/product/merchantwords';
+import { ScraperService } from '../scraper/scraper.service';
 
 @Controller()
 export class ProduitsController {
@@ -15,15 +16,21 @@ export class ProduitsController {
     context: 'scraperMicroService',
     prefix: 'ProduitsController',
   }) private logger: ScraperLoggerService,
-              private merchantwordsService: MerchantwordsService) {
+              private scraperService: ScraperService) {
 
   }
 
 
-  @MessagePattern({ cmd: 'getProducts' })
-  getProducts(store: string): Observable<Merchantwords[]> {
-    console.log(store)
-    return this.merchantwordsService.getMerchantwords();
+  @MessagePattern({ cmd: 'scrapeSearchWordLite' })
+  scrapeSearchWordLite(searchWord: string): Observable<Merchantwords[]> {
+    console.log(searchWord)
+    return this.scraperService.scrapeSearchWordLite(searchWord);
+  }
+
+  @MessagePattern({ cmd: 'scrapeSearchWordAsync' })
+  scrapeSearchWordAsync(searchWord: string): Observable<Merchantwords[]> {
+
+    return this.scraperService.scrapeSearchWordAsync(searchWord);
   }
 
 
