@@ -108,14 +108,13 @@ export class ScraperService implements OnModuleInit {
         .subscribe((data) => {
           count++;
           this.logger.log(` number of  product :[${count}] `);
+          this.scrapeKeyword$.next(this.keywords.hasNext());
       }, (error => {
         this.jobScrape.status = JobScrapeStatus.STOP;
         this.jobScrape.endTime = Date.now();
         this.logger.error(error);
         process.exit(1);
       }), () => {
-
-        this.scrapeKeyword$.next(this.keywords.hasNext());
       });
 
     });
