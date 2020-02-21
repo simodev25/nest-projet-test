@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { catchError, filter, map, mapTo, max, mergeMap, take, tap, timeout, toArray } from 'rxjs/operators';
-import { from, Observable, of, Subject, Subscription } from 'rxjs';
+import { catchError, filter, map, mapTo, max, mergeMap, scan, take, tap, timeout, toArray } from 'rxjs/operators';
+import { concat, from, Observable, of, Subject, Subscription } from 'rxjs';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { classToPlain, plainToClass } from 'class-transformer';
 import { format } from 'util';
@@ -202,9 +202,9 @@ export class ScraperService implements OnModuleInit {
           }),
         );
       }),
-      toArray(),
+      scan((a, c) => [...a, c], []),
       tap((products: Product[]) => {
-        this.logger.debug(`saveProduct asin [${products.length}] out `);
+        this.logger.debug(`saveProduct length [${products.length}] out `);
       }),
       map((products: Product[]) => products.length),
     );
