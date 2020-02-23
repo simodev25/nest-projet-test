@@ -18,7 +18,14 @@ jobs:
         name: simo25docker/job-scraper
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
-        workdir: job-scraper   
+        workdir: job-scraper
+    - name: Publish api scraper
+      uses: elgohr/Publish-Docker-Github-Action@2.12
+      with:
+        name: simo25docker/api-scraper
+        username: ${{ secrets.LOGIN_DOCKER }}
+        password: ${{ secrets.PASSWORD_DOCKER }}
+        workdir: api-scraper    
     - name: Publish replSet Scripte
       uses: elgohr/Publish-Docker-Github-Action@2.12
       with:

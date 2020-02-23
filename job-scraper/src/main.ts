@@ -28,7 +28,7 @@ async function bootstrap() {
       const scraperMicroservice = await NestFactory.createMicroservice(MicroserviceModule, {
           transport: Transport.TCP,
           options: {
-            port: 5667,
+            port: 30153,
 
           },
         })

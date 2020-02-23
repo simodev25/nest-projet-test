@@ -24,7 +24,7 @@ spec:
             - name: LEVEL
               value: "debug"
           ports:
-            - containerPort: 300
+            - containerPort: 3000
 
 
 ---
@@ -42,4 +42,4 @@ spec:
       port: 3000
       targetPort: 3000
   selector:
-    service-name: scraper-microservice
+    service-name: api-scraper
