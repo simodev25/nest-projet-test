@@ -1,20 +1,26 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import * as winston from 'winston';
 import { format, Logger } from 'winston';
-import * as path from 'path';
 import * as chalk from 'chalk';
 import * as PrettyError from 'pretty-error';
 import { ConfigService } from '@nestjs/config';
-
+import { RedisService } from 'nestjs-redis';
+import { from } from 'rxjs';
+import { filter, map, tap } from 'rxjs/operators';
+import { deserialize, serialize } from 'class-transformer';
+import { ScraperRequest } from '../../microservices/scraperRequest';
+import {validator} from '../utils/shared.utils';
 @Injectable()
 export class ScraperLoggerService implements LoggerService {
   private prefix?: string;
   private context?: string;
+  private idRequest?: string;
   private inject?: string;
   private logger: Logger;
   private readonly prettyError = new PrettyError();
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService,
+              private readonly redisClient: RedisService) {
 
   }
 
@@ -22,12 +28,31 @@ export class ScraperLoggerService implements LoggerService {
     return this.configService;
   }
 
+  get redis() {
+    return this.redisClient;
+  }
+
   get Logger(): any {
     return this.logger; // idk why i have this in my code !
   }
 
-  log(message: string): void {
-    this.logger.info(this.getMessage(message), this.context);
+  log(message: string, idRequest: string = null): void {
+    const message$: string = this.getMessage(message);
+    const response: any = this.redisClient.getClient().get(idRequest);
+    from(response).pipe(filter((response$: any) => !!response$),
+      map((response$: any) => {
+        let response$$: ScraperRequest = deserialize(ScraperRequest, response$);
+        if (response$$.idRequest == idRequest) {
+          if (validator.isEmpty(response$$.log))
+            response$$.log = [];
+          response$$.log.push(message$);
+        }
+        return response$$;
+      })).subscribe((response$$$: any) => {
+      this.redisClient.getClient().set(idRequest, serialize(response$$$));
+    });
+
+    this.logger.info(message$, this.context, idRequest);
   }
 
   setPrefix(prefix: string) {
@@ -83,11 +108,11 @@ export class ScraperLoggerService implements LoggerService {
         format.timestamp({
           format: 'YYYY-MM-DD HH:mm:ss',
         }),
-        format.label({ label: path.basename(process.mainModule.filename) }),
+        format.label({ label: 'microservice' }),
         format.printf(info => `${info.label} ${info.timestamp} ${info.level}: ${info.message}`),
       ),
       transports: [
-        new winston.transports.Console({  level: process.env.LEVEL || 'debug'}),
+        new winston.transports.Console({ level: process.env.LEVEL || 'debug' }),
         /*new winston.transports.File({
           level: 'debug',
           filename: `${this.configService.get('LOG_DIR')}${context}-debug.log `,
