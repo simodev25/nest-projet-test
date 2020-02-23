@@ -84,6 +84,7 @@ export class ScraperService implements OnModuleInit {
         )}`);
         process.exit();
       }
+      count = 0;
       return hasNext === true;
 
     })).subscribe((hasNext: boolean) => {
@@ -109,7 +110,7 @@ export class ScraperService implements OnModuleInit {
           '',
         )}`);
         this.logger.log(`scrapeKeyword$next ...`);
-        count = 0;
+
         this.scrapeKeyword$.next(this.keywords.hasNext());
       });
 

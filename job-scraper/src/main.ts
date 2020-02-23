@@ -26,10 +26,13 @@ async function bootstrap() {
 
     case 'scrapeMicroservice':
       const scraperMicroservice = await NestFactory.createMicroservice(MicroserviceModule, {
-          transport: Transport.TCP,
+          transport: Transport.RMQ,
           options: {
-            port: 30153,
-
+            urls: ['amqp://guest:guest@rabbitmq:5672'],
+            queue: 'scraper_service',
+            queueOptions: {
+              durable: false,
+            },
           },
         })
       ;

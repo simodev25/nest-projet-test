@@ -17,8 +17,9 @@ export class MerchantwordsController {
 
   }
 
-  @MessagePattern({ cmd: 'merchantwords' })
+  @MessagePattern('merchantwords')
   merchantwords(): Observable<Merchantwords[]> {
+
     console.log('micro in merchantwords ')
     return this.merchantwordsService.getMerchantwords();
   }

@@ -1,23 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ProductsController } from './products.controller';
-import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ClientProxyFactory, ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
-  controllers: [ProductsController],
-  providers: [
+  imports:[ ClientsModule.register([
     {
-      provide: 'ScraperProxyFactory',
-      useFactory: () => {
-
-        return ClientProxyFactory.create({
-          transport: Transport.TCP,
-          options: {
-            port: 5667,
-            host: 'scraper-microservice',
-          },
-        });
+      name: 'ScraperProxyFactory',
+      transport: Transport.RMQ,
+      options: {
+        urls: ['amqp://guest:guest@rabbitmq:5672'],
+        queue: 'scraper_service',
+        queueOptions: {
+          durable: false,
+        },
       },
-    }],
+    },
+  ])],
+  controllers: [ProductsController],
+  providers: [],
 })
 export class ProductsModule {
 
