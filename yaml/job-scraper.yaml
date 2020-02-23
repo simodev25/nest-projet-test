@@ -19,9 +19,6 @@ spec:
                 requests:
                   memory: "500Mi"
                   cpu: "2000m"
-                limits:
-                  memory: "500Mi"
-                  cpu: "2000m"
               env:
                 - name: JOB
                   value: "scrapeJob"

@@ -1,43 +1,45 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: scraper-microservice
+  name: api-scraper
   labels:
-    service-name: scraper-microservice
+    service-name: api-scraper
 spec:
   replicas: 4
   selector:
     matchLabels:
-      service-name: scraper-microservice
+      service-name: api-scraper
   template:
     metadata:
-      name: scraper-microservice
+      name: api-scraper
       labels:
-        service-name: scraper-microservice
+        service-name: api-scraper
     spec:
       containers:
-        - name: scraper-microservice
-          image: simo25docker/job-scraper
+        - name: api-scraper
+          image: simo25docker/api-scraper
           env:
             - name: JOB
               value: "scrapeMicroservice"
             - name: LEVEL
               value: "debug"
+          ports:
+            - containerPort: 300
 
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: scraper-microservice
+  name: api-scraper
   labels:
-    app: scraper-microservice
-    service-name: scraper-microservice
+    app: api-scraper
+    service-name: api-scraper
 spec:
   type: LoadBalancer
   ports:
-    - name: microservice
-      port: 5667
-      targetPort: 5667
+    - name: apiscraper
+      port: 3000
+      targetPort: 3000
   selector:
     service-name: scraper-microservice

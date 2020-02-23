@@ -11,6 +11,10 @@ import { MerchantwordsController } from './merchantwords.controller';
 
         return ClientProxyFactory.create({
           transport: Transport.TCP,
+          options: {
+            port: 5667,
+            host: 'scraper-microservice',
+          },
 
         });
       },

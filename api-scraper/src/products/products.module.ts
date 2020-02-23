@@ -11,7 +11,10 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
         return ClientProxyFactory.create({
           transport: Transport.TCP,
-
+          options: {
+            port: 5667,
+            host: 'scraper-microservice',
+          },
         });
       },
     }],
