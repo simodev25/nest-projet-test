@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ProductsModule } from './products/products.module';
 import { MerchantwordsModule } from './merchantwords/merchantwords.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
-  imports: [ProductsModule, MerchantwordsModule],
+  imports: [
+
+    ProductsModule, MerchantwordsModule],
   controllers: [],
   providers: [],
 })

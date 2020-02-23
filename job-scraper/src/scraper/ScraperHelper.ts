@@ -47,6 +47,10 @@ export class ScraperHelper {
 
     return contents.indexOf('api-services-support@amazon.com') > -1 || contents.indexOf('why_captcha_headline') > -1;
   }
+  public static isPageNotFound(contents: string): boolean {
+
+    return contents.indexOf('Page Not Found') > -1 ;
+  }
   public static getRandomUserAgent = () => {
     const index = getRandomInt(ScraperHelper.USER_AGENT_LIST.length);
     return ScraperHelper.USER_AGENT_LIST[index];
@@ -262,6 +266,7 @@ export class ScraperHelper {
     ERROR_PROXY: 'ERROR_PROXY',
     ERROR_PROXY_TIME_OUT: 'ERROR_PROXY_TIME_OUT',
     ERROR_PROXY_EMPTY: 'ERROR_PROXY_EMPTY',
+    PAGE_NOT_FOUND: 'PAGE_NOT_FOUND',
   };
 
   public static DEFAULT_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36'; // eslint-disable-line max-len

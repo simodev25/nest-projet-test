@@ -3,7 +3,8 @@ import { DynamicModule, HttpModule, Module } from '@nestjs/common';
 import { ScraperLoggerService } from './logger/loggerService';
 import { createLoggerProviders } from './logger/logger.providers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypegooseModule } from 'nestjs-typegoose';
+
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { RedisModule } from 'nestjs-redis';
 
 
@@ -17,34 +18,36 @@ const environment = 'local';
       isGlobal: true,
       envFilePath: `./config.${process.env.NODE_ENV || environment}.env`,
     }),
-    RedisModule.forRootAsync({
-      useFactory: (configService: ConfigService) => {
-        return {
-          url: configService.get('REDIS_URL'),
-        };
-      },
 
-      inject: [ConfigService],
-    }),
-    TypegooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get('MONGODB_URI'),
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useUnifiedTopology: false,
-        reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
-        reconnectInterval: 1000, // Reconnect every 500ms
-        bufferMaxEntries: 0,
-        connectTimeoutMS: 20000,
-        socketTimeoutMS: 45000,
-      }),
-      inject: [ConfigService],
-    }),
+    ClientsModule.register([
+      {
+        name: 'ScraperProxyFactory',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://guest:guest@10.97.142.20:5672'],
+          queue: 'scraper_service',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
   providers: [ScraperLoggerService],
-  exports: [ScraperLoggerService],
+  exports: [ScraperLoggerService,
+    ClientsModule.register([
+      {
+        name: 'ScraperProxyFactory',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://guest:guest@10.105.216.13:5672'],
+          queue: 'scraper_service',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ])],
 })
 export class SharedModule {
 

@@ -2,7 +2,7 @@ import { Logger } from '../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../shared/logger/loggerService';
 import { MerchantwordsService } from '../scraper/merchantwords.service';
 import { Injectable } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { Merchantwords } from '../scraper/product/merchantwords';
 
@@ -18,8 +18,7 @@ export class MerchantwordsController {
   }
 
   @MessagePattern({ cmd: 'merchantwords' })
-  merchantwords(): Observable<Merchantwords[]> {
-    console.log('micro in merchantwords ')
+  merchantwords(@Payload() data: number[], @Ctx() context: RmqContext): Observable<Merchantwords[]> {
     return this.merchantwordsService.getMerchantwords();
   }
 
