@@ -21,6 +21,7 @@
     "kube:job-replset": "kubectl create -f yaml/mongo/Job-replset.yaml ",
     "kube:createSerivcedb": "kubectl create -f yaml/mongo/headless-service.yaml ",
     "kube:createjob": "kubectl create -f yaml/job-scraper.yaml",
+    "kube:createmicroService": "kubectl create -f yaml/microService-scraper.yaml",
     "kube:deletejob": "kubectl delete  cronjobs --all --grace-period=0 --force && kubectl delete  jobs --all --grace-period=0 --force ",
     "kube:createproxy": "kubectl create -f yaml/proxys-scraper.yaml --validate=false",
     "kube:createproxy:dev": "kubectl create -f yaml/proxys-scraper.dev.yaml",

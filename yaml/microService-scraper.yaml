@@ -20,7 +20,7 @@ spec:
           image: simo25docker/job-scraper
           env:
             - name: JOB
-              value: "scrapeJob"
+              value: "scrapeMicroservice"
             - name: LEVEL
               value: "debug"
 
@@ -29,18 +29,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: scraper-torproxy
+  name: scraper-microservice
   labels:
-    app: scraper-torproxy
-    service-name: scraper-torproxy
+    app: scraper-microservice
+    service-name: scraper-microservice
 spec:
   # type: LoadBalancer
   ports:
-    - name: torproxy
+    - name: microservice
       port: 9050
       targetPort: 9050
-    - name: torproxycontrol
-      port: 9051
-      targetPort: 9051
   selector:
     service-name: scraper-torproxy
