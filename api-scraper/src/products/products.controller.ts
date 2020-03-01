@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { Response } from 'express';
 import { FindIdRequest } from '../dtos/findIdRequest';
 import { FindAsin } from '../dtos/findAsin';
+import { RequestContextHelper } from '../shared/helpers/requestContext.helper';
 
 
 @Controller('/products')
@@ -54,7 +55,6 @@ export class ProductsController {
   @Get('/asin/:asin')
   @Header('Content-Type', 'application/json; charset=utf-8')
   scrapeByAsin(@Res() reply: Response,@Req() req, @Param() params: FindAsin): any {
-
      this.productsService.scrapeByAsin(params.asin).subscribe((response$: any) => {
 
         reply.send(response$);

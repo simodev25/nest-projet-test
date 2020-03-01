@@ -11,6 +11,8 @@ import { ConfigService } from '@nestjs/config';
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => {
         return {
+          retryAttempts: 5,
+          retryDelay: 1000,
           url: configService.get('REDIS_URL'),
         };
       },

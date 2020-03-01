@@ -1,5 +1,5 @@
 import { Exception } from '../Exception/exception';
-import * as bcrypt from 'bcryptjs';
+
 const hash = require('object-hash');
 
 import { Validator } from 'class-validator';

@@ -3,9 +3,16 @@ import { DynamicModule, HttpModule, Module } from '@nestjs/common';
 import { ScraperLoggerService } from './logger/loggerService';
 import { createLoggerProviders } from './logger/logger.providers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { getScraperProxyFactory } from './factorys/scraper.factory';
 
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { RedisModule } from 'nestjs-redis';
+import {
+  DNSHealthIndicator,
+  MicroserviceHealthIndicator,
+  MongooseHealthIndicator,
+  TerminusModule,
+} from '@nestjs/terminus';
+import { TerminusOptionsService } from './health/terminus.options.service';
+import { AppHealthIndicator } from './health/app.health.Indicator';
 
 
 const environment = 'local';
@@ -13,41 +20,20 @@ const environment = 'local';
 
 @Module({
   imports: [
+   /* TerminusModule.forRootAsync({
+      imports: [SharedModule],
+      useClass: TerminusOptionsService,
+    }),*/
     HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `./config.${process.env.NODE_ENV || environment}.env`,
     }),
-
-    ClientsModule.register([
-      {
-        name: 'ScraperProxyFactory',
-        transport: Transport.RMQ,
-        options: {
-          urls: ['amqp://guest:guest@10.97.142.20:5672'],
-          queue: 'scraper_service',
-          queueOptions: {
-            durable: false,
-          },
-        },
-      },
-    ]),
   ],
-  providers: [ScraperLoggerService],
-  exports: [ScraperLoggerService,
-    ClientsModule.register([
-      {
-        name: 'ScraperProxyFactory',
-        transport: Transport.RMQ,
-        options: {
-          urls: ['amqp://guest:guest@10.105.216.13:5672'],
-          queue: 'scraper_service',
-          queueOptions: {
-            durable: false,
-          },
-        },
-      },
-    ])],
+  providers: [ScraperLoggerService, getScraperProxyFactory(), MicroserviceHealthIndicator, AppHealthIndicator, DNSHealthIndicator, MongooseHealthIndicator,
+  ],
+  exports: [ScraperLoggerService, getScraperProxyFactory(), MicroserviceHealthIndicator, AppHealthIndicator, DNSHealthIndicator, MongooseHealthIndicator,
+  ],
 })
 export class SharedModule {
 

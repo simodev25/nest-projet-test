@@ -7,7 +7,7 @@ export class AnyExceptionFilter implements ExceptionFilter {
     const reply = host.switchToHttp().getResponse();
 
     const status = (error instanceof HttpException) ? error.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-
-    reply.send(error.message);
+console.log('fffff',status)
+    reply.code(200).send(error.message);
   }
 }

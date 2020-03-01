@@ -9,7 +9,8 @@ import { from } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 import { deserialize, serialize } from 'class-transformer';
 import { ScraperRequest } from '../../microservices/scraperRequest';
-import {validator} from '../utils/shared.utils';
+import { validator } from '../utils/shared.utils';
+
 @Injectable()
 export class ScraperLoggerService implements LoggerService {
   private prefix?: string;
@@ -49,7 +50,7 @@ export class ScraperLoggerService implements LoggerService {
         }
         return response$$;
       })).subscribe((response$$$: any) => {
-      this.redisClient.getClient().set(idRequest, serialize(response$$$));
+      this.redisClient.getClient().set(idRequest, serialize(response$$$), 'EX', 60 * 10);
     });
 
     this.logger.info(message$, this.context, idRequest);
