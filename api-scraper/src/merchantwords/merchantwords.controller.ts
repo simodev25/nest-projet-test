@@ -11,8 +11,12 @@ export class MerchantwordsController {
 
   @Get()
   merchantwords() {
+    console.log('in merchantwords')
+    console.log('-----------------------------------')
     const pattern = { cmd: 'merchantwords' };
-    return this.scraperClient.send(pattern, {});
+
+
+    return this.scraperClient.send<any>('merchantwords', 'Hello World');
 
   }
 }
