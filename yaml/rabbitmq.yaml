@@ -1,40 +1,106 @@
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    component: rabbitmq
-  name: rabbitmq
+  name: rmq
 spec:
   ports:
+    - port: 4369
+      name: rabbitmq-epmd
     - port: 5672
-  selector:
-    app: rabbitmq
-    component: rabbitmq
+      name: rabbitmq-main
+    - port: 15672
+      name: rabbitmq-management
+    - port: 25672
+      name: rabbitmq-management-ssl
   type: LoadBalancer
+  selector:
+    app: rmq
 ---
-apiVersion: v1
-kind: ReplicationController
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
-  labels:
-    component: rabbitmq
-  name: rabbitmq
+  name: rmq
 spec:
-  replicas: 1
+  serviceName: rmq
+  replicas: 3
+  volumeClaimTemplates:
+    - metadata:
+        name: rmq
+        annotations:
+          volume.beta.kubernetes.io/storage-class: "standard"
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
   template:
     metadata:
       labels:
-        app: rabbitmq
-        component: rabbitmq
+        app: rmq
     spec:
+      # prevents rmq pods running on the same nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - rmq
+                topologyKey: kubernetes.io/hostname
       containers:
-        - image: rabbitmq
-          name: rabbitmq
+        - name: rmq
+          image: simo25docker/rabbitmq-statefulset
+
+          lifecycle:
+            preStop:
+              exec:
+                command: ["rabbitmqctl", "stop"]
+
+          livenessProbe:
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+            exec:
+              command: ["rabbitmqctl", "node_health_check"]
+
+          readinessProbe:
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 1
+            failureThreshold: 10
+            exec:
+              command: ["rabbitmqctl", "node_health_check"]
+
           ports:
-            - name: http
-              protocol: TCP
-              containerPort: 15672
-            - name: amqp
-              protocol: TCP
-              containerPort: 5672
+            - containerPort: 4369
+            - containerPort: 5672
+            - containerPort: 15672
+            - containerPort: 25672
+
+          volumeMounts:
+            - mountPath: /var/lib/rabbitmq
+              name: rmq
+          env:
+            - name: RABBITMQ_ERLANG_COOKIE
+              value: "MRJFJVJTQUMUXXHHNZZQ"
+            - name: RABBITMQ_ADMIN_PASSWORD
+              value: "simoCloud2020"
+            - name: RABBITMQ_USERNAME
+              value: "scraper"
+            - name: RABBITMQ_PASSWORD
+              value: "scraper-password"
+            - name: RABBITMQ_VHOST
+              value: 'scraper'
+            - name: CLUSTERED
+              value: "true"
+            - name: CLUSTER_WITH
+              value: "rmq-0"
+            - name: RABBITMQ_SERVICE_DOMAIN
+              value: "rmq.default.svc.cluster.local"
+
 
 

@@ -4,6 +4,7 @@ import { ScraperLoggerService } from './logger/loggerService';
 import { createLoggerProviders } from './logger/logger.providers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypegooseModule } from 'nestjs-typegoose';
+import { RedisModule } from 'nestjs-redis';
 
 
 const environment = 'local';
@@ -15,6 +16,15 @@ const environment = 'local';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `./config.${process.env.NODE_ENV || environment}.env`,
+    }),
+    RedisModule.forRootAsync({
+      useFactory: (configService: ConfigService) => {
+        return {
+          url: configService.get('REDIS_URL'),
+        };
+      },
+
+      inject: [ConfigService],
     }),
     TypegooseModule.forRootAsync({
       imports: [ConfigModule],

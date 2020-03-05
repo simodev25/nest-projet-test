@@ -4,7 +4,7 @@ import { ScraperLoggerService } from './loggerService';
 import * as winston from 'winston';
 
 function loggerFactory(logger: ScraperLoggerService, log: any, injectkey: string) {
-  const logger_: ScraperLoggerService = new ScraperLoggerService(logger.config);
+  const logger_: ScraperLoggerService = new ScraperLoggerService(logger.config, logger.redis);
   if (log.prefix) {
     logger_.setPrefix(log.prefix);
   }

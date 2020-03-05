@@ -1,6 +1,6 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { catchError, filter, map, mapTo, max, mergeMap, scan, take, tap, timeout, toArray } from 'rxjs/operators';
-import { concat, from, Observable, of, Subject, Subscription } from 'rxjs';
+import { BadRequestException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { catchError, filter, map, mapTo, mergeMap, scan, tap, timeout, toArray } from 'rxjs/operators';
+import { from, Observable, of, Subject, Subscription } from 'rxjs';
 import { ScraperAmazoneService } from './lib/scraperAmazone.service';
 import { classToPlain, plainToClass } from 'class-transformer';
 import { format } from 'util';
@@ -12,7 +12,8 @@ import { ProductReviews } from './product/productReviews';
 import { Logger } from '../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../shared/logger/loggerService';
 import { MerchantwordsService } from './merchantwords.service';
-import { isNil } from '../shared/utils/shared.utils';
+import { ScraperRequest } from '../microservices/scraperRequest';
+import { error } from 'winston';
 
 class Keywords {
   private counter: number = 0;
@@ -92,7 +93,7 @@ export class ScraperService implements OnModuleInit {
       const keyword = this.keywords.next();
       this.logger.log(` scrape keyword :[${keyword}] start`);
       const start = Date.now();
-      this.scrapeSearchWord$ = this.scrapeSearchWordSync(keyword).subscribe((count$: any) => {
+      this.scrapeSearchWord$ = this.scrapeSearchWordSync(new ScraperRequest(keyword)).subscribe((count$: any) => {
         count = count + count$;
         this.logger.log(`keyword :[${keyword}] number of products processed [${count}]`);
       }, (error => {
@@ -137,7 +138,7 @@ export class ScraperService implements OnModuleInit {
   public scrapeSearchWordLite(searchWord: string): Observable<any> {
     const country: string = 'US';
     const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
-
+    const start = Date.now();
     const scrapeAmazoneSearchWord = this.scraperAmazone
       .scrapeUrlHome(`${baseUrlAmazone}s?k=${searchWord.replace(/\\s/g, '+').trim()}&i=garden`)
       .pipe(
@@ -163,14 +164,17 @@ export class ScraperService implements OnModuleInit {
           return classToPlain(produitClass);
         }),
         toArray(),
+        tap((produitClasss: Product[]) => {
+          this.logger.debug(`send produits SearchWord ${searchWord} count [${produitClasss.length}] in ${Date.now() - start}ms `);
+        })
       );
 
     return scrapeAmazoneSearchWord;
   }
 
-  public scrapeSearchWordAsync(searchWord: string): Observable<any> {
-
-    const scrapeAmazoneSearchWord: Observable<any> = this.scrapeSearchWord(searchWord).pipe(
+  public scrapeSearchWordAsync(scraperRequest: ScraperRequest): Observable<any> {
+    const start = Date.now();
+    const scrapeAmazoneSearchWord: Observable<any> = this.scrapeSearchWord(scraperRequest).pipe(
       tap((produitClass: Product) => {
         this.logger.debug(`saveProduct asin [${produitClass.asin}] in `);
         this.productRepository.saveProduct(produitClass).subscribe();
@@ -179,14 +183,51 @@ export class ScraperService implements OnModuleInit {
         return classToPlain(produitClass);
       }),
       toArray(),
+      tap((produitClasss: Product[]) => {
+        this.logger.log(`send produits SearchWord ${scraperRequest.searchWord} count [${produitClasss.length}] in ${Date.now() - start}ms `);
+      })
     );
 
     return scrapeAmazoneSearchWord;
   }
 
-  public scrapeSearchWordSync(searchWord: string): Observable<number> {
+  public scrapeByAsin(scraperRequest: ScraperRequest): Observable<any> {
+    const start = Date.now();
 
-    const scrapeAmazoneSearchWord: Observable<any> = this.scrapeSearchWord(searchWord).pipe(
+    const country: string = 'US';
+    const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
+    const produitClass: Product = new Product();
+    produitClass.searchWord = scraperRequest.searchWord;
+    produitClass.baseUrl = baseUrlAmazone;
+    produitClass.country = country;
+    produitClass.currency = ScraperHelper.getCurrency(country);
+    produitClass.site = baseUrlAmazone;
+    produitClass.link = `${baseUrlAmazone}/dp/${scraperRequest.searchWord}`;
+    produitClass.asin = scraperRequest.searchWord;
+
+    const scrapeAmazoneSearchWord: Observable<any> = this.getProductDetail(produitClass, baseUrlAmazone, scraperRequest.idRequest).pipe(
+      mergeMap((produitClass$: Product) => this.getProductReviews(produitClass$, scraperRequest.idRequest)),
+      tap((produitClass$: Product) => {
+        produitClass$.title = produitClass$.productDetail.productTitle;
+        this.logger.debug(`saveProduct asin [${produitClass$.asin}] in `);
+        this.productRepository.saveProduct(produitClass$).subscribe();
+      }),
+      map((produitClass$: Product) => {
+        this.logger.log(`send produits SearchWord ${scraperRequest.searchWord} count [1] in ${Date.now() - start}ms `);
+        return classToPlain(produitClass$);
+      }),
+      catchError((error: any) => {
+
+        return of(new NotFoundException(`ASIN with ID [${produitClass.asin}] not found`));
+      }),
+    );
+
+    return scrapeAmazoneSearchWord;
+  }
+
+  public scrapeSearchWordSync(scraperRequest: ScraperRequest): Observable<number> {
+
+    const scrapeAmazoneSearchWord: Observable<any> = this.scrapeSearchWord(scraperRequest).pipe(
       mergeMap((produitClass: Product) => {
 
         this.logger.debug(`saveProduct asin [${produitClass.asin}] in `);
@@ -217,13 +258,13 @@ export class ScraperService implements OnModuleInit {
     return scrapeAmazoneSearchWord;
   }
 
-  private scrapeSearchWord(searchWord: string): Observable<any> {
+  private scrapeSearchWord(scraperRequest: ScraperRequest): Observable<any> {
 
     const country: string = 'US';
     const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
 
     const scrapeAmazoneSearchWord = this.scraperAmazone
-      .scrapeUrlHome(`${baseUrlAmazone}s?k=${searchWord.replace(/\\s/g, '+').trim()}&i=garden`)
+      .scrapeUrlHome(`${baseUrlAmazone}s?k=${scraperRequest.searchWord.replace(/\\s/g, '+').trim()}&i=garden`)
       .pipe(
         mergeMap(products => {
           this.logger.log(`number of products [${products.length}] `);
@@ -232,7 +273,7 @@ export class ScraperService implements OnModuleInit {
         map(produit => {
 
           const produitClass: Product = plainToClass(Product, produit);
-          produitClass.searchWord = searchWord;
+          produitClass.searchWord = scraperRequest.searchWord;
           produitClass.baseUrl = baseUrlAmazone;
           produitClass.country = country;
           produitClass.currency = ScraperHelper.getCurrency(country);
@@ -243,48 +284,53 @@ export class ScraperService implements OnModuleInit {
           filter(Boolean),
           mapTo(produitClass),
         )),
-        mergeMap((produitClass: Product) => {
-          const start = Date.now();
-          this.logger.debug(`find product asin [${produitClass.asin}]`);
-          return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
-            map((productDetail) => plainToClass(ProductDetail, productDetail)),
-            mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
-              filter(Boolean),
-              mapTo(productDetail),
-            )),
+        mergeMap((produitClass: Product) => this.getProductDetail(produitClass, baseUrlAmazone, scraperRequest.idRequest)),
 
-            map((productDetail: ProductDetail) => {
-
-              this.logger.debug(`find productDetail asin [${produitClass.asin}]  in ${Date.now() - start}ms`);
-              produitClass.productDetail = productDetail;
-              return produitClass;
-            })
-
-            ,
-          );
-
-        }),
-
-        mergeMap((produitClass: Product) => {
-          return of(produitClass.productDetail.linkReviews).pipe(
-            filter((linkReviews) => linkReviews != null),
-            mergeMap((linkReviews) => {
-              const start = Date.now();
-              return this.scraperAmazone.productReviews(linkReviews).pipe(
-                map((productReviews) => plainToClass(ProductReviews, productReviews)),
-                map((productReviews: ProductReviews) => {
-                  // produitClass.productDetail = productReviews;
-                  this.logger.debug(`find productReviews asin [${produitClass.asin}] in ${Date.now() - start}ms`);
-                  produitClass.productDetail.productReviews = productReviews;
-                  return produitClass;
-                }),
-              );
-            }),
-          );
-        }),
+        mergeMap((produitClass: Product) => this.getProductReviews(produitClass, scraperRequest.idRequest),
+        ),
       );
 
     return scrapeAmazoneSearchWord;
   }
+
+  private getProductDetail = (produitClass: Product, baseUrlAmazone: string, idRequest: string = null): Observable<Product> => {
+    const start = Date.now();
+    this.logger.log(`find product asin [${produitClass.asin}]`, idRequest);
+
+    return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
+      map((productDetail) => plainToClass(ProductDetail, productDetail)),
+      mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
+        filter(Boolean),
+        mapTo(productDetail),
+      )),
+
+      map((productDetail: ProductDetail) => {
+
+        this.logger.log(`find productDetail asin [${produitClass.asin}]  in ${Date.now() - start}ms`, idRequest);
+        produitClass.productDetail = productDetail;
+        return produitClass;
+      })
+
+      ,
+    );
+
+  };
+
+  private getProductReviews = (produitClass: Product, idRequest: string = null): Observable<Product> => {
+    return of(produitClass.productDetail.linkReviews).pipe(
+      filter((linkReviews) => linkReviews != null),
+      mergeMap((linkReviews) => {
+        const start = Date.now();
+        return this.scraperAmazone.productReviews(linkReviews).pipe(
+          map((productReviews) => plainToClass(ProductReviews, productReviews)),
+          map((productReviews: ProductReviews) => {
+            this.logger.log(`find productReviews asin [${produitClass.asin}] in ${Date.now() - start}ms`, idRequest);
+            produitClass.productDetail.productReviews = productReviews;
+            return produitClass;
+          }),
+        );
+      }),
+    );
+  };
 
 }

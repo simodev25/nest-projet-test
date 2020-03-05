@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { Observable, Subject, throwError, timer } from 'rxjs';
 
@@ -117,14 +117,15 @@ export class ProxyService {
     });
     return torRequest.pipe(
       tap((res: any) => {
-        if (ScraperHelper.isCaptcha(res)) {
-          //  this.torSession$.next(this.proxy);
+        if (ScraperHelper.isPageNotFound(res)) {
+          throw new BadRequestException();
+        } else if (ScraperHelper.isCaptcha(res)) {
           throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
         }
         return res;
       }),
       retryWhen(this.scrapeRetryStrategy({
-        maxRetryAttempts: 10,
+        maxRetryAttempts: 20,
         scalingDuration: this.renewTorSessionTimeout,
       })),
     );
@@ -166,14 +167,16 @@ export class ProxyService {
     });
     return torRequest.pipe(
       tap((res: any) => {
-        if (ScraperHelper.isCaptcha(res)) {
+        if (ScraperHelper.isPageNotFound(res)) {
+          throw new BadRequestException();
+        } else if (ScraperHelper.isCaptcha(res)) {
           //  this.torSession$.next(this.proxy);
           throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
         }
         return res;
       }),
       retryWhen(this.scrapeRetryStrategy({
-        maxRetryAttempts: 10,
+        maxRetryAttempts: 20,
         scalingDuration: this.renewTorSessionTimeout,
       })),
     );
@@ -194,12 +197,17 @@ export class ProxyService {
   ) => (attempts: Observable<any>) => {
     return attempts.pipe(
       mergeMap((error: any, i) => {
-
+        if (error instanceof BadRequestException) {
+          return throwError(error);
+        }
         const retryAttempt = i + 1;
         if (retryAttempt > maxRetryAttempts) {
           return throwError(error);
         }
         if (error instanceof Exception) {
+          if (error.getStatus() === ScraperHelper.EXIT_CODES.PAGE_NOT_FOUND) {
+            return throwError(error);
+          }
           // if maximum number of retries have been met
           // or response is a status code we don't wish to retry, throw error
           if (error.getStatus() === ScraperHelper.EXIT_CODES.ERROR_PROXY_EMPTY) {

@@ -1,22 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ClientProxyFactory, ClientsModule, Transport } from '@nestjs/microservices';
 import { MerchantwordsController } from './merchantwords.controller';
+import { SharedModule } from '../shared/shared.module';
 
 @Module({
   imports: [
-    ClientsModule.register([
-    {
-      name: 'ScraperProxyFactory',
-      transport: Transport.RMQ,
-      options: {
-        urls: ['amqp://guest:guest@rabbitmq:5672'],
-        queue: 'scraper_service',
-        queueOptions: {
-          durable: false,
-        },
-      },
-    },
-  ])],
+    SharedModule.forRoot(),
+   ],
   controllers: [MerchantwordsController],
   providers: [],
 })

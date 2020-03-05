@@ -4,11 +4,9 @@ import { ScraperService } from './scraper/scraper.service';
 import { MerchantwordsService } from './scraper/merchantwords.service';
 import { MicroserviceModule } from './microservices/microservice.module';
 import { Transport } from '@nestjs/microservices';
-import { Serializer } from '@nestjs/common/interfaces/microservices/serializer.interface';
-import { Deserializer } from '@nestjs/common/interfaces/microservices/deserializer.interface';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-
 
   switch (process.env.JOB) {
 
@@ -25,22 +23,21 @@ async function bootstrap() {
       break;
 
     case 'scrapeMicroservice':
-      const scraperMicroservice = await NestFactory.createMicroservice(MicroserviceModule, {
-          transport: Transport.RMQ,
-          options: {
-            urls: ['amqp://guest:guest@rabbitmq:5672'],
-            queue: 'scraper_service',
-            queueOptions: {
-              durable: false,
-            },
+      const scraperMicroservice = await NestFactory.create(MicroserviceModule);
+      const guestUrls = scraperMicroservice.get(ConfigService).get<string>('AMQP_URL').split(',');
+      scraperMicroservice.connectMicroservice({
+        transport: Transport.RMQ,
+        options: {
+          urls: guestUrls,
+          queue: 'scraper_service',
+          queueOptions: {
+            durable: false,
           },
-        })
-      ;
-
-      await scraperMicroservice.listen(() => {
-
-        console.log('microservice successfully started');
+        },
       });
+      await scraperMicroservice.startAllMicroservicesAsync();
+
+
       break;
 
   }
