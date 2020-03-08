@@ -1,0 +1,10 @@
+
+export enum StatusResponse {
+  STARTED = 'STARTED',
+  FAILED = 'FAILED',
+  COMPLETED = 'COMPLETED',
+  ABANDONED = 'ABANDONED',
+  STOPPED = 'STOPPED',
+  UNKNOWN = 'UNKNOWN'
+
+}

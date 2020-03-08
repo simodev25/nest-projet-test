@@ -41,7 +41,7 @@ spec:
     - port: 16379
       targetPort: 16379
       name: gossip
-  type: LoadBalancer
+  #type: LoadBalancer
   selector:
     app: redis
 

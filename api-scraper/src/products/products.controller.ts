@@ -1,10 +1,21 @@
-import { BadRequestException, Controller, Get, Header, Param, Req, Res } from '@nestjs/common';
+import { Controller, Get, Header, HttpStatus, Param, Req, Res, UseInterceptors } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Response } from 'express';
 import { FindIdRequest } from '../dtos/findIdRequest';
 import { FindAsin } from '../dtos/findAsin';
+import { CacheInterceptor } from '../shared/cache/cache.interceptor';
+import { Observable } from 'rxjs';
+import { FindSearchWord } from '../dtos/findsearchWord';
+import { Product } from './product/product';
+import { ApiCreatedResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiResponseDto } from './response/api.response.dto';
+import { ProductLow } from './product/product.low';
+
 
 @Controller('/products')
+@ApiResponse({ status: HttpStatus.OK, description: 'ok' })
+@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden' })
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
+@ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not Found' })
 export class ProductsController {
 
   constructor(private readonly productsService: ProductsService) {
@@ -12,71 +23,47 @@ export class ProductsController {
 
   }
 
-  @Get('searchword-low/:searchWord')
-  @Header('Content-Type', 'application/json; charset=utf-8')
-  scrapeSearchWordLite(@Req() req, @Param('searchWord') searchWord: string) {
+  @Get('/searchword-low/:searchWord')
+  @UseInterceptors(CacheInterceptor)
+  @ApiTags('products')
+  scrapeSearchWordLite(@Req() req, @Param() params: FindSearchWord): Observable<ProductLow[]> {
 
-    return this.productsService.scrapeSearchWordLite(searchWord);
 
+    return this.productsService.scrapeSearchWordLite(params.searchWord);
   }
 
   @Get('/searchword/:searchWord')
   @Header('Content-Type', 'application/json; charset=utf-8')
-  scrapeSearchWordAsync(@Res() reply: Response, @Req() req, @Param('searchWord') searchWord: string): any {
+  @ApiTags('products')
+  scrapeSearchWordAsync(@Req() req, @Param() params: FindSearchWord): Observable<ApiResponseDto> {
 
-    this.productsService.scrapeSearchWordAsync(searchWord).subscribe((response$: any) => {
-
-        reply.send(response$);
-
-      }, error => {
-        reply.send(error);
-      },
-    );
-
+    return this.productsService.scrapeSearchWordAsync(params.searchWord);
   }
 
   @Get('/searchword-responses/:idRequest')
   @Header('Content-Type', 'application/json; charset=utf-8')
-  scrapeSearchWordAsyncResponse(@Res() reply: Response, @Req() req, @Param() params: FindIdRequest) {
+  @ApiTags('products')
+  scrapeSearchWordAsyncResponse(@Req() req, @Param() params: FindIdRequest): Observable<ApiResponseDto> {
 
-    this.productsService.scrapeResponse(params.idRequest).subscribe((response$: any) => {
-
-        reply.send(response$);
-
-      }, error => {
-        reply.send(error);
-      },
-    );
+    return this.productsService.scrapeResponse(params.idRequest);
 
   }
 
   @Get('/asin/:asin')
   @Header('Content-Type', 'application/json; charset=utf-8')
-  scrapeByAsin(@Res() reply: Response, @Req() req, @Param() params: FindAsin): any {
+  @ApiTags('products')
+  scrapeByAsin(@Req() req, @Param() params: FindAsin): Observable<ApiResponseDto> {
 
-    this.productsService.scrapeByAsin(params.asin).subscribe((response$: any) => {
-
-        reply.send(response$);
-
-      }, error => {
-        reply.send(error);
-      },
-    );
+    return this.productsService.scrapeByAsin(params.asin);
 
   }
 
   @Get('/asin-responses/:idRequest')
   @Header('Content-Type', 'application/json; charset=utf-8')
-  scrapeByAsinResponse(@Res() reply: Response, @Req() req, @Param() params: FindIdRequest) {
+  @ApiTags('products')
+  scrapeByAsinResponse(@Req() req, @Param() params: FindIdRequest): Observable<ApiResponseDto> {
 
-    this.productsService.scrapeResponse(params.idRequest).subscribe((response$: any) => {
-
-        reply.send(response$);
-
-      }, error => {
-        reply.send(error);
-      },
-    );
+    return this.productsService.scrapeResponse(params.idRequest);
 
   }
 

@@ -1,14 +1,19 @@
 import { HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ResponseHelper } from './response/response.helper';
-import { ScraperRequest } from './response/scraperRequest';
+
 
 import { deserialize, serialize } from 'class-transformer';
-import { from, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { Product } from './product/product';
 import { validator } from '../shared/utils/shared.utils';
 import { ClusterRedisService } from '../shared/services/cluster.redis.service';
+
+import { ApiResponseDto } from './response/api.response.dto';
+import { ApiRequestDto } from './response/api.request.dto';
+import { StatusResponse } from '../shared/enums/statusResponse';
+import { ApiRequestException } from '../shared/Exception/api.request.exception';
 
 
 @Injectable()
@@ -28,13 +33,13 @@ export class ProductsService {
 
 
     return from(this.redisClient.getClient().get(idRequest)).pipe(map((response$: any) => {
-      console.log(response$);
+
       if (response$ == null) {
         throw new NotFoundException(`IdRequest [${idRequest}] not found`);
       }
       let response$$: any = deserialize(Product, response$);
       if (!validator.isEmpty(response$$?.idRequest)) {
-        response$$ = deserialize(ScraperRequest, response$);
+        response$$ = deserialize(ApiRequestDto, response$);
         response$$.initRequestAt();
       }
       return response$$;
@@ -44,6 +49,7 @@ export class ProductsService {
 
   scrapeSearchWordLite(searchWord: string) {
     const pattern = { cmd: 'scrapeSearchWordLite' };
+
     return this.scraperClient.send(pattern, searchWord);
 
   }
@@ -51,7 +57,7 @@ export class ProductsService {
 
   scrapeSearchWordAsync(searchWord: string) {
     const pattern = { cmd: 'searchword-responses' };
-    const generateRequest: ScraperRequest = this.responseHelper.generateResponse('searchword-responses', searchWord);
+    const generateRequest: ApiRequestDto = this.responseHelper.generateResponse('searchword-responses', searchWord);
     return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
         if (validator.isNotEmpty(exist)) {
@@ -60,14 +66,22 @@ export class ProductsService {
         this.send(pattern, generateRequest);
         return of(generateRequest);
       }),
+      map((products: Product[] | ApiRequestDto) => {
+        const apiResponse: ApiResponseDto = new ApiResponseDto(products);
+        if (apiResponse.status === StatusResponse.FAILED) {
+          throw new ApiRequestException(apiResponse, HttpStatus.NOT_FOUND);
+        }
+        return apiResponse;
+
+      }),
     );
   }
 
 
-  scrapeByAsin(asin: string) {
+  scrapeByAsin(asin: string): Observable<ApiResponseDto> {
     const pattern = { cmd: 'asin-responses' };
 
-    const generateRequest: ScraperRequest = this.responseHelper.generateResponse('asin-responses', asin);
+    const generateRequest: ApiRequestDto = this.responseHelper.generateResponse('asin-responses', asin);
     return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
         if (validator.isNotEmpty(exist)) {
@@ -76,26 +90,35 @@ export class ProductsService {
         this.send(pattern, generateRequest);
         return of(generateRequest);
       }),
+      map((products: Product[] | ApiRequestDto) => {
+        const apiResponse: ApiResponseDto = new ApiResponseDto(products);
+        if (apiResponse.status === StatusResponse.FAILED) {
+          throw new ApiRequestException(apiResponse, HttpStatus.NOT_FOUND);
+        }
+        return apiResponse;
+
+      }),
     );
 
 
   }
 
-  private send(pattern: any, generateResponse: ScraperRequest) {
-    this.redisClient.getClient().set(generateResponse.getIdRequest(), serialize(generateResponse), 'EX', 60 * 10);
+  private send(pattern: any, generateResponse: ApiRequestDto) {
+    this.redisClient.getClient().set(generateResponse.idRequest, serialize(generateResponse), 'EX', 60 * 10);
 
     this.scraperClient.send(pattern, generateResponse).pipe(
       map((data: any) => {
 
-        if (data.status === HttpStatus.BAD_REQUEST) {
-          throw new NotFoundException(data.response);
+        if (data[0]?.status === HttpStatus.BAD_REQUEST || data[0]?.status === HttpStatus.NOT_FOUND) {
+          throw new NotFoundException(data[0].response.message);
         }
         return data;
       }),
     ).subscribe((data) => {
-      this.redisClient.getClient().set(generateResponse.getIdRequest(), serialize(data), 'EX', 60 * 60 * 24);
+      this.redisClient.getClient().set(generateResponse.idRequest, serialize(data), 'EX', 60 * 60 * 24);
     }, error => {
-      this.redisClient.getClient().set(generateResponse.getIdRequest(), serialize(error), 'EX', 60 * 5);
+
+      this.redisClient.getClient().set(generateResponse.idRequest, serialize(error.message), 'EX', 60 * 5);
 
     });
 

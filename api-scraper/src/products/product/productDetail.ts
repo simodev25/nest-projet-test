@@ -3,6 +3,7 @@ import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { validator } from '../../shared/utils/shared.utils';
 import { IsNotEmpty, validate } from 'class-validator';
 import { ProductReviews } from './productReviews';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductDetail {
   @Exclude()
@@ -48,6 +49,7 @@ export class ProductDetail {
   private _productReviews: ProductReviews;
 
   @Expose()
+  @ApiProperty()
   get productReviews(): ProductReviews {
     return this._productReviews;
   }
@@ -57,6 +59,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get rating(): string {
     return this._rating;
@@ -67,6 +70,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get linkReviews(): string {
     return this._linkReviews;
   }
@@ -76,6 +80,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get categorys(): string[] {
     return this._categorys;
   }
@@ -86,6 +91,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get descriptions(): string[] {
     return this._descriptions;
   }
@@ -105,6 +111,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get link(): string {
     return this._link;
   }
@@ -116,6 +123,7 @@ export class ProductDetail {
 
   @Expose()
   @IsNotEmpty()
+  @ApiProperty()
   get manufacturer(): string {
     return this._manufacturer;
   }
@@ -125,6 +133,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get productTitle(): string {
     return this._productTitle;
   }
@@ -134,6 +143,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get customerRatings(): string {
     return this._customerRatings;
   }
@@ -143,6 +153,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get answeredQuestions(): string {
     return this._answeredQuestions;
   }
@@ -152,6 +163,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get crossedprice(): string {
     return this._crossedprice;
   }
@@ -162,6 +174,7 @@ export class ProductDetail {
 
   @Expose()
   @IsNotEmpty()
+  @ApiProperty()
   get price(): string {
     if (validator.isEmpty(this._price)) {
       this._price = this.priceMin;
@@ -174,6 +187,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get price01(): string {
     return this._price01;
   }
@@ -183,6 +197,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get price02(): string {
     return this._price02;
   }
@@ -193,6 +208,7 @@ export class ProductDetail {
 
   @Expose()
   @IsNotEmpty()
+  @ApiProperty()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get priceMin(): string {
     if (validator.isNotEmpty(this._price) && this._price.split('-').length > 0) {
@@ -213,6 +229,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get priceMax(): string {
     if (validator.isNotEmpty(this.price) && this.price.split('-').length > 1) {
@@ -228,6 +245,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   get images(): string[] {
     return this._images;
   }
@@ -237,6 +255,7 @@ export class ProductDetail {
   }
 
   @Expose()
+  @ApiProperty()
   @Type(() => ChildProduct)
   get childProduct(): ChildProduct[] {
     return this._childProduct;

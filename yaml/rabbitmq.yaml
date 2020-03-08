@@ -12,15 +12,18 @@ spec:
       name: rabbitmq-management
     - port: 25672
       name: rabbitmq-management-ssl
-  type: LoadBalancer
+ # type: LoadBalancer
   selector:
     app: rmq
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: rmq
 spec:
+  selector:
+    matchLabels:
+      app: rmq
   serviceName: rmq
   replicas: 3
   volumeClaimTemplates:

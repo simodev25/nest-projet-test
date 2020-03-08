@@ -5,15 +5,8 @@ import { createLoggerProviders } from './logger/logger.providers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getScraperProxyFactory } from './factorys/scraper.factory';
 
-import {
-  DNSHealthIndicator,
-  MicroserviceHealthIndicator,
-  MongooseHealthIndicator,
-  TerminusModule,
-} from '@nestjs/terminus';
-import { TerminusOptionsService } from './health/terminus.options.service';
+import { DNSHealthIndicator, MicroserviceHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus';
 import { AppHealthIndicator } from './health/app.health.Indicator';
-import { ClusterRedisService } from './services/cluster.redis.service';
 
 
 const environment = 'local';

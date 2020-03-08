@@ -1,15 +1,22 @@
 import { stringToHashCode } from '../../shared/utils/shared.utils';
 import { RequestMethod } from '../../shared/enums/response';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class ScraperRequest {
-
+export class ApiRequestDto {
+  @ApiProperty()
   idRequest: string;
+  @ApiProperty()
   createdAt: string;
+  @ApiProperty()
   lastRequestAt: string;
+  @ApiProperty()
   searchWord: string;
+  @ApiProperty()
   link: string;
+  @ApiProperty()
   methode: RequestMethod;
-  log: string[];
+  @ApiProperty()
+  logs: string[];
 
   constructor(path: string, searchWord: string) {
     this.createdAt = new Date().toISOString();

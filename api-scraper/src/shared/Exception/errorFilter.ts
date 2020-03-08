@@ -1,12 +1,6 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-} from "@nestjs/common";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { ServerResponse, IncomingMessage } from "http";
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { IncomingMessage, ServerResponse } from 'http';
 
 
 @Catch(Error)

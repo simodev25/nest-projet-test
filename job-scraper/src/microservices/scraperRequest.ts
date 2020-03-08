@@ -6,7 +6,7 @@ export class ScraperRequest {
   searchWord: string;
   link: string;
   methode: any;
-  log: string[];
+  logs: string[];
 
   constructor(searchWord: string) {
     this.createdAt = new Date().toISOString();

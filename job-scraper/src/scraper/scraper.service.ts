@@ -135,7 +135,7 @@ export class ScraperService implements OnModuleInit {
 
   }
 
-  public scrapeSearchWordLite(searchWord: string): Observable<any> {
+  public scrapeSearchWordLite(searchWord: string): Observable<Product[]> {
     const country: string = 'US';
     const baseUrlAmazone: string = ScraperHelper.getBaseUrlAmazone(country);
     const start = Date.now();
@@ -166,7 +166,7 @@ export class ScraperService implements OnModuleInit {
         toArray(),
         tap((produitClasss: Product[]) => {
           this.logger.debug(`send produits SearchWord ${searchWord} count [${produitClasss.length}] in ${Date.now() - start}ms `);
-        })
+        }),
       );
 
     return scrapeAmazoneSearchWord;
@@ -177,7 +177,11 @@ export class ScraperService implements OnModuleInit {
     const scrapeAmazoneSearchWord: Observable<any> = this.scrapeSearchWord(scraperRequest).pipe(
       tap((produitClass: Product) => {
         this.logger.debug(`saveProduct asin [${produitClass.asin}] in `);
-        this.productRepository.saveProduct(produitClass).subscribe();
+        this.productRepository.saveProduct(produitClass).subscribe(() => {
+
+        }, error => {
+          this.logger.error(`saveProduct errr [${error}] ASIN [${produitClass.asin}] link [${produitClass.link}] `);
+        });
       }),
       map((produitClass: Product) => {
         return classToPlain(produitClass);
@@ -185,7 +189,7 @@ export class ScraperService implements OnModuleInit {
       toArray(),
       tap((produitClasss: Product[]) => {
         this.logger.log(`send produits SearchWord ${scraperRequest.searchWord} count [${produitClasss.length}] in ${Date.now() - start}ms `);
-      })
+      }),
     );
 
     return scrapeAmazoneSearchWord;
@@ -210,7 +214,11 @@ export class ScraperService implements OnModuleInit {
       tap((produitClass$: Product) => {
         produitClass$.title = produitClass$.productDetail.productTitle;
         this.logger.debug(`saveProduct asin [${produitClass$.asin}] in `);
-        this.productRepository.saveProduct(produitClass$).subscribe();
+        this.productRepository.saveProduct(produitClass$).subscribe(() => {
+
+        }, error => {
+          this.logger.error(`saveProduct errr [${error}] ASIN [${produitClass.asin}] link [${produitClass.link}] `);
+        });
       }),
       map((produitClass$: Product) => {
         this.logger.log(`send produits SearchWord ${scraperRequest.searchWord} count [1] in ${Date.now() - start}ms `);
@@ -220,6 +228,7 @@ export class ScraperService implements OnModuleInit {
 
         return of(new NotFoundException(`ASIN with ID [${produitClass.asin}] not found`));
       }),
+      toArray(),
     );
 
     return scrapeAmazoneSearchWord;
@@ -300,7 +309,7 @@ export class ScraperService implements OnModuleInit {
     return this.scraperAmazone.productDetail(produitClass.link, baseUrlAmazone).pipe(
       map((productDetail) => plainToClass(ProductDetail, productDetail)),
       mergeMap((productDetail: ProductDetail) => from(productDetail.isValideProduct()).pipe(
-        filter(Boolean),
+        // filter(Boolean),
         mapTo(productDetail),
       )),
 

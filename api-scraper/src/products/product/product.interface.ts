@@ -1,14 +1,22 @@
-export interface IimageProduct {
+import { ApiProperty } from '@nestjs/swagger';
+
+export class ImageProduct {
+  @ApiProperty()
   image: string;
+  @ApiProperty()
   size: string;
 }
 
-export interface IratingProduct {
+export class RatingProduct {
+  @ApiProperty()
   name: string;
+  @ApiProperty()
   value: string;
 }
 
-export interface IreviewProduct {
+export class ReviewProduct {
+  @ApiProperty()
   date: Date;
+  @ApiProperty()
   text: string;
 }
