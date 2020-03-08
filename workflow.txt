@@ -32,4 +32,4 @@ jobs:
         name: simo25docker/replset-scripte
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
-        workdir: setup   
+        workdir: setup

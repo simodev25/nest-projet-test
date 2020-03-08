@@ -37,7 +37,7 @@ export class ClusterRedisService {
     ];
 
     this.cluster = new Redis.Cluster(servers, {
-      scaleReads: 'all',
+
     });
   }
 
