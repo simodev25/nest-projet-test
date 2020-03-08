@@ -47,7 +47,7 @@ export class ClusterRedisService {
     return this.cluster;
   }
 
-  public getClient(): Cluster {
+  public getClient(): any {
 
     return this.getCluster();
 

@@ -27,7 +27,7 @@ export class ProductsService {
   scrapeResponse(idRequest: string) {
 
 
-    return from(this.redisClient.getCluster().get(idRequest)).pipe(map((response$: any) => {
+    return from(this.redisClient.getClient().get(idRequest)).pipe(map((response$: any) => {
       console.log(response$);
       if (response$ == null) {
         throw new NotFoundException(`IdRequest [${idRequest}] not found`);
@@ -52,7 +52,7 @@ export class ProductsService {
   scrapeSearchWordAsync(searchWord: string) {
     const pattern = { cmd: 'searchword-responses' };
     const generateRequest: ScraperRequest = this.responseHelper.generateResponse('searchword-responses', searchWord);
-    return from(this.redisClient.getCluster().get(generateRequest.idRequest)).pipe(
+    return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
         if (validator.isNotEmpty(exist)) {
           return this.scrapeResponse(generateRequest.idRequest);
@@ -66,9 +66,9 @@ export class ProductsService {
 
   scrapeByAsin(asin: string) {
     const pattern = { cmd: 'asin-responses' };
-    this.redisClient.getCluster();
+
     const generateRequest: ScraperRequest = this.responseHelper.generateResponse('asin-responses', asin);
-    return from(this.redisClient.getCluster().get(generateRequest.idRequest)).pipe(
+    return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
         if (validator.isNotEmpty(exist)) {
           return this.scrapeResponse(generateRequest.idRequest);
@@ -82,7 +82,7 @@ export class ProductsService {
   }
 
   private send(pattern: any, generateResponse: ScraperRequest) {
-    this.redisClient.getCluster().set(generateResponse.getIdRequest(), serialize(generateResponse), 'EX', 60 * 10);
+    this.redisClient.getClient().set(generateResponse.getIdRequest(), serialize(generateResponse), 'EX', 60 * 10);
 
     this.scraperClient.send(pattern, generateResponse).pipe(
       map((data: any) => {
@@ -93,9 +93,9 @@ export class ProductsService {
         return data;
       }),
     ).subscribe((data) => {
-      this.redisClient.getCluster().set(generateResponse.getIdRequest(), serialize(data), 'EX', 60 * 60 * 24);
+      this.redisClient.getClient().set(generateResponse.getIdRequest(), serialize(data), 'EX', 60 * 60 * 24);
     }, error => {
-      this.redisClient.getCluster().set(generateResponse.getIdRequest(), serialize(error), 'EX', 60 * 5);
+      this.redisClient.getClient().set(generateResponse.getIdRequest(), serialize(error), 'EX', 60 * 5);
 
     });
 

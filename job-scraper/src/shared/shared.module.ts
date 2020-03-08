@@ -5,6 +5,7 @@ import { createLoggerProviders } from './logger/logger.providers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { RedisModule } from 'nestjs-redis';
+import { ClusterRedisService } from './services/cluster.redis.service';
 
 
 const environment = 'local';
@@ -53,8 +54,8 @@ export class SharedModule {
 
     return {
       module: SharedModule,
-      providers: [ScraperLoggerService, ...prefixedLoggerProviders, ConfigService],
-      exports: [ScraperLoggerService, ...prefixedLoggerProviders, ConfigService],
+      providers: [ScraperLoggerService, ...prefixedLoggerProviders, ConfigService, ClusterRedisService],
+      exports: [ScraperLoggerService, ...prefixedLoggerProviders, ConfigService, ClusterRedisService],
     };
   }
 }

@@ -10,6 +10,7 @@ import { filter, map, tap } from 'rxjs/operators';
 import { deserialize, serialize } from 'class-transformer';
 import { ScraperRequest } from '../../microservices/scraperRequest';
 import { validator } from '../utils/shared.utils';
+import { ClusterRedisService } from '../services/cluster.redis.service';
 
 @Injectable()
 export class ScraperLoggerService implements LoggerService {
@@ -21,7 +22,7 @@ export class ScraperLoggerService implements LoggerService {
   private readonly prettyError = new PrettyError();
 
   constructor(private readonly configService: ConfigService,
-              private readonly redisClient: RedisService) {
+              private readonly redisClient: ClusterRedisService) {
 
   }
 
