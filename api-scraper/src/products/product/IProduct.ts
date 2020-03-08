@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { IimageProduct } from './product.interface';
+import { ImageProduct } from './product.interface';
 import { ProductDetail } from './productDetail';
 
 export interface IProduct {

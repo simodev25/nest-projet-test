@@ -8,6 +8,7 @@ import { ScraperLoggerService } from '../shared/logger/loggerService';
 import { Merchantwords } from '../scraper/product/merchantwords';
 import { ScraperService } from '../scraper/scraper.service';
 import { ScraperRequest } from './scraperRequest';
+import { Product } from '../scraper/product/product';
 
 @Controller()
 export class ProduitsController {
@@ -22,7 +23,7 @@ export class ProduitsController {
 
 
   @MessagePattern({ cmd: 'scrapeSearchWordLite' })
-  scrapeSearchWordLite(searchWord: string): Observable<Merchantwords[]> {
+  scrapeSearchWordLite(searchWord: string): Observable<Product[]> {
     return this.scraperService.scrapeSearchWordLite(searchWord);
   }
 
@@ -32,7 +33,7 @@ export class ProduitsController {
   }
 
   @MessagePattern({ cmd: 'asin-responses' })
-  scrapeByAsin(@Payload() scraperRequest: ScraperRequest, @Ctx() context: RmqContext): Observable<Merchantwords[]> {
+  scrapeByAsin(@Payload() scraperRequest: ScraperRequest, @Ctx() context: RmqContext): Observable<Product[]> {
 
     return this.scraperService.scrapeByAsin(scraperRequest);
   }

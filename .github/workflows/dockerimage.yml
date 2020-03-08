@@ -1,24 +1,35 @@
 name: Build and Publish Docker
-on: 
+on:
     # Trigger the workflow on push or pull request,
   # but only for the master branch
   push:
     branches:
       - master
   # Also trigger on page_build, as well as release created events
-    
+
 jobs:
   build:
     runs-on: [ubuntu-latest]
     steps:
     - uses: actions/checkout@master
+    - name: Publish job scraper
+      uses: elgohr/Publish-Docker-Github-Action@2.12
+      with:
+        name: simo25docker/job-scraper
+        username: ${{ secrets.LOGIN_DOCKER }}
+        password: ${{ secrets.PASSWORD_DOCKER }}
+        workdir: job-scraper
     - name: Publish api scraper
       uses: elgohr/Publish-Docker-Github-Action@2.12
       with:
         name: simo25docker/api-scraper
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
-        workdir: api-scraper    
-
-
-
+        workdir: api-scraper
+    - name: Publish replSet Scripte
+      uses: elgohr/Publish-Docker-Github-Action@2.12
+      with:
+        name: simo25docker/replset-scripte
+        username: ${{ secrets.LOGIN_DOCKER }}
+        password: ${{ secrets.PASSWORD_DOCKER }}
+        workdir: setup

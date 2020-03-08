@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IratingProduct, IreviewProduct } from './product.interface';
+import { RatingProduct, ReviewProduct } from './product.interface';
+import { ApiProperty } from '@nestjs/swagger';
 @Exclude()
 export class ProductReviews {
 
@@ -8,13 +9,13 @@ export class ProductReviews {
   @Exclude()
   private _rating: string;
   @Exclude()
-  private _ratings: IratingProduct[];
+  private _ratings: RatingProduct[];
   @Exclude()
-  private _topCritical: IreviewProduct;
+  private _topCritical: ReviewProduct;
   @Exclude()
-  private _topPositive: IreviewProduct;
+  private _topPositive: ReviewProduct;
   @Exclude()
-  private _reviewsContent: IreviewProduct[];
+  private _reviewsContent: ReviewProduct[];
   @Expose()
   get reviews(): string {
     return this._reviews;
@@ -24,6 +25,7 @@ export class ProductReviews {
     this._reviews = value;
   }
   @Expose()
+  @ApiProperty()
   get rating(): string {
     return this._rating;
   }
@@ -32,35 +34,39 @@ export class ProductReviews {
     this._rating = value;
   }
   @Expose()
-  get ratings(): IratingProduct[] {
+  @ApiProperty()
+  get ratings(): RatingProduct[] {
     return this._ratings;
   }
 
-  set ratings(value: IratingProduct[]) {
+  set ratings(value: RatingProduct[]) {
     this._ratings = value;
   }
   @Expose()
-  get topCritical(): IreviewProduct {
+  @ApiProperty()
+  get topCritical(): ReviewProduct {
     return this._topCritical;
   }
 
-  set topCritical(value: IreviewProduct) {
+  set topCritical(value: ReviewProduct) {
     this._topCritical = value;
   }
   @Expose()
-  get topPositive(): IreviewProduct {
+  @ApiProperty()
+  get topPositive(): ReviewProduct {
     return this._topPositive;
   }
 
-  set topPositive(value: IreviewProduct) {
+  set topPositive(value: ReviewProduct) {
     this._topPositive = value;
   }
   @Expose()
-  get reviewsContent(): IreviewProduct[] {
+  @ApiProperty()
+  get reviewsContent(): ReviewProduct[] {
     return this._reviewsContent;
   }
 
-  set reviewsContent(value: IreviewProduct[]) {
+  set reviewsContent(value: ReviewProduct[]) {
     this._reviewsContent = value;
   }
 }

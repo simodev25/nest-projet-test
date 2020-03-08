@@ -1,12 +1,12 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class FindIdRequest {
+export class FindSearchWord {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
-    description: 'idRequest in the link ',
+    description: 'Search word',
     type: String,
   })
-  idRequest: string;
+  searchWord: string;
 }

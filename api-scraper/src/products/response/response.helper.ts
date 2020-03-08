@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { ScraperRequest } from './scraperRequest';
+import { ApiRequestDto } from './api.request.dto';
+
 
 @Injectable()
 export class ResponseHelper {
 
 
-  generateResponse(path: string, searchWord: string): ScraperRequest {
+  generateResponse(path: string, searchWord: string): ApiRequestDto {
 
-    const response: ScraperRequest = new ScraperRequest(path, searchWord);
+    const response: ApiRequestDto = new ApiRequestDto(path, searchWord);
     return response;
   }
 }

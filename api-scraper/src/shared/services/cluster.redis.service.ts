@@ -47,9 +47,9 @@ export class ClusterRedisService {
     return this.cluster;
   }
 
-  public getClient(): Cluster {
+  public getClient(): Cluster | Redis.Redis {
 
-    return this.getCluster();
+    return process.env.NODE_ENV === 'production' ? this.getCluster() : this.redisService.getClient();
 
   }
 

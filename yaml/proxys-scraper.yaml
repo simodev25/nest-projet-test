@@ -5,7 +5,7 @@ metadata:
   labels:
     service-name: scraper-torproxy
 spec:
-  replicas: 10
+  replicas: 4
   selector:
     matchLabels:
       service-name: scraper-torproxy
@@ -18,9 +18,6 @@ spec:
       containers:
         - name: scraper-torproxy
           image: simo25docker/torproxy
-          env:
-            - name: PASSWORD
-              value: "PASSWORD"
           readinessProbe:
             exec:
               command:

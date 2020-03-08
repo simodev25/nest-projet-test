@@ -1,13 +1,13 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ProductsModule } from './products/products.module';
-import { MerchantwordsModule } from './merchantwords/merchantwords.module';
+
 import { RequestContextMiddleware } from './shared/middlewares/requestContext.middleware';
 import { LogsMiddleware } from './shared/middlewares/logs.middleware';
 
 @Module({
   imports: [
 
-    ProductsModule, MerchantwordsModule],
+    ProductsModule],
   controllers: [],
   providers: [],
 })

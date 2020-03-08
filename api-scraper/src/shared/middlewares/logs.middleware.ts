@@ -12,7 +12,7 @@ export class LogsMiddleware implements NestMiddleware {
   }
 
   use(request: any, res: any, next: Function): any {
-
+    const now = Date.now();
     const respuesta = {
       baseUrl: request.baseUrl,
       hostname: request.hostname,
