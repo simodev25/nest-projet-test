@@ -67,7 +67,7 @@ export class ProxyService {
           if (err) {
             this.proxy.renewSession = StatusRenew.STOP;
             //    console.log(`renewTorSession  END error  *****************************************`);
-            console.log(err);
+
             throw new Exception('renewTorSession : error', ScraperHelper.EXIT_CODES.ERROR_PROXY);
           }
           this.proxy.countError = 0;

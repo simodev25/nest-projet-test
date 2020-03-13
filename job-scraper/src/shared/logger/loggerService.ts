@@ -43,11 +43,11 @@ export class ScraperLoggerService implements LoggerService {
     const response: any = this.redisClient.getClient().get(idRequest);
     from(response).pipe(filter((response$: any) => !!response$),
       map((response$: any) => {
-        let response$$: ScraperRequest = deserialize(ScraperRequest, response$);
+        const response$$: ScraperRequest = deserialize(ScraperRequest, response$);
         if (response$$.idRequest == idRequest) {
-          if (validator.isEmpty(response$$.log))
-            response$$.log = [];
-          response$$.log.push(message$);
+          if (validator.isEmpty(response$$.logs))
+            response$$.logs = [];
+          response$$.logs.push(message$);
         }
         return response$$;
       })).subscribe((response$$$: any) => {

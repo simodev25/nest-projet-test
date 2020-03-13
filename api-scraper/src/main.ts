@@ -5,19 +5,19 @@ import * as helmet from 'fastify-helmet';
 import { AnyExceptionFilter } from './shared/Exception/anyExceptionFilter';
 import { ValidationPipe } from '@nestjs/common';
 import { ErrorFilter } from './shared/Exception/errorFilter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ApiRequestExceptionFilter } from './shared/Exception/api.request.exception.filter';
 
 async function bootstrap() {
+
+  const globalPrefix: string = 'api/v1';
   const fastifyAdapter = new FastifyAdapter();
-  fastifyAdapter.setErrorHandler((error, request, reply) => {
-    console.log('getHttpAdapter')
-    reply.code(200).send('Alright!');
-  });
 
   const fastify = await NestFactory.create<NestFastifyApplication>(AppModule,
     fastifyAdapter,
   );
 
-  fastify.setGlobalPrefix('api/v1');
+  fastify.setGlobalPrefix(globalPrefix);
   fastify.enableCors();
   fastify.register(
     helmet,
@@ -30,17 +30,28 @@ async function bootstrap() {
     timeWindow: '1 minute',
   });
   fastify.register(require('fastify-server-timeout'), {
-    serverTimeout: 100, //ms
+    serverTimeout: 10000, //ms
   });
 
   fastify.useGlobalFilters(new ErrorFilter());
   fastify.useGlobalFilters(new AnyExceptionFilter());
+  fastify.useGlobalFilters(new ApiRequestExceptionFilter());
+
   fastify.useGlobalPipes(new ValidationPipe());
 
-  await fastify.listen(3000, '0.0.0.0', (err, address) => {
-    if (err) console.log(err)
-    console.log(`Server listening on ${address}`)
-  })
+
+  const options = new DocumentBuilder()
+    .setTitle('supermerchant api')
+    .setDescription('api.supermerchant.io  is the reliable, real-time search results API you\'ve been looking for')
+    .setVersion('1.0')
+   // .setContact('bensassai.mohammed', null, 'bensassai.mohammed@gmail.com')
+    .addTag('products')
+    .build();
+  const document = SwaggerModule.createDocument(fastify, options);
+  SwaggerModule.setup(`${globalPrefix}/swagger/products`, fastify, document);
+
+
+  await fastify.listen(3000);
 }
 
 bootstrap();

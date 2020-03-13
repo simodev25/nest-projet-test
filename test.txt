@@ -40,3 +40,28 @@ cluster.set('test003','toto')
 cluster.get("test002", function(err, res) {
   console.log('res',res);
 });
+
+---------------
+const zlib     = require('zlib');
+const redis    = require('redis').createClient();
+var user       = { name: "Xyz" }
+var userString = JSON.stringify(user)
+var userBuffer = new Buffer(userString, "utf8")
+var compressed = zlib.gzipSync(userBuffer)
+var data       = { id: 1, compressed: compressed }
+var dataString = JSON.stringify(data)
+
+console.log('Compressed', dataString);
+redis.set('mykey', dataString, err => {
+  if (err) throw err;
+  redis.get('mykey', (err, dataString) => {
+    if (err) throw err;
+
+    var data         = JSON.parse(dataString)
+    var buffer       = Buffer.from(data.compressed);
+    var uncompressed = zlib.gunzipSync(buffer);
+
+    console.log('Uncompressed', JSON.parse(uncompressed));
+    redis.end(false);
+  })
+});

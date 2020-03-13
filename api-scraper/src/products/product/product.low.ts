@@ -1,8 +1,6 @@
-import { ProductDetail } from './productDetail';
-import { ImageProduct } from './product.interface';
-import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class Product {
+export class ProductLow {
   @ApiProperty()
   baseUrl: string;
   @ApiProperty()
@@ -26,15 +24,5 @@ export class Product {
   @ApiProperty()
   reviews: string;
   @ApiProperty()
-  shipping: string;
-  @ApiProperty()
-  images: ImageProduct[];
-  @ApiProperty()
-  categorys: string[] ;
-  @ApiProperty()
-  productDetail: ProductDetail;
-  @ApiProperty()
   rating: string;
-
-
 }
