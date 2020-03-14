@@ -1,27 +1,53 @@
+# This headless service allows communication between RabbitMQ nodes via hostname instead of IP addresses.
+# The clusterIP is set to None.
+# See: https://kubernetes.io/docs/concepts/services-networking/service/#headless-services
 apiVersion: v1
 kind: Service
 metadata:
-  name: rmq
+  name: rmq-discovery
   labels:
     app: rmq
-  annotations:
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
-  type: ClusterIP
   ports:
-    - port: 4369
-      name: rabbitmq-epmd
-    - port: 5672
-      name: rabbitmq-main
-    - port: 15672
-      name: rabbitmq-management
-    - port: 25672
-      name: rabbitmq-management-ssl
- # type: LoadBalancer
+    - name: client-access-2
+      port: 5672
+    - name: client-access-1
+      port: 5671
+    - name: clitool
+      port: 25672
+    - name: epmd
+      port: 4369
+    - name: http
+      port: 15672
   selector:
     app: rmq
+  type: ClusterIP
   clusterIP: None
-  publishNotReadyAddresses: true
+---
+
+# This services is used to connect to the RabbitMQ using Port Forwarding
+# or expose an external IP and run RabbitMQ cluster behind a LoadBalancer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rmq-svc
+  labels:
+    app: rmq
+spec:
+  ports:
+    - name: client-access-2
+      port: 5672
+    - name: client-access-1
+      port: 5671
+    - name: clitool
+      port: 25672
+    - name: epmd
+      port: 4369
+    - name: http
+      port: 15672
+  selector:
+    app: rmq
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -31,7 +57,7 @@ spec:
   selector:
     matchLabels:
       app: rmq
-  serviceName: rmq
+  serviceName: rmq-discovery
   replicas: 3
   volumeClaimTemplates:
     - metadata:
@@ -108,13 +134,9 @@ spec:
             - name: CLUSTERED
               value: "true"
             - name: CLUSTER_WITH
-              value: "rmq-0.rmq.default.svc.cluster.local"
+              value: "rmq-0.rmq-discovery.default.svc.cluster.local"
             - name: RABBITMQ_SERVICE_DOMAIN
-              value: "rmq.default.svc.cluster.local"
-            - name: K8S_HOSTNAME_SUFFIX
-              value: ".rmq.default.svc.cluster.local"
-            - name: K8S_SERVICE_NAME
-              value: "rmq.default.svc.cluster.local"
+              value: ".rmq-discovery.default.svc.cluster.local"
             - name: RABBITMQ_USE_LONGNAME
               value: 'true'
             - name: MY_POD_NAME
@@ -123,7 +145,11 @@ spec:
                   apiVersion: v1
                   fieldPath: metadata.name
             - name: RABBITMQ_NODENAME
-              value: rabbit@$(MY_POD_NAME).rmq.default.svc.cluster.local
+              value: 'rabbit@$(MY_POD_NAME).rmq-discovery.default.svc.cluster.local'
+            - name: K8S_SERVICE_NAME
+              value: 'rmq-discovery'
+            - name: K8S_HOSTNAME_SUFFIX
+              value: '.rmq-discovery.default.svc.cluster.local'
 
 
 

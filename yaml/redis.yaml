@@ -30,7 +30,7 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis
+  name: redis-discovery
   labels:
     app: redis
 spec:
@@ -41,10 +41,30 @@ spec:
     - port: 16379
       targetPort: 16379
       name: gossip
-  #type: LoadBalancer
   selector:
     app: redis
-
+  type: ClusterIP
+  clusterIP: None
+---
+# This services is used to connect to the RabbitMQ using Port Forwarding
+# or expose an external IP and run RabbitMQ cluster behind a LoadBalancer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-svc
+  labels:
+    app.kubernetes.io/name: redis
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: client
+    - port: 16379
+      targetPort: 16379
+      name: gossip
+  selector:
+    app: redis
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -53,7 +73,9 @@ metadata:
   labels:
     app: redis
 spec:
-  serviceName: redis
+  serviceName: redis-discovery
+  updateStrategy:
+    type: RollingUpdate
   replicas: 6
   selector:
     matchLabels:

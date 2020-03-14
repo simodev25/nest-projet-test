@@ -12,33 +12,31 @@ export class ClusterRedisService {
 
   constructor(private  redisService: RedisService) {
     const servers: any[] = [{
-      host: 'redis-0.redis.default.svc.cluster.local',
+      host: 'redis-0.redis-discovery',
       port: 6379, password: 'REDIS_PASS',
     }, {
-      host: 'redis-1.redis.default.svc.cluster.local',
+      host: 'redis-1.redis-discovery',
       port: 6379, password: 'REDIS_PASS',
     },
       {
-        host: 'redis-2.redis.default.svc.cluster.local',
+        host: 'redis-2.redis-discovery',
         port: 6379, password: 'REDIS_PASS',
       },
       {
-        host: 'redis-3.redis.default.svc.cluster.local',
+        host: 'redis-3.redis-discovery',
         port: 6379, password: 'REDIS_PASS',
       }, {
-        host: 'redis-4.redis.default.svc.cluster.local',
+        host: 'redis-4.redis-discovery',
         port: 6379, password: 'REDIS_PASS',
       }
       , {
-        host: 'redis-5.redis.default.svc.cluster.local',
+        host: 'redis-5.redis-discovery',
         port: 6379, password: 'REDIS_PASS',
       },
 
     ];
 
-    this.cluster = new Redis.Cluster(servers, {
-
-    });
+    this.cluster = new Redis.Cluster(servers, {});
   }
 
   public getCluster(): Cluster {
@@ -48,6 +46,7 @@ export class ClusterRedisService {
   }
 
   public getClient(): Cluster | Redis.Redis {
+    console.log('process.env.NODE_ENV', process.env.NODE_ENV);
 
     return process.env.NODE_ENV === 'production' ? this.getCluster() : this.redisService.getClient();
 
