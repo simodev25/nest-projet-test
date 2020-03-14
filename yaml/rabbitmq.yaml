@@ -9,19 +9,15 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    -
-    - name: epmd
-      port: 4369
-      targetPort: epmd
-    - name: node
-      port: 5672
-      targetPort: node
-    - name: dist
-      port: 25672
-      targetPort: dist
-    - name: management
-      port: 15672
-      targetPort: management
+    - port: 4369
+      name: rabbitmq-epmd
+    - port: 5672
+      name: rabbitmq-main
+    - port: 15672
+      name: rabbitmq-management
+    - port: 25672
+      name: rabbitmq-management-ssl
+ # type: LoadBalancer
   selector:
     app: rmq
   clusterIP: None
