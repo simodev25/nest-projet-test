@@ -12,25 +12,25 @@ export class ClusterRedisService {
 
   constructor(private  redisService: RedisService) {
     const servers: any[] = [{
-      host: 'redis-0.redis',
+      host: 'redis-0.redis.default.svc.cluster.local',
       port: 6379, password: 'REDIS_PASS',
     }, {
-      host: 'redis-1.redis',
+      host: 'redis-1.redis.default.svc.cluster.local',
       port: 6379, password: 'REDIS_PASS',
     },
       {
-        host: 'redis-2.redis',
+        host: 'redis-2.redis.default.svc.cluster.local',
         port: 6379, password: 'REDIS_PASS',
       },
       {
-        host: 'redis-3.redis',
+        host: 'redis-3.redis.default.svc.cluster.local',
         port: 6379, password: 'REDIS_PASS',
       }, {
-        host: 'redis-4.redis',
+        host: 'redis-4.redis.default.svc.cluster.local',
         port: 6379, password: 'REDIS_PASS',
       }
       , {
-        host: 'redis-5.redis',
+        host: 'redis-5.redis.default.svc.cluster.local',
         port: 6379, password: 'REDIS_PASS',
       },
 
