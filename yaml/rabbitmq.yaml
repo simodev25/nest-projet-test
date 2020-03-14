@@ -2,7 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rmq
+  labels:
+    app: rmq
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
+  type: ClusterIP
   ports:
     - port: 4369
       name: rabbitmq-epmd
@@ -15,6 +20,8 @@ spec:
  # type: LoadBalancer
   selector:
     app: rmq
+  clusterIP: None
+  publishNotReadyAddresses: true
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -101,9 +108,26 @@ spec:
             - name: CLUSTERED
               value: "true"
             - name: CLUSTER_WITH
-              value: "rmq-0"
+              value: "rmq-0.rmq.default.svc.cluster.local"
             - name: RABBITMQ_SERVICE_DOMAIN
               value: "rmq.default.svc.cluster.local"
+            - name: K8S_HOSTNAME_SUFFIX
+              value: ".rmq.default.svc.cluster.local"
+            - name: K8S_SERVICE_NAME
+              value: "rmq.default.svc.cluster.local"
+            - name: RABBITMQ_USE_LONGNAME
+              value: 'true'
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: RABBITMQ_NODENAME
+              value: rabbit@$(MY_POD_NAME).rmq.default.svc.cluster.local
+
+
+
+
 
 
 
