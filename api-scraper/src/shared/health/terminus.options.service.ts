@@ -17,7 +17,7 @@ export class TerminusOptionsService implements TerminusOptionsFactory {
 
   createTerminusOptions(): TerminusModuleOptions {
     const healthEndpoint: TerminusEndpoint = {
-      url: '/api/health',
+      url: '/health',
       healthIndicators: [
         async () => this.appHealthIndicator.ishealth(),
 

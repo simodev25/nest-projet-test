@@ -41,8 +41,8 @@ export class AppHealthIndicator extends HealthIndicator {
     const healthIndicators = of('health');
 
     return healthIndicators.pipe(map((key: string) => {
-
-        let stateType: StateType;
+        let isdown$: boolean = true;
+        /*let stateType: StateType;
         let isdown$: boolean = true;
         if (this.serverIsShuttingDown) {
           stateType = StateType.SERVER_IS_SHUTTING_DOWN;
@@ -54,9 +54,9 @@ export class AppHealthIndicator extends HealthIndicator {
           isdown$ = true;
 
           stateType = StateType.SERVER_IS_NOT_READY;
-        }
+        }*/
 
-        const result$ = this.getStatus(key, isdown$, { stateType });
+        const result$ = this.getStatus(key, isdown$, { stateType: 'ok' });
 
         if (isdown$) {
           return result$;

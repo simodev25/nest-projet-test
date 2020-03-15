@@ -5,8 +5,14 @@ import { createLoggerProviders } from './logger/logger.providers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getScraperProxyFactory } from './factorys/scraper.factory';
 
-import { DNSHealthIndicator, MicroserviceHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus';
+import {
+  DNSHealthIndicator,
+  MicroserviceHealthIndicator,
+  MongooseHealthIndicator,
+  TerminusModule,
+} from '@nestjs/terminus';
 import { AppHealthIndicator } from './health/app.health.Indicator';
+import { TerminusOptionsService } from './health/terminus.options.service';
 
 
 const environment = 'local';
@@ -14,10 +20,10 @@ const environment = 'local';
 
 @Module({
   imports: [
-    /* TerminusModule.forRootAsync({
+     TerminusModule.forRootAsync({
        imports: [SharedModule],
        useClass: TerminusOptionsService,
-     }),*/
+     }),
     HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
