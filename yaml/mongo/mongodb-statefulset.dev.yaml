@@ -32,6 +32,12 @@ spec:
       containers:
         - name: mongo
           image: mongo
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
           command:
             - mongod
             - "--bind_ip_all"
@@ -42,13 +48,12 @@ spec:
           volumeMounts:
             - name: mongo-persistent-storage
               mountPath: /data/db
+              subPath: $(POD_NAME)
   volumeClaimTemplates:
     - metadata:
         name: mongo-persistent-storage
-        annotations:
-          volume.beta.kubernetes.io/storage-class: "fast"
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 80Gi
+            storage: 8Gi

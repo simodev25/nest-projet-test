@@ -11,6 +11,9 @@ import { ClusterRedisService } from '../shared/services/cluster.redis.service';
   imports: [SharedModule.forRoot(),
     RedisModule.forRootAsync({
       useFactory: (configService: ConfigService) => {
+        if(process.env.NODE_ENV === 'production') {
+          return [];
+        }
         return [{
           retryAttempts: 5,
           retryDelay: 1000,

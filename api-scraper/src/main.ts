@@ -51,7 +51,7 @@ async function bootstrap() {
   SwaggerModule.setup(`${globalPrefix}/swagger/products`, fastify, document);
 
 
-  await fastify.listen(3000);
+  await fastify.listen(3000, '0.0.0.0');
 }
 
 bootstrap();
