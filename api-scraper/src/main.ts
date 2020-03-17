@@ -41,14 +41,14 @@ async function bootstrap() {
 
 
   const options = new DocumentBuilder()
-    .setTitle('supermerchant api')
+    .setTitle('amazone.supermerchant.io api')
     .setDescription('api.supermerchant.io  is the reliable, real-time search results API you\'ve been looking for')
     .setVersion('1.0')
    // .setContact('bensassai.mohammed', null, 'bensassai.mohammed@gmail.com')
     .addTag('products')
     .build();
   const document = SwaggerModule.createDocument(fastify, options);
-  SwaggerModule.setup(`${globalPrefix}/swagger/products`, fastify, document);
+  SwaggerModule.setup(`${globalPrefix}/swagger/amazone/products`, fastify, document);
 
 
   await fastify.listen(3000, '0.0.0.0');

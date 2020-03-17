@@ -136,7 +136,7 @@ spec:
         labels:
           name: redis
       spec:
-        accessModes: [ "ReadWriteMany" ]
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 100Mi
+            storage: 1000Mi

@@ -45,7 +45,7 @@ export class ProductsController {
   @ApiTags('products')
   scrapeSearchWordAsyncResponse(@Req() req, @Param() params: FindIdRequest): Observable<ApiResponseDto> {
 
-    return this.productsService.scrapeResponse(params.idRequest);
+    return this.productsService.scrapeResponseByRequest(params.idRequest);
 
   }
 
@@ -63,7 +63,7 @@ export class ProductsController {
   @ApiTags('products')
   scrapeByAsinResponse(@Req() req, @Param() params: FindIdRequest): Observable<ApiResponseDto> {
 
-    return this.productsService.scrapeResponse(params.idRequest);
+    return this.productsService.scrapeResponseByRequest(params.idRequest);
 
   }
 

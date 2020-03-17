@@ -48,7 +48,7 @@ spec:
         annotations:
           volume.beta.kubernetes.io/storage-class: "fast"
       spec:
-        accessModes: [ "ReadWriteMany" ]
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
             storage: 80Gi

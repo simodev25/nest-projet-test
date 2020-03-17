@@ -40,18 +40,22 @@ spec:
   selector:
     service-name: api-scraper-amzone
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: api-scraper
   annotations:
-    ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/app-root: "/*"
+    ingress.kubernetes.io/compress-types: "application/json"
 spec:
   rules:
-    - host: amazone.supermerchant.io
-      http:
-       paths:
-        - path: /api/v1/*
+  - http:
+     paths:
+      - path: /api/v1
+        backend:
+          serviceName: api-scraper-amzone
+          servicePort: 3000
+      - path: /swagger/amazone/products
           backend:
             serviceName: api-scraper-amzone
             servicePort: 3000
