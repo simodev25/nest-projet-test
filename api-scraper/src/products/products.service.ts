@@ -29,7 +29,7 @@ export class ProductsService {
   }
 
 
-  scrapeResponse(idRequest: string) {
+  scrapeResponseByRequest(idRequest: string) {
 
 
     return from(this.redisClient.getClient().get(idRequest)).pipe(map((response$: any) => {
@@ -43,7 +43,35 @@ export class ProductsService {
         response$$.initRequestAt();
       }
       return response$$;
-    }));
+    }),
+      map((products: Product[] | ApiRequestDto) => {
+        const apiResponse: ApiResponseDto = new ApiResponseDto(products);
+        if (apiResponse.status === StatusResponse.FAILED) {
+          throw new ApiRequestException(apiResponse, HttpStatus.NOT_FOUND);
+        }
+        return apiResponse;
+
+      }),
+
+    );
+  }
+
+  private scrapeResponse(idRequest: string) {
+
+
+    return from(this.redisClient.getClient().get(idRequest)).pipe(map((response$: any) => {
+
+        if (response$ == null) {
+          throw new NotFoundException(`IdRequest [${idRequest}] not found`);
+        }
+        let response$$: any = deserialize(Product, response$);
+        if (!validator.isEmpty(response$$?.idRequest)) {
+          response$$ = deserialize(ApiRequestDto, response$);
+          response$$.initRequestAt();
+        }
+        return response$$;
+      })
+    );
   }
 
 
