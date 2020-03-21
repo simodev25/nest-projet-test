@@ -55,7 +55,3 @@ spec:
         backend:
           serviceName: api-scraper-amzone
           servicePort: 3000
-      - path: /swagger/amazone/products
-          backend:
-            serviceName: api-scraper-amzone
-            servicePort: 3000

@@ -18,7 +18,7 @@ async function bootstrap() {
   );
 
   fastify.setGlobalPrefix(globalPrefix);
-  fastify.enableCors();
+  fastify.enableCors({ origin: true } );
   fastify.register(
     helmet,
     // Example of passing an option to x-powered-by middleware
@@ -46,6 +46,7 @@ async function bootstrap() {
     .setVersion('1.0')
    // .setContact('bensassai.mohammed', null, 'bensassai.mohammed@gmail.com')
     .addTag('products')
+    .setBasePath('http://a9cb2afb1b53143098b14c24e1d152bd-127155881.us-west-2.elb.amazonaws.com/')
     .build();
   const document = SwaggerModule.createDocument(fastify, options);
   SwaggerModule.setup(`${globalPrefix}/swagger/amazone/products`, fastify, document);
