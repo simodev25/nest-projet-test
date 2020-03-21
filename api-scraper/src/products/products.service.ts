@@ -81,7 +81,11 @@ export class ProductsService {
     return this.scraperClient.send(pattern, searchWord);
 
   }
+  scrapeCategorys() {
+    const pattern = { cmd: 'categorys-salesOffers-responses' };
+    return this.scraperClient.send(pattern, {});
 
+  }
 
   scrapeSearchWordAsync(searchWord: string) {
     const pattern = { cmd: 'searchword-responses' };
@@ -110,6 +114,31 @@ export class ProductsService {
     const pattern = { cmd: 'asin-responses' };
 
     const generateRequest: ApiRequestDto = this.responseHelper.generateResponse('asin-responses', asin);
+    return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
+      mergeMap((exist: any) => {
+        if (validator.isNotEmpty(exist)) {
+          return this.scrapeResponse(generateRequest.idRequest);
+        }
+        this.send(pattern, generateRequest);
+        return of(generateRequest);
+      }),
+      map((products: Product[] | ApiRequestDto) => {
+        const apiResponse: ApiResponseDto = new ApiResponseDto(products);
+        if (apiResponse.status === StatusResponse.FAILED) {
+          throw new ApiRequestException(apiResponse, HttpStatus.NOT_FOUND);
+        }
+        return apiResponse;
+
+      }),
+    );
+
+
+  }
+
+  scrapeByCategory(category: string): Observable<ApiResponseDto> {
+    const pattern = { cmd: 'category-responses' };
+
+    const generateRequest: ApiRequestDto = this.responseHelper.generateResponse('category-responses', category);
     return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
         if (validator.isNotEmpty(exist)) {

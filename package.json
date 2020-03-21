@@ -37,7 +37,7 @@
     "kube:deleteALL": "kubectl delete  cronjobs --all --grace-period=0 --force && kubectl delete  jobs --all --grace-period=0 --force && kubectl delete  replicasets --all --grace-period=0 --force && kubectl delete  statefulsets --all --grace-period=0 --force && kubectl delete replicationcontroller --all --grace-period=0 --force && kubectl delete Deployment --all --grace-period=0 --force && kubectl delete services  --all --grace-period=0 --force && kubectl delete pods --all --grace-period=0 --force ",
     "kube:service": "minikube service scraper-mongo && minikube service scraper-torproxy",
     "kube:deletemicroService": "kubectl delete replicaset,services,pods -l service-name=scraper-microservice",
-    "kube:deleteApi-Service": "kubectl delete replicaset,services,pods -l service-name=api-scraper",
+    "kube:deleteApi-Service": "kubectl delete replicaset,services,pods -l service-name=api-scraper-amzone",
     "kube:deleteproxy": "kubectl delete replicaset,services,pods -l service-name=scraper-torproxy",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "jest",

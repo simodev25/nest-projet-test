@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { Observable, Subject, throwError, timer } from 'rxjs';
+import { from, Observable, of, Subject, throwError, timer } from 'rxjs';
 
 import { filter, map, mergeMap, retryWhen, tap } from 'rxjs/operators';
 
@@ -11,6 +11,8 @@ import { getRandomInt, isNil } from '../../shared/utils/shared.utils';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '../../shared/logger/logger.decorator';
 import { ScraperLoggerService } from '../../shared/logger/loggerService';
+import * as puppeteer from 'puppeteer';
+import { PuppeteerManager } from './puppeteer.manager';
 
 const request = require('request');
 
@@ -46,7 +48,8 @@ export class ProxyService {
                 prefix: 'scraperService',
               }) private logger: ScraperLoggerService,
               private readonly scraperHelper: ScraperHelper,
-              private readonly configService: ConfigService) {
+              private readonly configService: ConfigService,
+              private readonly puppeteerManager: PuppeteerManager) {
     this.tr.TorControlPort.password = 'PASSWORD';
     this.tr.TorControlPort.port = this.configService.get('TOR_PORT_CONTROL');
 
@@ -129,6 +132,54 @@ export class ProxyService {
         scalingDuration: this.renewTorSessionTimeout,
       })),
     );
+
+  }
+
+  public getPuppeteer(url: string): Observable<string> {
+    const PUPPETEER_ARGS = ['--no-sandbox', '--disable-setuid-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+
+    //  `--proxy-server=socks5://10.96.245.112:9050`,
+    ];
+    this.getProxy();
+    const browser: any = puppeteer.launch({
+      headless: true,
+      devTools: false,
+      args: PUPPETEER_ARGS,
+
+    });
+    return from(browser).pipe(
+      mergeMap((browser: any) => {
+
+        return from(browser.newPage());
+      }),
+      mergeMap((page: any) => {
+
+        return from(page.setUserAgent(ScraperHelper.getRandomUserAgent())).pipe(
+          mergeMap((data: any) => {
+            return from(page.goto(url, { waitUntil: 'networkidle0' }));
+          }),
+          mergeMap((data: any) => {
+            return from(page.evaluate(() => document.body.innerHTML));
+          }),
+        );
+      }),
+    )
+      .pipe(
+        tap((res: any) => {
+          if (ScraperHelper.isPageNotFound(res)) {
+            throw new BadRequestException();
+          } else if (ScraperHelper.isCaptcha(res)) {
+            throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+          }
+          return res;
+        }),
+        retryWhen(this.scrapeRetryStrategy({
+          maxRetryAttempts: 20,
+          scalingDuration: this.renewTorSessionTimeout,
+        })),
+      );
 
   }
 
@@ -219,7 +270,7 @@ export class ProxyService {
             return timer(scalingDuration);
           }
 
-          this.logger.error(`scrapeRetryStrategy[error CODE : ${error.getStatus()}]:Attempt ${retryAttempt}: retrying in ${scalingDuration}ms`);
+          this.logger.error(`scrapeRetryStrategy[error  : ${error}]:Attempt ${retryAttempt}: retrying in ${scalingDuration}ms`);
           // retry after 1s, 2s, etc...
         } else {
           if (!isNil(error.options) && !isNil(error.options.command)) {
@@ -232,7 +283,7 @@ export class ProxyService {
             return timer(scalingDuration);
           }
 
-          this.logger.error(`scrapeRetryStrategy[error CODE : ${error.code}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
+          this.logger.error(`scrapeRetryStrategy[error  : ${error}]:Attempt ${retryAttempt}: retrying in ${retryAttempt * scalingDuration}ms`);
         }
 
         return timer(scalingDuration);

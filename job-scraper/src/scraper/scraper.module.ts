@@ -18,6 +18,7 @@ import { MerchantwordsEntity } from './schema/merchantwords.entity';
 import { MerchantwordsService } from './merchantwords.service';
 import { ScraperMerchantwordsService } from './lib/scraper.merchantwords.service';
 import { MerchantwordsRepository } from './schema/merchantwords.repository';
+import { PuppeteerManager } from './lib/puppeteer.manager';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { MerchantwordsRepository } from './schema/merchantwords.repository';
       ProductEntity, ProductDetailEntity, MerchantwordsEntity, ProductReviewsEntity, ProductHistEntity, ProductHtmlEntity]),
 
   ],
-  providers: [ScraperAmazoneService, ScraperHelper, ScraperService, MerchantwordsRepository, ProductRepository, ScraperLoggerService, ConfigService, ProxyService, MerchantwordsService, ScraperMerchantwordsService],
+  providers: [ScraperAmazoneService, ScraperHelper, ScraperService, MerchantwordsRepository, ProductRepository, ScraperLoggerService, ConfigService, ProxyService, MerchantwordsService, ScraperMerchantwordsService, PuppeteerManager],
   exports: [MerchantwordsService, ScraperService],
 })
 export class ScraperModule {

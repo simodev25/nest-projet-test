@@ -17,13 +17,15 @@ export class ApiRequestDto {
   methode: RequestMethod;
   @ApiProperty()
   logs: string[];
-
+  @ApiProperty()
+  category: string;
   constructor(path: string, searchWord: string) {
     this.createdAt = new Date().toISOString();
     this.idRequest = stringToHashCode(searchWord?.trim());
     this.searchWord = searchWord;
     this.link = `/api/v1/products/${path}/${this.idRequest}`;
     this.methode = RequestMethod.GET;
+    this.category = searchWord;
   }
 
   getIdRequest() {

@@ -98,7 +98,7 @@ export class Product {
   @Expose()
   @IsNotEmpty()
   get searchWord(): string {
-    return this._searchWord;
+    return this._searchWord || this.title;
   }
 
   set searchWord(value: string) {
@@ -169,7 +169,7 @@ export class Product {
   @Expose()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get reviews(): string {
-    return this._reviews;
+    return this._reviews || this.productDetail?.productReviews?.reviews;
   }
 
   set reviews(value: string) {
@@ -179,7 +179,7 @@ export class Product {
   @Expose()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get rating(): string {
-    return this._rating || this._productDetail?.rating;
+    return this._rating || this.productDetail?.productReviews?.rating;
   }
 
   set rating(rating: string) {

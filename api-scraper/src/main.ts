@@ -18,7 +18,7 @@ async function bootstrap() {
   );
 
   fastify.setGlobalPrefix(globalPrefix);
-  fastify.enableCors();
+  fastify.enableCors({ origin: true } );
   fastify.register(
     helmet,
     // Example of passing an option to x-powered-by middleware
@@ -41,14 +41,15 @@ async function bootstrap() {
 
 
   const options = new DocumentBuilder()
-    .setTitle('amazone.supermerchant.io api')
-    .setDescription('api.supermerchant.io  is the reliable, real-time search results API you\'ve been looking for')
+      .setTitle('amazon.supermerchant.io api')
+    .setDescription('amazon.supermerchant.io  is the reliable, real-time search results API you\'ve been looking for')
     .setVersion('1.0')
    // .setContact('bensassai.mohammed', null, 'bensassai.mohammed@gmail.com')
     .addTag('products')
+    .addTag('categorys')
     .build();
   const document = SwaggerModule.createDocument(fastify, options);
-  SwaggerModule.setup(`${globalPrefix}/swagger/amazone/products`, fastify, document);
+  SwaggerModule.setup(`${globalPrefix}/swagger/amazone`, fastify, document);
 
 
   await fastify.listen(3000, '0.0.0.0');

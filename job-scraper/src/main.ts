@@ -6,8 +6,8 @@ import { MicroserviceModule } from './microservices/microservice.module';
 import { Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 
-async function bootstrap() {
 
+async function bootstrap() {
   switch (process.env.JOB) {
 
     case 'merchantwordsJob' :
