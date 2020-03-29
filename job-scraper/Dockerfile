@@ -2,7 +2,7 @@
 # ---- Base Node ----
 FROM node:alpine3.10 AS base
 
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini udev ttf-freefont chromium git
 
 WORKDIR /job
 
@@ -27,5 +27,7 @@ COPY --from=build /job/node_modules ./node_modules
 COPY --from=build /job/dist .
 COPY config.production.env .
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+ENV CHROMIUM_PATH /usr/bin/chromium-browser
 
 CMD ["tini", "yarn", "start:prod"]

@@ -62,10 +62,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: rmq
-        annotations:
-          volume.beta.kubernetes.io/storage-class: "fast"
+        labels:
+          name: rmq
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
             storage: 4Gi
