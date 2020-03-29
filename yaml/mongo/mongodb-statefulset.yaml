@@ -29,6 +29,11 @@ spec:
         app: mongo
     spec:
       terminationGracePeriodSeconds: 10
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            # Name of the PVC created earlier
+            claimName: minio-pv-claim
       containers:
         - name: mongo
           image: mongo
@@ -40,15 +45,6 @@ spec:
           ports:
             - containerPort: 27017
           volumeMounts:
-            - name: mongo-persistent-storage
-              mountPath: /data/db
-  volumeClaimTemplates:
-    - metadata:
-        name: mongo-persistent-storage
-        annotations:
-          volume.beta.kubernetes.io/storage-class: "fast"
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 15Gi
+            - name: storage
+              mountPath: /data/mongo
+

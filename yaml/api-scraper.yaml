@@ -32,38 +32,10 @@ metadata:
     app: api-scraper-amzone
     service-name: api-scraper-amzone
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - name: apiscraper
       port: 3000
       targetPort: 3000
   selector:
     service-name: api-scraper-amzone
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: api-scraper
-  annotations:
-    nginx.ingress.kubernetes.io/app-root: "/*"
-    nginx.ingress.kubernetes.io/cors-allow-methods: '*'
-    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/server-snippet: |
-      set $agentflag 0;
-
-      if ($http_X_RapidAPI_Proxy_Secret != "06161fa0-6c53-11ea-8373-3d02c4e8fb2f" ){
-        set $agentflag 1;
-      }
-
-      if ( $agentflag = 1 ) {
-        return 301 https://m.example.com;
-      }
-spec:
-  rules:
-  - http:
-     paths:
-      - path: /api/v1
-        backend:
-          serviceName: api-scraper-amzone
-          servicePort: 3000

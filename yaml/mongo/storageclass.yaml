@@ -1,11 +1,8 @@
 kind: StorageClass
-apiVersion: storage.k8s.io/v1
+apiVersion: storage.k8s.io/v1beta1
 metadata:
   name: fast
-provisioner: kubernetes.io/aws-ebs
+provisioner: kubernetes.io/gce-pd
 parameters:
-  type: io1
-  iopsPerGB: "50"
-reclaimPolicy: Retain
-mountOptions:
-  - debug
+  type: pd-ssd
+

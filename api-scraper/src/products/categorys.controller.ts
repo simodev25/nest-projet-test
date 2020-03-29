@@ -3,6 +3,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CacheInterceptor } from '../shared/cache/cache.interceptor';
 import { Observable } from 'rxjs';
+import { Categorys } from './product/categorys';
 
 @Controller('/categorys')
 @ApiResponse({ status: HttpStatus.OK, description: 'ok' })
@@ -16,7 +17,7 @@ export class CategorysController {
   @Get()
   @UseInterceptors(CacheInterceptor)
   @ApiTags('categorys')
-  scrapeCategorys(@Req() req): Observable<any> {
+  scrapeCategorys(@Req() req): Observable<Categorys[]> {
 
 
     return this.productsService.scrapeCategorys();
