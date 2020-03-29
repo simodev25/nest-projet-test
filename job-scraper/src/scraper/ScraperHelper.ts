@@ -148,6 +148,7 @@ export class ScraperHelper {
       $ = ScraperHelper.parseElement(script);
       return $;
     }).filter((script: CheerioStatic) => {
+
       return script.root().html().indexOf(key) > -1;
     })[0];
 

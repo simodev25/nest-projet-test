@@ -9,6 +9,7 @@ import { Product } from './product/product';
 import { ApiCreatedResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiResponseDto } from './response/api.response.dto';
 import { ProductLow } from './product/product.low';
+import { FindCategory } from '../dtos/findCategory';
 
 
 @Controller('/products')
@@ -62,6 +63,24 @@ export class ProductsController {
   @Header('Content-Type', 'application/json; charset=utf-8')
   @ApiTags('products')
   scrapeByAsinResponse(@Req() req, @Param() params: FindIdRequest): Observable<ApiResponseDto> {
+
+    return this.productsService.scrapeResponseByRequest(params.idRequest);
+
+  }
+
+  @Get('/todaydeals/:category')
+  @Header('Content-Type', 'application/json; charset=utf-8')
+  @ApiTags('products')
+  scrapeByCategory(@Req() req, @Param() params: FindCategory): Observable<ApiResponseDto> {
+
+    return this.productsService.scrapeByCategory(params.category);
+
+  }
+
+  @Get('/todaydeals-responses/:idRequest')
+  @Header('Content-Type', 'application/json; charset=utf-8')
+  @ApiTags('products')
+  scrapeByCategorynResponse(@Req() req, @Param() params: FindIdRequest): Observable<ApiResponseDto> {
 
     return this.productsService.scrapeResponseByRequest(params.idRequest);
 

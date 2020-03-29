@@ -24,6 +24,8 @@ export class ProductDetail {
   @Exclude()
   private _price02: string;
   @Exclude()
+  private _priceDeal: string;
+  @Exclude()
   private _priceMin: string;
   @Exclude()
   private _priceMax: string;
@@ -192,10 +194,22 @@ export class ProductDetail {
   }
 
   @Expose()
+  get priceDeal(): string {
+    return this._priceDeal;
+  }
+
+  set priceDeal(value: string) {
+    this._priceDeal = value;
+  }
+
+  @Expose()
   @IsNotEmpty()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get priceMin(): string {
-    if (validator.isNotEmpty(this._price) && this._price.split('-').length > 0) {
+    if (validator.isNotEmpty(this.priceDeal)) {
+      this._priceMin = this.priceDeal.replace('$', '');
+
+    } else if (validator.isNotEmpty(this._price) && this._price.split('-').length > 0) {
       const priceMin = this._price.split('-')[0].replace('$', '');
       this._priceMin = priceMin;
     } else if (validator.isNotEmpty(this.price01)) {

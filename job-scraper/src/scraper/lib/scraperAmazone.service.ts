@@ -5,8 +5,16 @@ import { Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { ScraperHelper } from '../ScraperHelper';
 import * as scrapeIt from 'scrape-it';
-import { deleteSpace, getValueFromParameters, isNil, parseDateFromJson, validator } from '../../shared/utils/shared.utils';
+import {
+  deleteSpace,
+  getValueFromParameters,
+  isNil,
+  parseDateFromJson,
+  validator,
+} from '../../shared/utils/shared.utils';
 import { ProxyService } from './proxy.service';
+import { IDepartment } from '../../shared/interface/departments.amazon';
+
 
 @Injectable()
 export class ScraperAmazoneService implements IScraper {
@@ -62,7 +70,7 @@ export class ScraperAmazoneService implements IScraper {
                       selector: 'div div.a-spacing-top-micro span:nth-child(2)',
                       attr: 'aria-label',
                       convert: (x: string) => {
-                        return isNil(x) ? 0 : x.replace(',', '')
+                        return isNil(x) ? 0 : x.replace(',', '');
                       },
                     },
                     rating: {
@@ -110,6 +118,173 @@ export class ScraperAmazoneService implements IScraper {
           }),
           map(data => {
             return data['produits'];
+          }),
+        );
+      }),
+    );
+
+    return result$;
+
+  }
+
+  public scrapeUrlSalesAffers(link: string): Observable<any> {
+
+
+    const result$ = of(1).pipe(
+      mergeMap(x => {
+        return this.httpService.getPuppeteer(link).pipe(
+          map((res: any) => {
+
+            const data: any = scrapeIt.scrapeHTML(res,
+              {
+                isCaptcha: {
+                  selector: 'form                                                                                                                                                                                 ',
+                  how: 'html',
+                  convert: (x: string) => {
+                    return x ? x.indexOf('Captcha') > -1 : false;
+                  },
+                },
+                sourceHtml: {
+                  selector: '#widgetContent                                                                                                                                                                                ',
+                  how: 'html',
+                  convert: (x: string) => {
+
+                    //console.log(res)
+                    //TODO
+                    return 'x';
+                  },
+                },
+                produits: {
+                  listItem: 'div.a-section.layer:nth-of-type(2)',
+                  data: {
+                    title: {
+                      selector: 'a.dealTitleTwoLine',
+                      how: 'text',
+                      convert: (x: string) => {
+                        return x;
+                      },
+                    },
+                    asin: {
+                      selector: 'a.dealTitleTwoLine',
+                      attr: 'href',
+                      convert: (x: string) => {
+                        const x$ = x.substr(x.indexOf('dp/') + 3);
+                        return x$.substring(0, x$.indexOf('/'));
+                      },
+                    },
+                    image: {//image principale
+                      selector: 'img',
+                      attr: 'src',
+                      convert: (x: string) => `${x}`,
+                    },
+                    link: {//link principale
+                      selector: 'a.dealTitleTwoLine',
+                      attr: 'href',
+                      convert: (x: string) => {
+
+                        return x.indexOf('https://www.amazon.com') !== -1 ? x :
+                          `https://www.amazon.com${x}`;
+                      },
+                    },
+                    reviews: {
+                      selector: 'div div.a-spacing-top-micro span:nth-child(2)',
+                      attr: 'aria-label',
+                      convert: (x: string) => {
+                        return isNil(x) ? 0 : x.replace(',', '');
+                      },
+                    },
+                    rating: {
+                      selector: 'div div.a-spacing-top-micro span:nth-child(1)',
+                      attr: 'aria-label',
+                      convert: (x: string) => {
+                        return isNil(x) ? 0 : x.split(' ')[0];
+                      },
+                    },
+                    shipping: {//shipping
+                      selector: 'i.a-icon-prime',
+                      attr: 'aria-label',
+                      convert: (x: string) => x,
+                    },
+                    price: {//price
+                      selector: 'span.a-price span.a-offscreen',
+                      how: 'html',
+                      convert: (x: string) => isNil(x) ? 0 : x.replace('$', ''),
+                    },
+                    images: {//image tail
+                      selector: 'img',
+                      attr: 'srcset',
+                      convert: (x: string) => {
+
+                        const imagestemps = x.split(',');
+                        const images: any[] = [];
+                        for (let i = 0; i < imagestemps.length; i++) {
+                          const imagestempssplit = imagestemps[i].split(' ');
+                          if (validator.isURL(imagestempssplit[1])) {
+                            images.push({
+                              image: String(imagestempssplit[1]),
+                              size: String(imagestempssplit[2]),
+                            });
+                          }
+
+                        }
+                        return images;
+                      },
+                    },
+                  },
+                },
+              },
+            );
+            return data;
+          }),
+          map(data => {
+            //  console.log( data['produits'])
+
+            return data['produits'];
+          }),
+        );
+      }),
+    );
+
+    return result$;
+
+  }
+
+  public getCategorysSalesOffers(link: string): Observable<any> {
+
+
+    const result$ = of(1).pipe(
+      mergeMap(x => {
+        return this.httpService.getPuppeteer(link).pipe(
+          map((res: any) => {
+
+            const data: any = scrapeIt.scrapeHTML(res,
+              {
+                categorys: {
+                  listItem: 'span[data-action=\'gbfilter-checkbox\']',
+                  data: {
+                    name: {
+                      selector: 'span.a-checkbox-label',
+                      how: 'html',
+                      convert: (x: string) => {
+
+                        return x;
+                      },
+                    },
+                    id: {
+                      attr: 'data-gbfilter-checkbox',
+                      convert: (x: any) => {
+                        return JSON.parse(x).value;
+                      },
+                    },
+                  },
+                },
+              },
+            );
+            return data;
+          }),
+          map(data => {
+            const categorys: IDepartment[] = (data['categorys'] as IDepartment[]).filter((category: IDepartment) => validator.isNumberString(category.id));
+            return categorys;
           }),
         );
       }),
@@ -195,7 +370,13 @@ export class ScraperAmazoneService implements IScraper {
             selector: 'strong.priceLarge                                                                                                                                                                                       ',
             how: 'html',
             convert: (x: string) => x,
-          }, priceMin: {
+          }
+          , priceDeal: {
+            selector: 'span.priceBlockDealPriceString                                                                                                                                                                                       ',
+            how: 'html',
+            convert: (x: string) => x,
+          }
+          , priceMin: {
             selector: 'strong.priceLarge                                                                                                                                                                                       ',
             how: 'html',
             convert: (x: string) => x,
@@ -473,6 +654,31 @@ export class ScraperAmazoneService implements IScraper {
     }
 
     return descriptions.filter(description => description.trim() !== '');
+  }
+
+  private getProductfromScript(contents: string): any {
+    const puppeteer = require('puppeteer');
+    const imagesProduct: any[] = [];
+
+    if (contents != null) {
+      const $: CheerioStatic = ScraperHelper.getScript(contents, 'dcsServerResponse');
+      if ($) {
+
+
+        const scriptProducts: any = $.root().html().replace('<script type="text/javascript">', '').replace('</script>', '');
+
+
+        const html: string[] = $.root().html().match(ScraperHelper.regexImages) || [];
+
+        html.forEach((match) => {
+
+          imagesProduct.push(match);
+        });
+        return imagesProduct;
+      }
+
+    }
+    return [];
   }
 
 }

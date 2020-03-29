@@ -6,6 +6,7 @@ import { ResponseHelper } from './response/response.helper';
 import { RedisModule } from 'nestjs-redis';
 import { ConfigService } from '@nestjs/config';
 import { ClusterRedisService } from '../shared/services/cluster.redis.service';
+import { CategorysController } from './categorys.controller';
 
 @Module({
   imports: [SharedModule.forRoot(),
@@ -24,7 +25,7 @@ import { ClusterRedisService } from '../shared/services/cluster.redis.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [ProductsController],
+  controllers: [ProductsController, CategorysController],
   providers: [ProductsService, ResponseHelper, ClusterRedisService],
 })
 export class ProductsModule {

@@ -38,4 +38,16 @@ export class ProduitsController {
     return this.scraperService.scrapeByAsin(scraperRequest);
   }
 
+  @MessagePattern({ cmd: 'category-responses' })
+  getScrapeCategory(@Payload() scraperRequest: ScraperRequest, @Ctx() context: RmqContext): Observable<Product[]> {
+
+    return this.scraperService.scrapeByCategory(scraperRequest);
+  }
+
+  @MessagePattern({ cmd: 'categorys-salesOffers-responses' })
+  getCategorysSalesOffers(@Payload() scraperRequest: ScraperRequest, @Ctx() context: RmqContext): Observable<Product[]> {
+
+    return this.scraperService.getCategorysSalesOffers();
+  }
+
 }
