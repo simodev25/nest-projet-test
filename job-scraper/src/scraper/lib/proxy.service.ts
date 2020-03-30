@@ -56,8 +56,7 @@ export class ProxyService {
     this.getProxy();
 
     const PUPPETEER_ARGS = ['--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
+      '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"',
       `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
     ];
     this.browser = puppeteer.launch({
@@ -159,11 +158,8 @@ export class ProxyService {
       }),
       mergeMap((page: any) => {
 
-        return from(page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36')).pipe(
-          mergeMap((data: any) => {
-            from(page.evaluate(() => navigator.userAgent )).subscribe(console.log)
-            return from(page.goto(url));
-          }),
+        return from(page.goto(url))
+          .pipe(
           mergeMap((data: any) => {
             return from(page.evaluate(() => document.body.innerHTML));
           }),
