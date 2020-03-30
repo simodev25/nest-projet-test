@@ -56,7 +56,8 @@ export class ProxyService {
     this.getProxy();
 
     const PUPPETEER_ARGS = ['--no-sandbox',
-      '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
       `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
     ];
     this.browser = puppeteer.launch({
@@ -150,7 +151,14 @@ export class ProxyService {
 
   public getPuppeteer(url: string): Observable<string> {
 
-
+    const defaultViewport = {
+      deviceScaleFactor: 1,
+      hasTouch: false,
+      height: 1024,
+      isLandscape: false,
+      isMobile: false,
+      width: 1280
+    };
     return from(this.browser).pipe(
       mergeMap((browser: any) => {
 
@@ -158,8 +166,10 @@ export class ProxyService {
       }),
       mergeMap((page: any) => {
 
-        return from(page.goto(url))
-          .pipe(
+        return from(page.setViewport(defaultViewport)).pipe(
+          mergeMap((data: any) => {
+            return from(page.goto(url));
+          }),
           mergeMap((data: any) => {
             return from(page.evaluate(() => document.body.innerHTML));
           }),
@@ -168,7 +178,7 @@ export class ProxyService {
     )
       .pipe(
         tap((res: any) => {
-        //  console.log(res)
+          console.log(res)
           if (ScraperHelper.isPageNotFound(res)) {
             throw new BadRequestException();
           } else if (ScraperHelper.isCaptcha(res)) {
