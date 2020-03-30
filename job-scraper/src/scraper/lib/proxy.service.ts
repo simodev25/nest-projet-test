@@ -179,6 +179,7 @@ export class ProxyService {
           } else if (ScraperHelper.isCaptcha(res)) {
             throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
           }
+          from(this.browser.close()).subscribe();
           return res;
         }),
         retryWhen(this.scrapeRetryStrategy({
