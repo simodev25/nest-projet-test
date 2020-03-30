@@ -57,7 +57,6 @@ export class ProxyService {
 
     const PUPPETEER_ARGS = ['--no-sandbox',
       '--disable-setuid-sandbox',
-      '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
     ];
@@ -160,7 +159,7 @@ export class ProxyService {
       }),
       mergeMap((page: any) => {
 
-        return from(page.setUserAgent(ScraperHelper.getRandomUserAgent())).pipe(
+        return from(page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36')).pipe(
           mergeMap((data: any) => {
             return from(page.goto(url));
           }),
