@@ -55,18 +55,7 @@ export class ProxyService {
     this.initProxys();
     this.getProxy();
 
-    const PUPPETEER_ARGS = ['--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
-    ];
-    this.browser = puppeteer.launch({
-      headless: true,
-      devTools: false,
-      executablePath: process.env.CHROMIUM_PATH,
-      args: PUPPETEER_ARGS,
 
-    });
 
 
     this.torSession$.pipe(
@@ -150,35 +139,58 @@ export class ProxyService {
   }
 
   public getPuppeteer(url: string): Observable<string> {
+    const puppeteerRequest = new Observable<string>(subscriber => {
+      (async () => {
+        const defaultViewport = {
+          deviceScaleFactor: 1,
+          hasTouch: false,
+          height: 1024,
+          isLandscape: false,
+          isMobile: false,
+          width: 1280
+        };
+        const PUPPETEER_ARGS = ['--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
+        ];
+        const browser = await puppeteer.launch({
+          headless: true,
+          devTools: false,
+          executablePath: process.env.CHROMIUM_PATH,
+          args: PUPPETEER_ARGS,
 
-    const defaultViewport = {
-      deviceScaleFactor: 1,
-      hasTouch: false,
-      height: 1024,
-      isLandscape: false,
-      isMobile: false,
-      width: 1280
-    };
-    return from(this.browser).pipe(
-      mergeMap((browser: any) => {
+        });
+        // prepare for headless chrome
 
-        return from(browser.newPage());
-      }),
-      mergeMap((page: any) => {
+        const page = await browser.newPage();
+        await page.setViewport(defaultViewport);
+        // set user agent (override the default headless User Agent)
+        await page.setUserAgent(ScraperHelper.getRandomUserAgent());
 
-        return from(page.setViewport(defaultViewport)).pipe(
-          mergeMap((data: any) => {
-            return from(page.goto(url));
-          }),
-          mergeMap((data: any) => {
-            return from(page.evaluate(() => document.body.innerHTML));
-          }),
-        );
-      }),
-    )
-      .pipe(
+        // go to Google home page
+        await page.goto(url);
+
+        // get the User Agent on the context of Puppeteer
+        const userAgent = await page.evaluate(() => navigator.userAgent );
+
+        // If everything correct then no 'HeadlessChrome' sub string on userAgent
+        console.log(userAgent);
+
+        const data = await page.evaluate(() => document.body.innerHTML);
+
+        subscriber.next(data)
+        subscriber.complete();
+        await browser.close();
+      })();
+
+    });
+
+
+
+    return puppeteerRequest.pipe(
         tap((res: any) => {
-          console.log(res)
+
           if (ScraperHelper.isPageNotFound(res)) {
             throw new BadRequestException();
           } else if (ScraperHelper.isCaptcha(res)) {
