@@ -55,7 +55,8 @@ export class ProxyService {
     this.initProxys();
     this.getProxy();
 
-    const PUPPETEER_ARGS = ['--no-sandbox', '--disable-setuid-sandbox',
+    const PUPPETEER_ARGS = ['--no-sandbox',
+      '--disable-setuid-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
 
@@ -172,6 +173,7 @@ export class ProxyService {
     )
       .pipe(
         tap((res: any) => {
+          console.log(res)
           if (ScraperHelper.isPageNotFound(res)) {
             throw new BadRequestException();
           } else if (ScraperHelper.isCaptcha(res)) {
