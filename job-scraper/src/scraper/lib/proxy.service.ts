@@ -161,6 +161,7 @@ export class ProxyService {
 
         return from(page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36')).pipe(
           mergeMap((data: any) => {
+            from(page.evaluate(() => navigator.userAgent )).subscribe(console.log)
             return from(page.goto(url));
           }),
           mergeMap((data: any) => {
@@ -171,7 +172,7 @@ export class ProxyService {
     )
       .pipe(
         tap((res: any) => {
-          console.log(res)
+        //  console.log(res)
           if (ScraperHelper.isPageNotFound(res)) {
             throw new BadRequestException();
           } else if (ScraperHelper.isCaptcha(res)) {
