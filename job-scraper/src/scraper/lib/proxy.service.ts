@@ -38,7 +38,7 @@ export class ProxyService {
   private torSession$: Subject<IProxy> = new Subject<IProxy>();
   private tr = require('tor-request');
   private proxyencour: IProxy;
-
+ private browser:any;
   get proxy(): IProxy {
     return this.proxyencour;
   }
@@ -52,8 +52,23 @@ export class ProxyService {
               private readonly puppeteerManager: PuppeteerManager) {
     this.tr.TorControlPort.password = 'PASSWORD';
     this.tr.TorControlPort.port = this.configService.get('TOR_PORT_CONTROL');
-
     this.initProxys();
+    this.getProxy();
+
+    const PUPPETEER_ARGS = ['--no-sandbox', '--disable-setuid-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+
+      `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
+    ];
+    this.browser = puppeteer.launch({
+      headless: true,
+      devTools: false,
+      executablePath: process.env.CHROMIUM_PATH,
+      args: PUPPETEER_ARGS,
+
+    });
+
 
     this.torSession$.pipe(
       filter((proxy: IProxy) => {
@@ -137,23 +152,8 @@ export class ProxyService {
 
   public getPuppeteer(url: string): Observable<string> {
 
-    this.getProxy();
 
-    const PUPPETEER_ARGS = ['--no-sandbox', '--disable-setuid-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-
-     // `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT_CONTROL')}`,
-    ];
-
-    const browser: any = puppeteer.launch({
-      headless: true,
-      devTools: false,
-      executablePath: process.env.CHROMIUM_PATH,
-      args: PUPPETEER_ARGS,
-
-    });
-    return from(browser).pipe(
+    return from(this.browser).pipe(
       mergeMap((browser: any) => {
 
         return from(browser.newPage());
@@ -162,7 +162,7 @@ export class ProxyService {
 
         return from(page.setUserAgent(ScraperHelper.getRandomUserAgent())).pipe(
           mergeMap((data: any) => {
-            return from(page.goto(url, { waitUntil: 'networkidle0' }));
+            return from(page.goto(url));
           }),
           mergeMap((data: any) => {
             return from(page.evaluate(() => document.body.innerHTML));
