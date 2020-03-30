@@ -5,13 +5,9 @@ import { MerchantwordsService } from './scraper/merchantwords.service';
 import { MicroserviceModule } from './microservices/microservice.module';
 import { Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { ScraperRequest } from './microservices/scraperRequest';
+
 
 async function bootstrap() {
-  const scraperMicroservice$ = await NestFactory.create(MicroserviceModule);
-  const scraperService: ScraperService = scraperMicroservice$.get(ScraperService);
-  const scraperRequest: ScraperRequest = new ScraperRequest(null, '2617941011');
-  scraperService.scrapeByCategory(scraperRequest).subscribe()
   switch (process.env.JOB) {
 
     case 'merchantwordsJob' :
