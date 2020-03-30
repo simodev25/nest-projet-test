@@ -26,7 +26,7 @@ COPY --from=build /job/node_modules ./node_modules
 # copy app sources
 COPY --from=build /job/dist .
 COPY config.production.env .
-
+ENV PUPPETEER_CHROMIUM_REVISION '80.0.3987.0'
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 ENV CHROMIUM_PATH /usr/bin/chromium-browser
 

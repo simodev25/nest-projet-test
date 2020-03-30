@@ -150,10 +150,12 @@ export class ProxyService {
           width: 1280
         };
         const PUPPETEER_ARGS = ['--no-sandbox',
+         '--window-size=1024,1280',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
         ];
+console.log('process.env.CHROMIUM_PATH',process.env.CHROMIUM_PATH)
         const browser = await puppeteer.launch({
           headless: true,
           devTools: false,
@@ -163,10 +165,12 @@ export class ProxyService {
         });
         // prepare for headless chrome
 
-        const page = await browser.newPage();
+        const page = await browser.newPage().catch(console.error);
+        const version = await page.browser().version();
+        console.log('version chrome',version)
         await page.setViewport(defaultViewport);
         // set user agent (override the default headless User Agent)
-        await page.setUserAgent(ScraperHelper.getRandomUserAgent());
+        await page.setUserAgent(ScraperHelper.getRandomUserAgent()).catch(console.error);
 
         // go to Google home page
         await page.goto(url);
@@ -177,7 +181,7 @@ export class ProxyService {
         // If everything correct then no 'HeadlessChrome' sub string on userAgent
         console.log(userAgent);
 
-        const data = await page.evaluate(() => document.body.innerHTML);
+        const data = await page.evaluate(() => document.body.innerHTML).catch(console.error);;
 
         subscriber.next(data)
         subscriber.complete();
