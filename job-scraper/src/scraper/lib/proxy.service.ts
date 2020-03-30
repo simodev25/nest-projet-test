@@ -136,13 +136,16 @@ export class ProxyService {
   }
 
   public getPuppeteer(url: string): Observable<string> {
+
+    this.getProxy();
+
     const PUPPETEER_ARGS = ['--no-sandbox', '--disable-setuid-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
 
       `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT_CONTROL')}`,
     ];
-    this.getProxy();
+
     const browser: any = puppeteer.launch({
       headless: true,
       devTools: false,
