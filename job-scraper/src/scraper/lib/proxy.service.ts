@@ -15,6 +15,7 @@ import * as puppeteer from 'puppeteer';
 import { PuppeteerManager } from './puppeteer.manager';
 
 const request = require('request');
+const agents = require('browser-agents');
 
 enum StatusRenew {
   EN_COUR = 'EN_COUR',
@@ -38,7 +39,8 @@ export class ProxyService {
   private torSession$: Subject<IProxy> = new Subject<IProxy>();
   private tr = require('tor-request');
   private proxyencour: IProxy;
- private browser:any;
+  private browser: any;
+
   get proxy(): IProxy {
     return this.proxyencour;
   }
@@ -54,8 +56,6 @@ export class ProxyService {
     this.tr.TorControlPort.port = this.configService.get('TOR_PORT_CONTROL');
     this.initProxys();
     this.getProxy();
-
-
 
 
     this.torSession$.pipe(
@@ -139,74 +139,81 @@ export class ProxyService {
   }
 
   public getPuppeteer(url: string): Observable<string> {
-    const puppeteerRequest = new Observable<string>(subscriber => {
-      (async () => {
-        const defaultViewport = {
-          deviceScaleFactor: 1,
-          hasTouch: false,
-          height: 1024,
-          isLandscape: false,
-          isMobile: false,
-          width: 1280
-        };
-        const PUPPETEER_ARGS = ['--no-sandbox',
-         '--window-size=1024,1280',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
-        ];
-console.log('process.env.CHROMIUM_PATH',process.env.CHROMIUM_PATH)
-        const browser = await puppeteer.launch({
-          headless: true,
-          devTools: false,
-          executablePath: process.env.CHROMIUM_PATH,
-          args: PUPPETEER_ARGS,
 
-        });
-        // prepare for headless chrome
+    const html = (async () => {
+      const defaultViewport = {
+        deviceScaleFactor: 1,
+        hasTouch: false,
+        height: 1024,
+        isLandscape: false,
+        isMobile: false,
+        width: 1280,
+      };
+      const PUPPETEER_ARGS = [
+        '--no-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`
+    ]
+      ;
+      console.log('process.env.CHROMIUM_PATH', process.env.CHROMIUM_PATH);
+      const browser = await puppeteer.launch({
+        /* headless: true,*/
+         devTools: false,
+        executablePath: process.env.CHROMIUM_PATH,
+        args: PUPPETEER_ARGS,
 
-        const page = await browser.newPage().catch(console.error);
-        const version = await page.browser().version();
-        console.log('version chrome',version)
-        await page.setViewport(defaultViewport);
-        // set user agent (override the default headless User Agent)
-        await page.setUserAgent(ScraperHelper.getRandomUserAgent()).catch(console.error);
+      });
+      // prepare for headless chrome
 
-        // go to Google home page
-        await page.goto(url);
+      const page = await browser.newPage();
+      process.on('unhandledRejection', (reason, p) => {
+        console.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
+        browser.close();
+      });
+      const version = await page.browser().version();
+      console.log('version chrome', version);
+      //   await page.setViewport(defaultViewport);
+      // set user agent (override the default headless User Agent)
+      await page.setUserAgent(agents.Chrome.random());
 
-        // get the User Agent on the context of Puppeteer
-        const userAgent = await page.evaluate(() => navigator.userAgent );
+      await page.setRequestInterception(true);
+      page.on('request', request => {
+        if (request.resourceType() === 'image') {
+          request.abort();
+        } else {
+          request.continue();
+        }
+      });
+      await page.goto(url);
+      await page.waitFor('span[data-action=\'gbfilter-checkbox\']');
 
-        // If everything correct then no 'HeadlessChrome' sub string on userAgent
-        console.log(userAgent);
+      const content = await page.content();
 
-        const data = await page.evaluate(() => document.body.innerHTML).catch(console.error);;
 
-        subscriber.next(data)
-        subscriber.complete();
-        await browser.close();
-      })();
+      await page.close();
+      return content;
+    })();
 
-    });
 
+    const puppeteerRequest = from(html);
 
 
     return puppeteerRequest.pipe(
-        tap((res: any) => {
+      tap((res: any) => {
 
-          if (ScraperHelper.isPageNotFound(res)) {
-            throw new BadRequestException();
-          } else if (ScraperHelper.isCaptcha(res)) {
-            throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
-          }
-          return res;
-        }),
-        retryWhen(this.scrapeRetryStrategy({
-          maxRetryAttempts: 20,
-          scalingDuration: this.renewTorSessionTimeout,
-        })),
-      );
+        if (ScraperHelper.isPageNotFound(res)) {
+          throw new BadRequestException();
+        } else if (ScraperHelper.isCaptcha(res)) {
+          throw new Exception('NetworkService : error will be picked up by retryWhen [isCaptcha]', ScraperHelper.EXIT_CODES.ERROR_CAPTCHA);
+        }
+        return res;
+      }),
+      retryWhen(this.scrapeRetryStrategy({
+        maxRetryAttempts: 20,
+        scalingDuration: this.renewTorSessionTimeout,
+      })),
+    );
 
   }
 

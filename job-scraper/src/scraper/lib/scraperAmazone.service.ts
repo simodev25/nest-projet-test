@@ -251,12 +251,12 @@ export class ScraperAmazoneService implements IScraper {
 
   public getCategorysSalesOffers(link: string): Observable<any> {
 
-
+    let res_=null;
     const result$ = of(1).pipe(
       mergeMap(x => {
         return this.httpService.getPuppeteer(link).pipe(
           map((res: any) => {
-
+            res_=res;
             const data: any = scrapeIt.scrapeHTML(res,
               {
                 categorys: {
@@ -284,6 +284,11 @@ export class ScraperAmazoneService implements IScraper {
           }),
           map(data => {
             const categorys: IDepartment[] = (data['categorys'] as IDepartment[]).filter((category: IDepartment) => validator.isNumberString(category.id));
+           /* const fs = require('fs');
+            fs.writeFile((new Date().getTime().toString())+categorys.length.toString()+'helloworld.html', res_, function (err) {
+              if (err) return console.log(err);
+              console.log('Hello World > helloworld.txt');
+            })*/
             return categorys;
           }),
         );
@@ -656,29 +661,6 @@ export class ScraperAmazoneService implements IScraper {
     return descriptions.filter(description => description.trim() !== '');
   }
 
-  private getProductfromScript(contents: string): any {
-    const puppeteer = require('puppeteer');
-    const imagesProduct: any[] = [];
 
-    if (contents != null) {
-      const $: CheerioStatic = ScraperHelper.getScript(contents, 'dcsServerResponse');
-      if ($) {
-
-
-        const scriptProducts: any = $.root().html().replace('<script type="text/javascript">', '').replace('</script>', '');
-
-
-        const html: string[] = $.root().html().match(ScraperHelper.regexImages) || [];
-
-        html.forEach((match) => {
-
-          imagesProduct.push(match);
-        });
-        return imagesProduct;
-      }
-
-    }
-    return [];
-  }
 
 }

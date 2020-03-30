@@ -30,7 +30,7 @@ async function bootstrap() {
     timeWindow: '1 minute',
   });
   fastify.register(require('fastify-server-timeout'), {
-    serverTimeout: 10000, //ms
+    serverTimeout: 20000, //ms
   });
 
   fastify.useGlobalFilters(new ErrorFilter());
