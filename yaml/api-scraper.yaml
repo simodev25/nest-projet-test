@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-scraper-amzone
+  name: api-scraper-amazon
 spec:
   selector:
     matchLabels:
-      service-name: api-scraper-amzone
+      service-name: api-scraper-amazon
   replicas: 2
   template:
     metadata:
       labels:
-        service-name: api-scraper-amzone
+        service-name: api-scraper-amazon
     spec:
       containers:
-        - name: api-scraper-amzone
+        - name: api-scraper-amazon
           image: simo25docker/api-scraper
           readinessProbe:
             httpGet:
@@ -27,15 +27,30 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-scraper-amzone
+  name: api-scraper-amazon
   labels:
-    app: api-scraper-amzone
-    service-name: api-scraper-amzone
+    app: api-scraper-amazon
+    service-name: api-scraper-amazon
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
     - name: apiscraper
       port: 3000
       targetPort: 3000
   selector:
-    service-name: api-scraper-amzone
+    service-name: api-scraper-amazon
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: api-scraper
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: "/*"
+spec:
+  rules:
+  - http:
+     paths:
+      - path: /api/v1
+        backend:
+          serviceName: api-scraper-amazon
+          servicePort: 3000
