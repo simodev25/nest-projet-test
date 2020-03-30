@@ -143,7 +143,7 @@ export class ProxyService {
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
 
-      `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT_CONTROL')}`,
+     // `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT_CONTROL')}`,
     ];
 
     const browser: any = puppeteer.launch({
