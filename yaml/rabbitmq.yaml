@@ -90,26 +90,32 @@ spec:
       containers:
         - name: rmq
           image: simo25docker/rabbitmq-statefulset
-
-          lifecycle:
-            preStop:
-              exec:
-                command: ["rabbitmqctl", "stop"]
-
-          livenessProbe:
-            initialDelaySeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 30
-            exec:
-              command: ["rabbitmqctl", "node_health_check"]
-
-          readinessProbe:
-            initialDelaySeconds: 10
-            timeoutSeconds: 5
-            periodSeconds: 1
-            failureThreshold: 10
-            exec:
-              command: ["rabbitmqctl", "node_health_check"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+            limits:
+              cpu: "200m"
+              memory: "200Mi"
+#          lifecycle:
+#            preStop:
+#              exec:
+#                command: ["rabbitmqctl", "stop"]
+#
+#          livenessProbe:
+#            initialDelaySeconds: 60
+#            timeoutSeconds: 100
+#            failureThreshold: 30
+#            exec:
+#              command: ["rabbitmqctl", "node_health_check"]
+#
+#          readinessProbe:
+#            initialDelaySeconds: 60
+#            timeoutSeconds: 100
+#            periodSeconds: 1
+#            failureThreshold: 10
+#            exec:
+#              command: ["rabbitmqctl", "node_health_check"]
 
           ports:
             - containerPort: 4369
