@@ -15,7 +15,7 @@ export class CategorysController {
 
   }
   @Get()
- // @UseInterceptors(CacheInterceptor)
+  @UseInterceptors(CacheInterceptor)
   @ApiTags('categorys')
   scrapeCategorys(@Req() req): Observable<Categorys[]> {
 
