@@ -13,6 +13,7 @@ import {
 } from '@nestjs/terminus';
 import { AppHealthIndicator } from './health/app.health.Indicator';
 import { TerminusOptionsService } from './health/terminus.options.service';
+import { ClusterRedisService } from './services/cluster.redis.service';
 
 
 const environment = 'local';
@@ -20,19 +21,19 @@ const environment = 'local';
 
 @Module({
   imports: [
-     TerminusModule.forRootAsync({
-       imports: [SharedModule],
-       useClass: TerminusOptionsService,
-     }),
+    TerminusModule.forRootAsync({
+      imports: [SharedModule],
+      useClass: TerminusOptionsService,
+    }),
     HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `./config.${process.env.NODE_ENV || environment}.env`,
     }),
   ],
-  providers: [ScraperLoggerService, getScraperProxyFactory(), MicroserviceHealthIndicator, AppHealthIndicator, DNSHealthIndicator, MongooseHealthIndicator,
+  providers: [ScraperLoggerService, getScraperProxyFactory(), MicroserviceHealthIndicator, AppHealthIndicator, DNSHealthIndicator, MongooseHealthIndicator, ClusterRedisService,
   ],
-  exports: [ScraperLoggerService, getScraperProxyFactory(), MicroserviceHealthIndicator, AppHealthIndicator, DNSHealthIndicator, MongooseHealthIndicator,
+  exports: [ScraperLoggerService, getScraperProxyFactory(), MicroserviceHealthIndicator, AppHealthIndicator, DNSHealthIndicator, MongooseHealthIndicator, ClusterRedisService,
   ],
 })
 export class SharedModule {

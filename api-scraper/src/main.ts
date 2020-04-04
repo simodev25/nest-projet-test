@@ -49,7 +49,7 @@ async function bootstrap() {
     .addTag('categorys')
     .build();
   const document = SwaggerModule.createDocument(fastify, options);
-  SwaggerModule.setup(`${globalPrefix}/swagger/amazone`, fastify, document);
+  SwaggerModule.setup(`${globalPrefix}/swagger`, fastify, document);
 
 
   await fastify.listen(3000, '0.0.0.0');

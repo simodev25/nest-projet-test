@@ -4,7 +4,7 @@ const hash = require('object-hash');
 
 import { Validator } from 'class-validator';
 
-export const validator = new Validator();
+export const ApiValidator = new Validator();
 
 export const isUndefined = (obj: any): obj is undefined =>
   typeof obj === 'undefined';
@@ -43,7 +43,6 @@ export function getValueFromParameters(urlString: string, key: string) {
 
 export function getUrlOrgine(urlString: string) {
   const url = new URL(urlString);
-  console.log(urlString.replace(url.searchParams.toString(), ''));
   return urlString.replace(url.searchParams.toString(), '').replace('#customerReviews', '');
 
 }

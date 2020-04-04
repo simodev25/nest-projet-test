@@ -251,12 +251,12 @@ export class ScraperAmazoneService implements IScraper {
 
   public getCategorysSalesOffers(link: string): Observable<any> {
 
-    let res_=null;
+    //let res_=null;
     const result$ = of(1).pipe(
       mergeMap(x => {
         return this.httpService.getPuppeteer(link).pipe(
           map((res: any) => {
-            res_=res;
+           // res_=res;
             const data: any = scrapeIt.scrapeHTML(res,
               {
                 categorys: {

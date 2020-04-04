@@ -21,3 +21,24 @@ export const getScraperProxyFactory = () => {
     inject: [ConfigService],
   };
 };
+
+
+export const getUrlScraperProxyFactory = () => {
+  return {
+    provide: 'UrlScraperProxyFactory',
+    useFactory: (configService: ConfigService) => {
+      const guestUrls = configService.get<string>('AMQP_URL').split(',');
+      return ClientProxyFactory.create({
+        transport: Transport.RMQ,
+        options: {
+          urls: guestUrls,
+          queue: 'url_scraper_service',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      });
+    },
+    inject: [ConfigService],
+  };
+};

@@ -152,7 +152,6 @@ export class PuppeteerManager {
           await pupPage.setViewport(this.viewportOptions);
           try {
             pupPage = await this.attemptNavigation(pupPage, pageUrl, []);
-            console.log(pupPage)
             resolve(pupPage);
           } catch (navigationError) {
             await pupPage.close();
