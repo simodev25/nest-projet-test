@@ -18,7 +18,7 @@ export class UrlScraperService implements IRequest {
 
   run(urlRequestOptions: UrlRequestOptions): Observable<any> {
 
-    return this.requestFactory.getManager(urlRequestOptions.requesterModule).run(urlRequestOptions).pipe(
+    return this.requestFactory.getManager(urlRequestOptions.requesterType).run(urlRequestOptions).pipe(
       map((body: string) => {
         const data: any = scrapeIt.scrapeHTML(body, urlRequestOptions.scrapeOptions);
         return data;

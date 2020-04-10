@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { RequesterModule } from './enums/requester.module';
+import { RequesterType } from './enums/requesterType';
 import { IRequest } from './i.request';
 import { ModuleRef } from '@nestjs/core';
-import { RequestManager } from './request.manager';
 import { TorManager } from './tor.manager';
 import { PuppeteerManager } from './puppeteer.manager';
 
@@ -13,12 +12,13 @@ export class RequestFactory {
 
   }
 
-  public getManager(requesterModule: RequesterModule): IRequest {
-    if (requesterModule === RequesterModule.REQUEST) {
+  public getManager(requesterType: RequesterType): IRequest {
+    return this.moduleRef.get(TorManager);
+    if (requesterType === RequesterType.REQUEST) {
       return this.moduleRef.get(TorManager);
-    } else if (requesterModule === RequesterModule.TOR) {
+    } else if (requesterType === RequesterType.TOR) {
       return this.moduleRef.get(TorManager);
-    } else if (requesterModule === RequesterModule.PUPPETEER) {
+    } else if (requesterType === RequesterType.PUPPETEER) {
       return this.moduleRef.get(PuppeteerManager);
     }
 

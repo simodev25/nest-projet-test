@@ -19,6 +19,7 @@ export class UrlScraperController {
   @Header('Content-Type', 'application/json; charset=utf-8')
   @ApiTags('scraperurl')
   scraperUrl(@Req() req, @Body() urlRequestOptions: UrlRequestOptions) {
-    return   this.urlScraperService.scraperUrl(urlRequestOptions);
+
+  return   this.urlScraperService.scraperUrl(urlRequestOptions);
   }
 }

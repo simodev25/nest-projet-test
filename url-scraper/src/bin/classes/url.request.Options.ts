@@ -1,14 +1,14 @@
-import { RequesterModule } from '../enums/requester.module';
+import { RequesterType } from '../enums/requesterType';
 import { ScrapeOptions } from 'scrape-it';
 
 export class UrlRequestOptions {
   url: string;
-  requesterModule: RequesterModule;
+  requesterType: RequesterType;
   scrapeOptions: ScrapeOptions;
 
-  constructor(url, requesterModule: RequesterModule) {
+  constructor(url, requesterType: RequesterType) {
     this.url = url;
-    this.requesterModule = requesterModule;
+    this.requesterType = requesterType;
   }
 
 
