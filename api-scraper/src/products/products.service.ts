@@ -7,7 +7,7 @@ import { deserialize, serialize } from 'class-transformer';
 import { from, Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { Product } from './product/product';
-import { validator } from '../shared/utils/shared.utils';
+import { ApiValidator } from '../shared/utils/shared.utils';
 import { ClusterRedisService } from '../shared/services/cluster.redis.service';
 
 import { ApiResponseDto } from './response/api.response.dto';
@@ -38,7 +38,7 @@ export class ProductsService {
         throw new NotFoundException(`IdRequest [${idRequest}] not found`);
       }
       let response$$: any = deserialize(Product, response$);
-      if (!validator.isEmpty(response$$?.idRequest)) {
+      if (!ApiValidator.isEmpty(response$$?.idRequest)) {
         response$$ = deserialize(ApiRequestDto, response$);
         response$$.initRequestAt();
       }
@@ -65,7 +65,7 @@ export class ProductsService {
           throw new NotFoundException(`IdRequest [${idRequest}] not found`);
         }
         let response$$: any = deserialize(Product, response$);
-        if (!validator.isEmpty(response$$?.idRequest)) {
+        if (!ApiValidator.isEmpty(response$$?.idRequest)) {
           response$$ = deserialize(ApiRequestDto, response$);
           response$$.initRequestAt();
         }
@@ -92,7 +92,7 @@ export class ProductsService {
     const generateRequest: ApiRequestDto = this.responseHelper.generateResponse('searchword-responses', searchWord);
     return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
-        if (validator.isNotEmpty(exist)) {
+        if (ApiValidator.isNotEmpty(exist)) {
           return this.scrapeResponse(generateRequest.idRequest);
         }
         this.send(pattern, generateRequest);
@@ -116,7 +116,7 @@ export class ProductsService {
     const generateRequest: ApiRequestDto = this.responseHelper.generateResponse('asin-responses', asin);
     return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
-        if (validator.isNotEmpty(exist)) {
+        if (ApiValidator.isNotEmpty(exist)) {
           return this.scrapeResponse(generateRequest.idRequest);
         }
         this.send(pattern, generateRequest);
@@ -141,7 +141,7 @@ export class ProductsService {
     const generateRequest: ApiRequestDto = this.responseHelper.generateResponse('category-responses', category);
     return from(this.redisClient.getClient().get(generateRequest.idRequest)).pipe(
       mergeMap((exist: any) => {
-        if (validator.isNotEmpty(exist)) {
+        if (ApiValidator.isNotEmpty(exist)) {
           return this.scrapeResponse(generateRequest.idRequest);
         }
         this.send(pattern, generateRequest);

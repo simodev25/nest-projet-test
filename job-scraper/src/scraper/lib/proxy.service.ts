@@ -150,16 +150,16 @@ export class ProxyService {
         width: 1280,
       };
       const PUPPETEER_ARGS = [
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-setuid-sandbox',
-        `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`
-    ]
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          `--proxy-server=socks5://${this.proxy.host}:${this.configService.get('TOR_PORT')}`,
+        ]
       ;
       console.log('process.env.CHROMIUM_PATH', process.env.CHROMIUM_PATH);
       const browser = await puppeteer.launch({
         /* headless: true,*/
-         devTools: false,
+        devTools: false,
         executablePath: process.env.CHROMIUM_PATH,
         args: PUPPETEER_ARGS,
 

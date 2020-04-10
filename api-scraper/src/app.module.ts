@@ -3,12 +3,12 @@ import { ProductsModule } from './products/products.module';
 
 import { RequestContextMiddleware } from './shared/middlewares/requestContext.middleware';
 import { LogsMiddleware } from './shared/middlewares/logs.middleware';
-import { CorsMiddleware } from './shared/middlewares/corsMiddleware';
+import { UrlScraperModule } from './urlScraper/urlScraper.module';
 
 @Module({
   imports: [
 
-    ProductsModule],
+    ProductsModule, UrlScraperModule],
   controllers: [],
   providers: [],
 })
@@ -21,8 +21,8 @@ export class AppModule implements NestModule {
     consumer
       .apply(LogsMiddleware)
       .forRoutes({ path: '(.*)', method: RequestMethod.ALL });
-  /*  consumer
-      .apply(CorsMiddleware)
-      .forRoutes({ path: '(.*)', method: RequestMethod.ALL });*/
+    /*  consumer
+        .apply(CorsMiddleware)
+        .forRoutes({ path: '(.*)', method: RequestMethod.ALL });*/
   }
 }

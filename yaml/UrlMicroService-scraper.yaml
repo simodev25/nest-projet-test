@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: url-microservice
+  labels:
+    service-name: url-microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service-name: url-microservice
+  template:
+    metadata:
+      name: url-microservice
+      labels:
+        service-name: url-microservice
+    spec:
+      containers:
+        - name: url-microservice
+          image: simo25docker/url-scraper
+          env:
+            - name: LEVEL
+              value: "debug"
+
+

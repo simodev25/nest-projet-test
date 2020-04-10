@@ -3,7 +3,7 @@ import { tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { ClusterRedisService } from '../services/cluster.redis.service';
 import { deserialize, serialize } from 'class-transformer';
-import { stringToHashCode } from '../utils/shared.utils';
+import { ApiValidator, stringToHashCode } from '../utils/shared.utils';
 import { Merchantwords } from '../../products/product/merchantwords';
 
 @Injectable()
@@ -17,9 +17,15 @@ export class CacheInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-
+    let key: string = null;
     const request: any = context.switchToHttp().getRequest();
-    const key: string = stringToHashCode(request.params);
+    if (ApiValidator.isNotEmptyObject(request.params)) {
+      key = stringToHashCode(request.params);
+    } else if (ApiValidator.isNotEmptyObject(request.body)) {
+      key = stringToHashCode(request.body);
+    }
+
+    console.log(key);
 
     if (!key) {
       return next.handle();
