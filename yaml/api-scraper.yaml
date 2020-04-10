@@ -74,12 +74,17 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-origin: '*'
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/server-snippet: |
-      set $agentflag 0;
+      set $agentflag 1;
 
-      if ($http_X_RapidAPI_Proxy_Secret != "06161fa0-6c53-11ea-8373-3d02c4e8fb2f" ){
-        set $agentflag 1;
+      if ($http_X_RapidAPI_Proxy_Secret = "06161fa0-6c53-11ea-8373-3d02c4e8fb2f" ){
+        set $agentflag 0;
       }
-
+      if ($http_X_RapidAPI_Proxy_Secret = "dab297a0-7b32-11ea-8642-c3dd29c53a10" ){
+             set $agentflag 0;
+      }
+      if ($http_X_RapidAPI_Proxy_Secret = "445e2910-7bda-11ea-bf71-f5ec60b834e5" ){
+             set $agentflag 0;
+      }
       if ( $agentflag = 1 ) {
         return 301 https://m.example.com;
       }

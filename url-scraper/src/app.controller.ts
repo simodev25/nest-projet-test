@@ -17,7 +17,6 @@ export class AppController {
 
   @MessagePattern({ cmd: 'api-url-scraper' })
   apiUrlscrape(@Payload() urlRequestOptions: UrlRequestOptions, @Ctx() context: RmqContext): Observable<any> {
-    console.log('Payload',urlRequestOptions);
     return this.appService.urlScraper(urlRequestOptions);
   }
 }

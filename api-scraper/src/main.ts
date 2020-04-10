@@ -22,7 +22,7 @@ async function bootstrap() {
   fastify.register(
     helmet,
     // Example of passing an option to x-powered-by middleware
-    { hidePoweredBy: { setTo: 'PHP 4.2.0' } },
+    { hidePoweredBy: { setTo: 'fastify' } },
   );
 
   fastify.register(require('fastify-rate-limit'), {
