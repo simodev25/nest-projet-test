@@ -1,6 +1,6 @@
 import { ChildProduct } from './childProduct';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { validator } from '../../shared/utils/shared.utils';
+import { ApiValidator } from '../../shared/utils/shared.utils';
 import { IsNotEmpty, validate } from 'class-validator';
 import { ProductReviews } from './productReviews';
 import { ApiProperty } from '@nestjs/swagger';
@@ -176,7 +176,7 @@ export class ProductDetail {
   @IsNotEmpty()
   @ApiProperty()
   get price(): string {
-    if (validator.isEmpty(this._price)) {
+    if (ApiValidator.isEmpty(this._price)) {
       this._price = this.priceMin;
     }
     return this._price;
@@ -211,13 +211,13 @@ export class ProductDetail {
   @ApiProperty()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get priceMin(): string {
-    if (validator.isNotEmpty(this._price) && this._price.split('-').length > 0) {
+    if (ApiValidator.isNotEmpty(this._price) && this._price.split('-').length > 0) {
       const priceMin = this._price.split('-')[0].replace('$', '');
       this._priceMin = priceMin;
-    } else if (validator.isNotEmpty(this.price01)) {
+    } else if (ApiValidator.isNotEmpty(this.price01)) {
       this._priceMin = this.price01;
 
-    } else if (validator.isNotEmpty(this.price02)) {
+    } else if (ApiValidator.isNotEmpty(this.price02)) {
       this._priceMin = this.price02;
 
     }
@@ -232,7 +232,7 @@ export class ProductDetail {
   @ApiProperty()
   @Transform(value => parseFloat(value) ? parseFloat(value) : null)
   get priceMax(): string {
-    if (validator.isNotEmpty(this.price) && this.price.split('-').length > 1) {
+    if (ApiValidator.isNotEmpty(this.price) && this.price.split('-').length > 1) {
       const priceMax = this.price.split('-')[1].replace('$', '');
       this._priceMax = priceMax;
     }

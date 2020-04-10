@@ -1,12 +1,11 @@
-import { Controller, Get, Header, HttpStatus, Param, Req, Res, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Header, HttpStatus, Param, Req, UseInterceptors } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { FindIdRequest } from '../dtos/findIdRequest';
 import { FindAsin } from '../dtos/findAsin';
 import { CacheInterceptor } from '../shared/cache/cache.interceptor';
 import { Observable } from 'rxjs';
 import { FindSearchWord } from '../dtos/findsearchWord';
-import { Product } from './product/product';
-import { ApiCreatedResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiResponseDto } from './response/api.response.dto';
 import { ProductLow } from './product/product.low';
 import { FindCategory } from '../dtos/findCategory';

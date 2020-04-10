@@ -42,7 +42,6 @@ export function getValueFromParameters(urlString: string, key: string) {
 
 export function getUrlOrgine(urlString: string) {
   const url = new URL(urlString);
-  console.log(urlString.replace(url.searchParams.toString(), ''));
   return urlString.replace(url.searchParams.toString(), '').replace('#customerReviews', '');
 
 }
