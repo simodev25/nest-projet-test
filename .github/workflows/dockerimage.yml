@@ -26,6 +26,13 @@ jobs:
         username: ${{ secrets.LOGIN_DOCKER }}
         password: ${{ secrets.PASSWORD_DOCKER }}
         workdir: api-scraper
+    - name: Publish url scraper
+      uses: elgohr/Publish-Docker-Github-Action@2.12
+      with:
+        name: simo25docker/url-scraper
+        username: ${{ secrets.LOGIN_DOCKER }}
+        password: ${{ secrets.PASSWORD_DOCKER }}
+        workdir: url-scraper
     - name: Publish replSet Scripte
       uses: elgohr/Publish-Docker-Github-Action@2.12
       with:
