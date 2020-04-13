@@ -103,6 +103,16 @@ export class PuppeteerManager implements IRequest, OnModuleDestroy {
         async (resolve, reject): Promise<void> => {
           // create the puppeteer page,configure and navigate to the designated web page
           let pupPage: puppeteer.Page = await (this.browser as puppeteer.Browser).newPage();
+          await pupPage.setUserAgent(this.scraperHelper.agentCromeRandom());
+
+          await pupPage.setRequestInterception(true);
+          pupPage.on('request', request => {
+            if (request.resourceType() === 'image') {
+              request.abort();
+            } else {
+              request.continue();
+            }
+          });
           await pupPage.setViewport(this.viewportOptions);
           try {
             pupPage = await this.attemptNavigation(pupPage, urlRequestOptions.url, []);

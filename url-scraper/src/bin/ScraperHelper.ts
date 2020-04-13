@@ -4,6 +4,8 @@ import { AxiosRequestConfig } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 
+const agents = require('browser-agents');
+
 @Injectable()
 export class ScraperHelper {
 
@@ -56,13 +58,17 @@ export class ScraperHelper {
     const headersRequest = {
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
       'Accept-Encoding': 'gzip',
-      'User-Agent': ScraperHelper.DEFAULT_USER_AGENT,
+      'User-Agent': agents.Chrome.random(),
       'Connection': 'keep-alive',
 
     };
 
     const requestConfig: AxiosRequestConfig = { headers: headersRequest, timeout: 10000 };
     return requestConfig;
+  };
+
+  public agentCromeRandom(): any {
+    return agents.Chrome.random();
   };
 
 
